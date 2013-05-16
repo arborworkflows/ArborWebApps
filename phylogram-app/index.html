@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" type="text/css" href="style.css">
+<title>Phylogram</title>
+
+<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="phylogram.js"></script>
+
+</head>
+<body onload="initializePhylogram('#phylogram');">
+
+<div id='phylogram'></div>
+
+<div style="position:relative; left:50px;">
+<p>width: <input type="button" value="-" onclick="decreaseTreeWidth();"></input><input type="button" value="+" onclick="increaseTreeWidth();"></input> | height: <input type="button" value="-" onclick="decreaseTreeHeight();"></input><input type="button" value="+" onclick="increaseTreeHeight();"></input> | <input type="checkbox" id="option_label_nodes" checked="checked" onclick="(document.getElementById('option_label_nodes').checked ? labelNodes() : unlabelNodes());">labels</input></p>
+</div>
+
+<div><p>You may zoom by using the mouse wheel or double-clicking. The graph can also be dragged.</p></div>
+
+</body>
+</html>
