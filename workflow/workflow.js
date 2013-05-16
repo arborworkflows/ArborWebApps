@@ -50,26 +50,6 @@ window.onload = function () {
 
     prepareWorkflowForRuntime(workflow);
 
-    d3.json("workflow").post(JSON.stringify({data: "This is some data"}), function (error, id) {
-        d3.json("workflow/" + id, function (error, doc) {
-            console.log(doc);
-            d3.json("workflow/" + id).send("put", JSON.stringify({data: "This is some other data"}), function (error, doc) {
-                d3.json("workflow/" + id, function (error, doc) {
-                    console.log(doc);
-                    d3.json("workflow/" + id).send("delete", "", function (error, result) {
-                        console.log(result);
-                        d3.json("workflow/" + id, function (error, doc) {
-                            console.log(doc);
-                            d3.json("workflow", function (error, list) {
-                                console.log(list);
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    });
-
     function connectionPath(d) {
         var o = d.outputItem.outputs[d.outputIndex],
             i = d.inputItem.inputs[d.inputIndex],
@@ -200,7 +180,7 @@ window.onload = function () {
     itemTypes = {
         source: {name: "Source", inputs: [], outputs: [1, 2, 3]},
         analysis: {name: "Analysis", inputs: [1, 2, 3, 4], outputs: [1, 2, 3]},
-        sink: {name: "Sink", inputs: [1, 2, 3, 4], outputs: []},
+        sink: {name: "Sink", inputs: [1, 2, 3, 4], outputs: []}
     };
 
     function addItem(type) {
@@ -221,4 +201,54 @@ window.onload = function () {
     d3.select("#add-source").on("click", function () { addItem(itemTypes.source); });
     d3.select("#add-analysis").on("click", function () { addItem(itemTypes.analysis); });
     d3.select("#add-sink").on("click", function () { addItem(itemTypes.sink); });
+    d3.json("workflow", function (error, list) {
+        list.unshift("Select workflow");
+        d3.select("#workflow").selectAll("option")
+            .data(list).enter().append("option")
+            .text(function (d) { return d; });
+    });
+    d3.select("#new").on("click", function () {
+        workflow = {items: [], connections: []};
+        d3.json("workflow").post(JSON.stringify(workflow), function (error, id) {
+            d3.select("#workflow").append("option").text(id);
+            $("#workflow").val(id);
+            updateItems();
+            updateConnections();
+        });
+    });
+    d3.select("#save").on("click", function () {
+        if ($("#workflow").val() === "Select workflow") {
+            d3.json("workflow").post(JSON.stringify(serializeWorkflow(workflow)), function (error, id) {
+                d3.select("#workflow").append("option").text(id);
+                $("#workflow").val(id);
+            });
+        } else {
+            d3.json("workflow/" + $("#workflow").val()).send("put", JSON.stringify(serializeWorkflow(workflow)), function (error, result) {
+                console.log(result);
+            });
+        }
+    });
+    d3.select("#copy").on("click", function () {
+        d3.json("workflow").post(JSON.stringify(serializeWorkflow(workflow)), function (error, id) {
+            d3.select("#workflow").append("option").text(id);
+            $("#workflow").val(id);
+        });
+    });
+    d3.select("#workflow").on("change", function (d) {
+        if ($("#workflow").val() === "Select workflow") {
+            workflow = {items: [], connections: []};
+            updateItems();
+            updateConnections();
+        } else {
+            d3.json("workflow/" + $("#workflow").val(), function (error, w) {
+                workflow = {items: [], connections: []};
+                updateItems();
+                updateConnections();
+                workflow = w;
+                prepareWorkflowForRuntime(workflow);
+                updateItems();
+                updateConnections();
+            });
+        }
+    });
 };
