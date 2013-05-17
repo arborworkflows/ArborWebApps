@@ -33,4 +33,4 @@ to submit bug and feature requests.
 
 # Acknowledgement
 
-Arbor Workflows development is sponsored by the NIH.
+Arbor Workflows development is sponsored by the NSF.
