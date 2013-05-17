@@ -1,4 +1,4 @@
-# Arbor Workflows web applciation suite
+# Arbor Workflows web application suite
 
 This repository contains a set of visual web interfaces built
 for the [Arbor Workflows](http://arborworkflows.com) project.
@@ -12,10 +12,11 @@ open a command shell and execute the following:
     ln -s /path/to/ArborWebApps /path/to/tangelo-build/deploy/web/arbor
 
 You should then be able to visit the web apps on your Tangelo instance, e.g.
-http://localhost:8080/arbor/. Alternately, you can clone the repository
+[http://localhost:8080/arbor/](http://localhost:8080/arbor/).
+Alternately, you can clone the repository
 directly in the `deploy/web` directory or your home directory and visit it
-at http://localhost:8080/ArborWebApps/
-or http://localhost:8080/~username/ArborWebApps/.
+at [http://localhost:8080/ArborWebApps/](http://localhost:8080/ArborWebApps/)
+or [http://localhost:8080/~username/ArborWebApps/](http://localhost:8080/~username/ArborWebApps/).
 
 These applications require that you have a running
 [MongoDB](http://www.mongodb.org) instance and have installed
