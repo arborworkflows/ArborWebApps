@@ -4,10 +4,11 @@
 window.onload = function () {
     "use strict";
 
-    var workflow, drag, vis, outputAnalysis, outputIndex, conn, analysisMap, analysisTypes;
+    var workflow, drag, vis, outputAnalysis, outputIndex, conn, analyses, analysisMap, analysisTypes;
 
     // Add properties to workflow to aid in interactive editing
     function prepareWorkflowForRuntime(workflow) {
+        $("#name").val(workflow.name);
         analysisMap = {};
         workflow.analyses.forEach(function (a) {
             a.inputScale = d3.scale.linear().domain([0, a.inputs.length - 1]).range([25, 125]);
@@ -24,13 +25,14 @@ window.onload = function () {
 
     // Convert workflow to pure JSON (no references) for serialization
     function serializeWorkflow(workflow) {
-        var serialized = {analyses: [], connections: []};
+        var serialized = {name: workflow.name, analyses: [], connections: []};
         workflow.analyses.forEach(function (analysis) {
             serialized.analyses.push({
                 x: analysis.x,
                 y: analysis.y,
                 name: analysis.name,
                 inputs: analysis.inputs,
+                parameters: analysis.parameters,
                 outputs: analysis.outputs
             });
         });
@@ -63,27 +65,70 @@ window.onload = function () {
     }
 
     function updateConnections() {
-        conn.selectAll("path").data(workflow.connections).enter().append("path")
+        function connectionKey(d) {
+            return d.inputAnalysis.name
+                + "$"
+                + d.inputIndex
+                + "$"
+                + d.outputAnalysis.name
+                + "$"
+                + d.outputIndex;
+        }
+        conn.selectAll("path").data(workflow.connections, connectionKey).enter().append("path")
             .style("stroke", "black")
             .style("stroke-width", 2)
             .style("fill", "none")
             .attr("d", connectionPath);
-        conn.selectAll("path").data(workflow.connections).exit().remove();
+        conn.selectAll("path").data(workflow.connections, connectionKey).exit().remove();
     }
 
     function setupWorkflowAnalysis(analysis) {
-        d3.select(this).selectAll("circle.input").data(analysis.inputs).enter().append("circle")
+
+        function portShape(type, x, y) {
+            if (type === "table") {
+                return "M " + x + " " + y
+                    + "m -10, -10"
+                    + "l 20, 0"
+                    + "l 0, 20"
+                    + "l -20, 0"
+                    + "Z";
+            } else if (type === "tree") {
+                return "M " + x + " " + y
+                    + "m -10, 10"
+                    + "l 20, 0"
+                    + "l -10, -20"
+                    + "Z";
+            }
+            return "M " + x + " " + y
+                + " m -10,0"
+                + " a 10,10 0 1,0 20,0"
+                + " a 10,10 0 1,0 -20,0";
+        }
+
+        d3.select(this).selectAll("path.input").data(analysis.inputs).enter().append("path")
             .classed("input", true)
-            .attr("cx", function (o, i) { return analysis.inputScale(i); })
-            .attr("cy", 0)
-            .attr("r", 10)
+            .attr("d", function (d, i) { return portShape(d.type, analysis.inputScale(i), 0); })
             .style("fill", "#eee")
             .style("stroke", "black")
             .style("stroke-width", 2)
             .on("mouseover", function (d) { d3.select(this).style("fill", "orange"); })
             .on("mouseout", function (d) { d3.select(this).style("fill", "#eee"); })
             .on("mouseup", function (d, i) {
-                if (outputAnalysis !== undefined) {
+                var existing;
+                if (outputAnalysis !== undefined
+                        && outputAnalysis.outputs[outputIndex].type === analysis.inputs[i].type) {
+
+                    // Remove any existing connection to this input
+                    workflow.connections.forEach(function (c, ci) {
+                        if (c.inputAnalysis === analysis && c.inputIndex === i) {
+                            existing = ci;
+                        }
+                    });
+                    if (existing !== undefined) {
+                        workflow.connections.splice(existing, 1);
+                    }
+
+                    // Add the new connection
                     workflow.connections.push({
                         outputAnalysis: outputAnalysis,
                         outputIndex: outputIndex,
@@ -98,11 +143,9 @@ window.onload = function () {
                 }
             });
 
-        d3.select(this).selectAll("circle.output").data(analysis.outputs).enter().append("circle")
+        d3.select(this).selectAll("path.output").data(analysis.outputs).enter().append("path")
             .classed("output", true)
-            .attr("cx", function (o, i) { return analysis.outputScale(i); })
-            .attr("cy", 100)
-            .attr("r", 10)
+            .attr("d", function (d, i) { return portShape(d.type, analysis.outputScale(i), 100); })
             .style("fill", "#eee")
             .style("stroke", "black")
             .style("stroke-width", 2)
@@ -156,19 +199,36 @@ window.onload = function () {
     }
 
     function clearWorkflow() {
-        workflow = {analyses: [], connections: []};
+        workflow = {name: "New Workflow", analyses: [], connections: []};
+        prepareWorkflowForRuntime(workflow);
         updateAnalyses();
         updateConnections();
     }
 
-    function addAnalysis(type) {
+    function addAnalysis(a) {
+        console.log(a);
         var count,
-            analysis = {x: 0, y: 0, name: type.name, inputs: type.inputs, outputs: type.outputs};
+            analysis = {
+                x: 0,
+                y: 0,
+                name: a.name,
+                inputs: a.inputs,
+                parameters: [],
+                outputs: a.outputs
+            };
+        a.parameters.forEach(function (param) {
+            var p = {name: param.name, type: param.type, value: param.value};
+            if (param.values) {
+                p.values = param.values;
+            }
+            p.current = param.value;
+            analysis.parameters.push(p);
+        });
         analysis.inputScale = d3.scale.linear().domain([0, analysis.inputs.length - 1]).range([25, 125]);
         analysis.outputScale = d3.scale.linear().domain([0, analysis.outputs.length - 1]).range([25, 125]);
         count = 1;
         while (analysisMap[analysis.name] !== undefined) {
-            analysis.name = type.name + " " + count;
+            analysis.name = a.name + " " + count;
             count += 1;
         }
         analysisMap[analysis.name] = analysis;
@@ -197,6 +257,18 @@ window.onload = function () {
     // Start with an empty workflow
     clearWorkflow();
 
+    d3.json("analysis", function (error, list) {
+        analyses = list;
+        d3.select("#analysis").selectAll("li")
+            .data(list).enter().append("li").append("a")
+            .attr("href", "#")
+            .text(function (d) { return d.name; })
+            .on("click", function (d) {
+                addAnalysis(d);
+                d3.event.preventDefault();
+            });
+    });
+
     // Define analysis types
     // TODO: This should be read from the database
     analysisTypes = {
@@ -212,17 +284,21 @@ window.onload = function () {
 
     // Populate workflow list
     d3.json("workflow", function (error, list) {
-        list.unshift("Select workflow");
+        list.unshift({"id": "Select workflow", "name": "Select workflow"});
         d3.select("#workflow").selectAll("option")
             .data(list).enter().append("option")
-            .text(function (d) { return d; });
+            .attr("value", function (d) { return d.id; })
+            .text(function (d) { return d.name; });
     });
 
     // Create new workflow
     d3.select("#new").on("click", function () {
-        workflow = {analyses: [], connections: []};
+        workflow = {name: "New Workflow", analyses: [], connections: []};
         d3.json("workflow").post(JSON.stringify(workflow), function (error, id) {
-            d3.select("#workflow").append("option").text(id);
+            d3.select("#workflow").append("option")
+                .datum({id: id, name: workflow.name})
+                .attr("value", id)
+                .text(workflow.name);
             $("#workflow").val(id);
             updateAnalyses();
             updateConnections();
@@ -231,14 +307,24 @@ window.onload = function () {
 
     // Save workflow
     d3.select("#save").on("click", function () {
-        if ($("#workflow").val() === "Select workflow") {
+        var cur = $("#workflow").val();
+
+        workflow.name = $("#name").val();
+        if (cur === "Select workflow") {
             d3.json("workflow").post(JSON.stringify(serializeWorkflow(workflow)), function (error, id) {
-                d3.select("#workflow").append("option").text(id);
+                d3.select("#workflow").append("option")
+                    .datum({id: id, name: workflow.name})
+                    .attr("value", id)
+                    .text(workflow.name);
                 $("#workflow").val(id);
             });
         } else {
             d3.json("workflow/" + $("#workflow").val()).send("put", JSON.stringify(serializeWorkflow(workflow)), function (error, result) {
-                console.log(result);
+
+                // Update the name in the dropdown menu
+                d3.select("#workflow").select("option[value=\"" + cur + "\"]")
+                    .datum({id: cur, name: workflow.name})
+                    .text(workflow.name);
             });
         }
     });
@@ -256,7 +342,7 @@ window.onload = function () {
                 // Remove workflow from select
                 d3.select("#workflow").selectAll("option")
                     .each(function (d) {
-                        if (d === cur) {
+                        if (d.id === cur) {
                             d3.select(this).remove();
                         }
                     });
@@ -266,8 +352,13 @@ window.onload = function () {
 
     // Copy workflow
     d3.select("#copy").on("click", function () {
+        $("#name").val("Copy of " + $("#name").val());
+        workflow.name = $("#name").val();
         d3.json("workflow").post(JSON.stringify(serializeWorkflow(workflow)), function (error, id) {
-            d3.select("#workflow").append("option").text(id);
+            d3.select("#workflow").append("option")
+                .datum({id: id, name: workflow.name})
+                .attr("value", id)
+                .text(workflow.name);
             $("#workflow").val(id);
         });
     });

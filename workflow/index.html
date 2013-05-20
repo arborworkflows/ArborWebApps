@@ -1,40 +1,42 @@
 <!doctype html>
 <html>
-	<head>
-		<link href="/css/tangelo.css" rel="stylesheet" type="text/css">
-		<script src="/lib/d3.v3.min.js" charset="utf-8"></script>
-		<script src="/lib/jquery-1.8.2.min.js"></script>
-		<script src="/lib/bootstrap.js"></script>
-		<style>
-		text {
-			fill: black;
-		}
-		</style>
-	</head>
-	<body>
-		<div id="main" class="container">
-			<h1>Arbor Workflow Editor</h1>
-			<div id="row">
-				<div id="span12">
-					<select id="workflow"></select>
-				</div>
-			</div>
-			<div id="row">
-				<div id="span12">
-					<button id="new" class="btn">New</button>
-					<button id="save" class="btn">Save</button>
-					<button id="copy" class="btn">Duplicate</button>
-					<button id="delete" class="btn">Delete</button>
-				</div>
-			</div>
-			<div id="row" style="margin-top:15px">
-				<div id="span12">
-					<button id="add-source" class="btn">Add Source</button>
-					<button id="add-analysis" class="btn">Add Analysis</button>
-					<button id="add-sink" class="btn">Add Sink</button>
-				</div>
-			</div>
-		</div>
-		<script src="workflow.js"></script>
-	</body>
+    <head>
+        <link href="/css/tangelo.css" rel="stylesheet" type="text/css">
+        <script src="/lib/d3.v3.min.js" charset="utf-8"></script>
+        <script src="/lib/jquery-1.8.2.min.js"></script>
+        <script src="/lib/bootstrap.js"></script>
+        <style>
+        text {
+            fill: black;
+        }
+        </style>
+    </head>
+    <body>
+        <div id="main" class="container">
+            <h1>Arbor Workflow Editor</h1>
+            <div id="row">
+                <div id="span12" class="form-inline">
+                    <select id="workflow"></select>
+                    <button id="new" class="btn">New</button>
+                </div>
+            </div>
+            <div id="row" style="margin-top:15px">
+                <div id="span12" class="form-inline">
+                    <input id="name" type="text"></input>
+                    <button id="save" class="btn">Save</button>
+                    <button id="copy" class="btn">Duplicate</button>
+                    <button id="delete" class="btn">Delete</button>
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                            Add Analysis
+                            <span class="caret"></span>
+                        </a>
+                        <ul id="analysis" class="dropdown-menu">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="workflow.js"></script>
+    </body>
 </html>
