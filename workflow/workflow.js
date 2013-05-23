@@ -167,12 +167,53 @@ window.onload = function () {
             .exit().remove();
 
         g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
-            .call(drag);
+            .call(drag)
+            .on("click", function (d) {
+                var params, content = d3.select("#popover-content");
+                content.selectAll("*").remove();
+                content.append("h3").text(d.name);
+                params = content.selectAll("div.param")
+                    .data(d.parameters)
+                    .enter().append("div")
+                    .classed("param", true)
+                    .each(function (p) {
+                        var sel, param = d3.select(this);
+                        param.append("div").append("small")
+                            .text(p.name);
+                        if (p.type === "enum") {
+                            sel = param.append("select");
+                            sel.selectAll("option")
+                                .data(p.options)
+                                .enter().append("option")
+                                .text(function (o) { return o; });
+                            $(sel.node()).val(p.current);
+                        } else {
+                            param.append("input")
+                                .attr("type", "text")
+                                .attr("value", p.current);
+                        }
+                    });
+                content.append("div").append("button")
+                    .classed("btn btn-primary", true)
+                    .style("margin-bottom", "20px")
+                    .text("Save")
+                    .on("click", function () {
+                        d3.select("#popover-content").selectAll("div.param").each(function (p) {
+                            if (p.type === "enum") {
+                                p.current = $(this).find("select").val();
+                            } else if (p.type === "int") {
+                                p.current = Math.floor(+d3.select(this).select("input").property("value"));
+                            } else if (p.type === "float") {
+                                p.current = +d3.select(this).select("input").property("value");
+                            } else if (p.type === "string") {
+                                p.current = d3.select(this).select("input").property("value");
+                            }
+                        });
+                    });
+                $("#popover").fadeIn(200);
+            });
 
         g.append("rect")
-            .each(function (d) {
-                $(this).popover({title: d.name, content: "Here is a description of this filter. A form with options could go here too.", trigger: "click", html: true, container: "body"});
-            })
             .attr("width", 150)
             .attr("height", 100)
             .attr("rx", 10)
@@ -203,6 +244,7 @@ window.onload = function () {
         prepareWorkflowForRuntime(workflow);
         updateAnalyses();
         updateConnections();
+        $("#popover").fadeOut(200);
     }
 
     function addAnalysis(a) {
@@ -217,10 +259,7 @@ window.onload = function () {
                 outputs: a.outputs
             };
         a.parameters.forEach(function (param) {
-            var p = {name: param.name, type: param.type, value: param.value};
-            if (param.values) {
-                p.values = param.values;
-            }
+            var p = {name: param.name, type: param.type, value: param.value, options: param.options};
             p.current = param.value;
             analysis.parameters.push(p);
         });
@@ -249,7 +288,7 @@ window.onload = function () {
             d.y += d3.event.dy;
             d3.select(this)
                 .attr("transform", "translate(" + d.x + "," + d.y + ")");
-            $(d3.select(this).select("rect").node()).popover("hide");
+
             conn.selectAll("path")
                 .attr("d", connectionPath);
         });

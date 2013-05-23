@@ -6,7 +6,7 @@
             {"name": "String", "type": "string", "value": "hi"},
             {"name": "Integer", "type": "int", "value": 12},
             {"name": "Float", "type": "float", "value": 12.5},
-            {"name": "Enum", "type": "enum", "values": ["One", "Two" ,"Three"], "value": "One"}
+            {"name": "Enum", "type": "enum", "options": ["One", "Two" ,"Three"], "value": "One"}
         ],
         "outputs": [{"name": "output", "type": "table"}]
     },
@@ -17,7 +17,7 @@
             {"name": "String", "type": "string", "value": "hi"},
             {"name": "Integer", "type": "int", "value": 12},
             {"name": "Float", "type": "float", "value": 12.5},
-            {"name": "Enum", "type": "enum", "values": ["One", "Two" ,"Three"], "value": "One"}
+            {"name": "Enum", "type": "enum", "options": ["One", "Two" ,"Three"], "value": "One"}
         ],
         "outputs": [{"name": "output", "type": "tree"}]
     },
