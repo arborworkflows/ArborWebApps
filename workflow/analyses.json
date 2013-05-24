@@ -1,5 +1,11 @@
 [
     {
+        "name": "Local Table",
+        "inputs": [],
+        "parameters": [],
+        "outputs": [{"name": "output", "type": "table"}]
+    },
+    {
         "name": "Table Source",
         "inputs": [],
         "parameters": [
