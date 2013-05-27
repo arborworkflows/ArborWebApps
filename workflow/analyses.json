@@ -75,6 +75,21 @@
         ]
     },
     {
+        "name": "FC Model Compare",
+        "type": "arbor.fit_continuous_model_comparison",
+        "inputs": [
+            {"name": "model 1", "type": "table"},
+            {"name": "model 2", "type": "table"},
+            {"name": "model 3", "type": "table", "optional": true},
+            {"name": "model 4", "type": "table", "optional": true},
+            {"name": "model 5", "type": "table", "optional": true}
+        ],
+        "parameters": [],
+        "outputs": [
+            {"name": "comparison", "type": "table"}
+        ]
+    },
+    {
         "name": "Tree Difference",
         "type": "arbor.tree_difference",
         "inputs": [

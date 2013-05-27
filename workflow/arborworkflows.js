@@ -129,6 +129,9 @@ $(document).ready(function () {
                 canRun = true;
                 analysisInfo = flow.serialize().analyses[aIndex];
                 a.inputs.forEach(function (input, inputIndex) {
+                    if (input.optional) {
+                        return;
+                    }
                     foundDoneInput = false;
                     flow.data().connections.forEach(function (c) {
                         if (c.inputAnalysis === a

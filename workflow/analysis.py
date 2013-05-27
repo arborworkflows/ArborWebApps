@@ -140,6 +140,20 @@ def fit_continuous_eb(analysis):
 
     return [results, outTree]
 
+def fit_continuous_model_comparison(analysis):
+    models = [m["data"]["content"][0] for m in analysis["inputs"] if "data" in m]
+
+    results = {
+        "name": "model comparison",
+        "type": "table",
+        "data": {
+            "type": "json",
+            "content": models
+        }
+    }
+
+    return [results]
+
 @tangelo.restful
 def put(id):
     coll = pymongo.Connection("mongo")["arbor"]["analyses"]
@@ -163,7 +177,8 @@ def post(action = None):
             return fit_continuous_ou(analysis)
         if analysis["type"] == "arbor.fit_continuous_eb":
             return fit_continuous_eb(analysis)
-
+        if analysis["type"] == "arbor.fit_continuous_model_comparison":
+            return fit_continuous_model_comparison(analysis)
         return analysis
 
 @tangelo.restful
