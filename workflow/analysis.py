@@ -25,7 +25,7 @@ def fit_continuous_bm(analysis):
     anoleData = r["read.csv"](**kwargs)
 
     # svl<-anoleData[,1]
-    svl = anoleData.rx(True, 1)
+    svl = anoleData.rx2(analysis["parameters"][0]["current"])
 
     #names(svl) = r.rownames(anoleData)
     svl.names = r.rownames(anoleData)
@@ -62,9 +62,9 @@ def fit_continuous_ou(analysis):
     anoleData = r["read.csv"](**kwargs)
 
     # svl<-anoleData[,1]
-    svl = anoleData.rx(True, 1)
+    svl = anoleData.rx2(analysis["parameters"][0]["current"])
 
-    #names(svl) = r.rownames(anoleData)
+    # names(svl) = r.rownames(anoleData)
     svl.names = r.rownames(anoleData)
 
     # ouOut<-fitContinuous(anoleTree, svl, model="OU")
@@ -79,7 +79,7 @@ def fit_continuous_ou(analysis):
         }
     }
 
-    #ouTree<-transform(anoleTree, "OU", ouOut$opt$alpha)
+    # ouTree<-transform(anoleTree, "OU", ouOut$opt$alpha)
     ouTree = geiger.transform(anoleTree, "OU", ouOut.rx2("opt").rx2("alpha"))
     outTree = {
         "name": "transformed tree",
@@ -110,9 +110,9 @@ def fit_continuous_eb(analysis):
     anoleData = r["read.csv"](**kwargs)
 
     # svl<-anoleData[,1]
-    svl = anoleData.rx(True, 1)
+    svl = anoleData.rx2(analysis["parameters"][0]["current"])
 
-    #names(svl) = r.rownames(anoleData)
+    # names(svl) = r.rownames(anoleData)
     svl.names = r.rownames(anoleData)
 
     # ebOut<-fitContinuous(anoleTree, svl, model="EB")
@@ -127,7 +127,7 @@ def fit_continuous_eb(analysis):
         }
     }
 
-    #ebTree<-transform(anoleTree, "EB", ebOut$opt$a)
+    # ebTree<-transform(anoleTree, "EB", ebOut$opt$a)
     ebTree = geiger.transform(anoleTree, "EB", ebOut.rx2("opt").rx2("a"))
     outTree = {
         "name": "transformed tree",
