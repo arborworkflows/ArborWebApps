@@ -229,7 +229,6 @@ workflow = function (selection) {
 
         vis.selectAll("g.analysis").selectAll("rect")
             .style("fill", function (d) {
-                console.log(d.state);
                 return stateScale(d.state);
             });
     }

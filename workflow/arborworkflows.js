@@ -146,15 +146,14 @@ $(document).ready(function () {
                 if (canRun) {
                     a.state = "running";
                     flow.update();
-                    console.log(analysisInfo);
 
                     // TODO: Do ajax request to run the analysis.
                     // Update state to done when complete.
                     d3.json("analysis/run").send("post", JSON.stringify(analysisInfo), function (error, results) {
-                        console.log(results);
                         a.outputs.forEach(function (o, oIndex) {
-                            o.data = results[oIndex];
+                            o.data = results[oIndex].data;
                         });
+                        console.log(a);
                         a.state = "done";
                         flow.update();
                     });
