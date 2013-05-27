@@ -4,6 +4,8 @@ import json
 import pymongo
 import bson.objectid
 import bson.json_util
+#import rpy2.robjects as robjects
+#from rpy2.robjects.packages import importr
 
 @tangelo.restful
 def put(id):
@@ -14,11 +16,29 @@ def put(id):
 	return json.dumps("updated")
 
 @tangelo.restful
-def post():
-	coll = pymongo.Connection("mongo")["arbor"]["analyses"]
-	doc = json.load(cherrypy.request.body)
-	coll.save(doc)
-	return json.dumps(str(doc["_id"]))
+def post(action = None):
+	if action == None:
+		coll = pymongo.Connection("mongo")["arbor"]["analyses"]
+		doc = json.load(cherrypy.request.body)
+		coll.save(doc)
+		return json.dumps(str(doc["_id"]))
+	elif action == "run":
+		analysis = json.load(cherrypy.request.body)
+		if analysis["type"] == "arbor.fit_continuous_bm":
+			tree_data = analysis["inputs"][0]["data"]
+			table_data = analysis["inputs"][0]["data"]
+			#ape = importr("ape")
+			#geiger = importr("geiger")
+			#r = robjects.r
+			#anoleTree = ape.read_tree(text=tree_data["content"])
+			#kwargs = {"text": table_data["content"], "row.names": 1}
+			#anoleData = r["read.csv"](**kwargs)
+			#svl = anoleData[,1]
+			#names(svl) = r.rownames(anoleData)
+			#bmOut = geiger.fitContinuous(anoleTree, svl, model="BM")
+
+			return analysis
+		return analysis
 
 @tangelo.restful
 def get(id = None):

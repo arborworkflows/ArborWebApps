@@ -1,5 +1,5 @@
 /*jslint browser: true */
-/*globals d3, $, FileReader */
+/*globals d3, $, workflow, FileReader */
 
 $(document).ready(function () {
     "use strict";
@@ -120,6 +120,49 @@ $(document).ready(function () {
         }
     });
 
+    // Run workflow
+    d3.select("#run").on("click", function () {
+        flow.data().analyses.forEach(function (a, aIndex) {
+            var analysisInfo, canRun, foundDoneInput;
+
+            if (!a.state || a.state === "waiting") {
+                canRun = true;
+                analysisInfo = flow.serialize().analyses[aIndex];
+                a.inputs.forEach(function (input, inputIndex) {
+                    foundDoneInput = false;
+                    flow.data().connections.forEach(function (c) {
+                        if (c.inputAnalysis === a
+                                && c.inputIndex === inputIndex
+                                && c.outputAnalysis.state === "done") {
+                            foundDoneInput = true;
+                            analysisInfo.inputs[inputIndex].data =
+                                c.outputAnalysis.outputs[c.outputIndex].data;
+                        }
+                    });
+                    if (!foundDoneInput) {
+                        canRun = false;
+                    }
+                });
+                if (canRun) {
+                    a.state = "running";
+                    flow.update();
+                    console.log(analysisInfo);
+
+                    // TODO: Do ajax request to run the analysis.
+                    // Update state to done when complete.
+                    d3.json("analysis/run").send("post", JSON.stringify(analysisInfo), function (error, results) {
+                        console.log(results);
+                        a.outputs.forEach(function (o, oIndex) {
+                            o.data = results[oIndex];
+                        });
+                        a.state = "done";
+                        flow.update();
+                    });
+                }
+            }
+        });
+    });
+
     function handleReaderProgress(evt) {
         if (evt.lengthComputable) {
             var loaded = (evt.loaded / evt.total);
@@ -134,7 +177,6 @@ $(document).ready(function () {
         $("#dropstatus").hide();
 
         var data = d3.csv.parse(evt.target.result);
-        console.log(data);
 
         flow.add({
             name: file.name,
@@ -142,8 +184,6 @@ $(document).ready(function () {
             parameters: [],
             outputs: [{name: "output", type: "table"}]
         });
-
-        //d3.select("#preview").text(evt.target.result);
     }
 
     // Handle file drag/drop events
@@ -192,16 +232,58 @@ $(document).ready(function () {
                     $("#droplabel").html("");
                     $("#dropstatus").hide();
 
-                    data = d3.csv.parse(evt.target.result);
+                    function endsWith(str, suffix) {
+                        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+                    }
 
-                    a = flow.add({
-                        name: file.name,
-                        inputs: [],
-                        parameters: [],
-                        outputs: [{name: "output", type: "table"}]
-                    });
+                    data = null;
+                    if (endsWith(file.name, ".csv")) {
+                        // TODO: Load data into the database
+                        // by sending evt.target.result somewhere
 
-                    a.data = data;
+                        flow.add({
+                            name: file.name,
+                            type: "arbor.database.table",
+                            inputs: [],
+                            state: "done",
+                            parameters: [
+                                {name: "project", type: "string", value: "default"},
+                                {name: "type", type: "string", value: "CharacterMatrix"},
+                                {name: "name", type: "string", value: file.name}
+                            ],
+                            outputs: [{
+                                name: "output",
+                                type: "table",
+                                data: {
+                                    type: "csv",
+                                    content: evt.target.result
+                                }
+                            }]
+                        });
+                    } else if (endsWith(file.name, ".phy")) {
+                        // TODO: Load data into the database
+                        // by sending evt.target.result somewhere
+
+                        flow.add({
+                            name: file.name,
+                            type: "arbor.database.tree",
+                            state: "done",
+                            inputs: [],
+                            parameters: [
+                                {name: "project", type: "string", value: "default"},
+                                {name: "type", type: "string", value: "PhyloTree"},
+                                {name: "name", type: "string", value: file.name}
+                            ],
+                            outputs: [{
+                                name: "output",
+                                type: "tree",
+                                data: {
+                                    type: "newick",
+                                    content: evt.target.result
+                                }
+                            }]
+                        });
+                    }
                 };
 
                 // begin the read operation

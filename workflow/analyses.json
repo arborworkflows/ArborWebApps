@@ -1,71 +1,91 @@
 [
     {
-        "name": "Local Table",
+        "name": "Tree Source",
+        "type": "source.tree",
         "inputs": [],
         "parameters": [],
-        "outputs": [{"name": "output", "type": "table"}]
+        "outputs": [
+            {"name": "output", "type": "tree"}
+        ]
     },
     {
         "name": "Table Source",
+        "type": "source.table",
         "inputs": [],
-        "parameters": [
-            {"name": "String", "type": "string", "value": "hi"},
-            {"name": "Integer", "type": "int", "value": 12},
-            {"name": "Float", "type": "float", "value": 12.5},
-            {"name": "Enum", "type": "enum", "options": ["One", "Two" ,"Three"], "value": "One"}
-        ],
-        "outputs": [{"name": "output", "type": "table"}]
-    },
-    {
-        "name": "Tree Source",
-        "inputs": [],
-        "parameters": [
-            {"name": "String", "type": "string", "value": "hi"},
-            {"name": "Integer", "type": "int", "value": 12},
-            {"name": "Float", "type": "float", "value": 12.5},
-            {"name": "Enum", "type": "enum", "options": ["One", "Two" ,"Three"], "value": "One"}
-        ],
-        "outputs": [{"name": "output", "type": "tree"}]
+        "parameters": [],
+        "outputs": [
+            {"name": "output", "type": "table"}
+        ]
     },
     {
         "name": "Drop Tips",
+        "type": "arbor.drop_tips",
         "inputs": [
             {"name": "input", "type": "tree"}
         ],
         "parameters": [
-            {"name": "String", "type": "string", "value": ""},
-            {"name": "Integer", "type": "int", "value": 5}
+            {"name": "tips", "type": "string", "value": ""}
         ],
         "outputs": [
             {"name": "output", "type": "tree"}
         ]
     },
     {
-        "name": "Tree + Table",
+        "name": "Fit Continuous BM",
+        "type": "arbor.fit_continuous_bm",
         "inputs": [
-            {"name": "input", "type": "tree"},
-            {"name": "input", "type": "table"}
+            {"name": "tree", "type": "tree"},
+            {"name": "character matrix", "type": "table"}
         ],
         "parameters": [
-            {"name": "String", "type": "string", "value": ""},
-            {"name": "Integer", "type": "int", "value": 5}
-        ],
-        "outputs": [
-            {"name": "output", "type": "treetable"}
-        ]
-    },
-    {
-        "name": "Geiger Model",
-        "inputs": [
-            {"name": "input", "type": "treetable"}
-        ],
-        "parameters": [
-            {"name": "String", "type": "string", "value": ""},
-            {"name": "Integer", "type": "int", "value": 5}
+            {"name": "character", "type": "string", "value": ""}
         ],
         "outputs": [
             {"name": "output", "type": "tree"},
             {"name": "results", "type": "table"}
+        ]
+    },
+    {
+        "name": "Fit Continuous OU",
+        "type": "arbor.fit_continuous_ou",
+        "inputs": [
+            {"name": "tree", "type": "tree"},
+            {"name": "character matrix", "type": "table"}
+        ],
+        "parameters": [
+            {"name": "character", "type": "string", "value": ""}
+        ],
+        "outputs": [
+            {"name": "output", "type": "tree"},
+            {"name": "results", "type": "table"}
+        ]
+    },
+    {
+        "name": "Fit Continuous EB",
+        "type": "arbor.fit_continuous_eb",
+        "inputs": [
+            {"name": "tree", "type": "tree"},
+            {"name": "character matrix", "type": "table"}
+        ],
+        "parameters": [
+            {"name": "character", "type": "string", "value": ""}
+        ],
+        "outputs": [
+            {"name": "output", "type": "tree"},
+            {"name": "results", "type": "table"}
+        ]
+    },
+    {
+        "name": "Tree Difference",
+        "type": "arbor.tree_difference",
+        "inputs": [
+            {"name": "model 1", "type": "tree"},
+            {"name": "model 2", "type": "tree"}
+        ],
+        "parameters": [],
+        "outputs": [
+            {"name": "comparison tree", "type": "tree"},
+            {"name": "metrics", "type": "table"}
         ]
     }
 ]

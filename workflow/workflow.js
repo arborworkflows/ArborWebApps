@@ -14,6 +14,7 @@ workflow = function (selection) {
         outputIndex,
         conn,
         analysisMap,
+        stateScale,
         detail,
         detailContent;
 
@@ -223,7 +224,14 @@ workflow = function (selection) {
             .attr("width", 32)
             .attr("height", 32)
             .attr("xlink:href", "simple.png");
+
         g.each(updateAnalysis);
+
+        vis.selectAll("g.analysis").selectAll("rect")
+            .style("fill", function (d) {
+                console.log(d.state);
+                return stateScale(d.state);
+            });
     }
 
     that = {};
@@ -241,6 +249,8 @@ workflow = function (selection) {
                 x: 200,
                 y: 200,
                 name: a.name,
+                type: a.type,
+                state: a.state,
                 inputs: a.inputs,
                 parameters: [],
                 outputs: a.outputs
@@ -280,6 +290,8 @@ workflow = function (selection) {
                 x: analysis.x,
                 y: analysis.y,
                 name: analysis.name,
+                type: analysis.type,
+                state: analysis.state,
                 inputs: analysis.inputs,
                 parameters: analysis.parameters,
                 outputs: analysis.outputs
@@ -300,6 +312,10 @@ workflow = function (selection) {
         updateAnalyses();
         updateConnections();
     };
+
+    stateScale = d3.scale.ordinal()
+        .domain([undefined, "waiting", "running", "done"])
+        .range(["#ccc", "#ccc", "#cdf", "#cfc"]);
 
     // Create main SVG object
     vis = selection.append("svg");
