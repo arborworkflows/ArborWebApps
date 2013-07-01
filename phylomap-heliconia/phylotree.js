@@ -339,8 +339,9 @@ function updateJSON(options) {
 		d3.select(node.childNodes[0]).style("fill", "red");
 	}
 
-	d3.json('/app/phylomap/service/phylomongo/' + mongo.server + '/' + mongo.db + '/' +
-			mongo.coll + '?maxdepth=' + maxDepth + '&_id=' + oldJSON._id, function(json) {
+	//d3.json('/app/phylomap/service/phylomongo/' + mongo.server + '/' + mongo.db + '/' +
+	d3.json('service/phylomongo/' + mongo.server + '/' + mongo.db + '/' +
+			mongo.coll + '?maxdepth=' + maxDepth + '&_id=' + oldJSON._id, function(err, json) {
 		toggleAll (json, function() {
 			oldJSON.clades = json._clades;
 			oldJSON._clades = null;
@@ -645,24 +646,44 @@ vis.append("svg:rect")
 addLoadEvent(function () {
 	mongo = phylotree.getMongoDBInfo();
 
-	// Display the configuration dialog when clicked
-	tangelo.onConfigLoad(function () {
-		var cfg;
+    $("#navbar").navbar({
+        // Display the configuration dialog when clicked
+        onConfigLoad: function () {
+            var cfg;
 
-		cfg = phylotree.getMongoDBInfo();
-		d3.select("#mongodb-server").property("value", cfg.server);
-		d3.select("#mongodb-db").property("value", cfg.db);
-		d3.select("#mongodb-coll").property("value", cfg.coll);
-	});
+            cfg = phylotree.getMongoDBInfo();
+            d3.select("#mongodb-server").property("value", cfg.server);
+            d3.select("#mongodb-db").property("value", cfg.db);
+            d3.select("#mongodb-coll").property("value", cfg.coll);
+        },
 
-	// Update the internal datastore when the user saves the configuration.
-	tangelo.onConfigSave(phylotree.updateConfig);
+        // Update the internal datastore when the user saves the configuration.
+        onConfigSave: phylotree.updateConfig,
 
-	// Use default configuration values when the defaults button is pressed.
-	tangelo.onConfigDefault(phylotree.setConfigDefaults);
+        // Use default configuration values when the defaults button is pressed.
+        onConfigDefault: phylotree.setConfigDefaults
+    });
+
+   /* // Display the configuration dialog when clicked*/
+	//tangelo.onConfigLoad(function () {
+		//var cfg;
+
+		//cfg = phylotree.getMongoDBInfo();
+		//d3.select("#mongodb-server").property("value", cfg.server);
+		//d3.select("#mongodb-db").property("value", cfg.db);
+		//d3.select("#mongodb-coll").property("value", cfg.coll);
+	//});
+
+	//// Update the internal datastore when the user saves the configuration.
+	//tangelo.onConfigSave(phylotree.updateConfig);
+
+	//// Use default configuration values when the defaults button is pressed.
+	//tangelo.onConfigDefault(phylotree.setConfigDefaults);
 
 	// Can probably make this a better API
-	d3.json('/app/phylomap/service/phylomongo/' + mongo.server + '/' + mongo.db + '/' + mongo.coll + '?maxdepth=3', function(json) {
+    //
+	//d3.json('/app/phylomap/service/phylomongo/' + mongo.server + '/' + mongo.db + '/' + mongo.coll + '?maxdepth=3', function(err, json) {
+	d3.json('service/phylomongo/' + mongo.server + '/' + mongo.db + '/' + mongo.coll + '?maxdepth=3', function(err, json) {
 		root = json;
 		root.x0 = height / 2;
 		root.y0 = 0;

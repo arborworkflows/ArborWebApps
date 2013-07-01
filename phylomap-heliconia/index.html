@@ -4,10 +4,11 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
         <link rel="shortcut icon" href=/img/tangelo.ico>
 		<title>Arbor Tree and Distribution Browser</title>
-		<script type="text/javascript" charset="utf-8" src="http://d3js.org/d3.v3.min.js"></script>
-        <script src=http://code.jquery.com/jquery-1.8.2.min.js></script>
-        <script src=/lib/tangelo.min.js></script>
-        <script src=/lib/bootstrap.js></script>
+   <!--     <script type="text/javascript" charset="utf-8" src="http://d3js.org/d3.v3.min.js"></script>-->
+        <!--<script src=http://code.jquery.com/jquery-1.8.2.min.js></script>-->
+        <!--<script src=/lib/tangelo.min.js></script>-->
+        <!--<script src=/lib/bootstrap.js></script>-->
+        <script src=/js/loader/load-tangelo.min.js></script>
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
         <link href=/css/tangelo.css rel=stylesheet type=text/css>
         <script type="text/javascript" src="Sive.js"></script>
@@ -69,7 +70,8 @@
 
 	</head>
 	<body>
-        <div data-tangelo-type=navbar data-tangelo-brand=Arbor data-tangelo-app=Phylomap>
+        <!--<div data-tangelo-type=navbar data-tangelo-brand=Arbor data-tangelo-app=Phylomap>-->
+        <div id=navbar data-tangelo-brand=Arbor data-tangelo-app=Phylomap>
             <div data-tangelo-type=info>
                 <p>This application lets you explore a phylogenetic tree and associated species location data. Click on a
                 node to expand/collapse its descendants recursively.  Shift-click on a node corresponding to a clade to
