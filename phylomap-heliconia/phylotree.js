@@ -1,3 +1,6 @@
+var phylotree = {};
+phylotree.phylomap = null;
+
 function addLoadEvent(func) {
 	var oldonload = window.onload;
 	if (typeof window.onload != 'function') {
@@ -446,29 +449,15 @@ function toggleCladeSelect(element) {
 }
 
 function mapItem(item) {
-// update the phylomap!
-	// ensure our helper functions have been included via javascript includes
-	if (typeof createMarker != 'undefined' && typeof google.maps.LatLng != 'undefined') {
-		// do we have location data, also must be an end node
-		if (typeof item.loc != 'undefined') {
-			// do markers already exist?
-			if (markerExists(item._id)) {
-				clearOneId(item._id);
-			} else {
-				// add markers
-				var icon = getIcon();
-				item.loc.forEach(function(d){
-					var latlng = new google.maps.LatLng(
-						parseFloat(d[1]),
-						parseFloat(d[0]));
-					var text = "location: " + latlng + "<br>id: " + item._id;
-					var name = item.taxonomies[0].scientific_name;
-					createMarker(latlng, name, text, item._id, icon);
-				});
-			}
-		}
-		//createMarker ()
-	}
+    if (phylotree.phylomap) {
+        phylotree.phylomap.postMessage({type: "mapItem", item: item}, "*");
+    }
+}
+
+function searchLocationsNearClade(searchUrl, rootId, callback){
+    if (phylotree.phylomap) {
+        phylotree.phylomap.postMessage({type: "searchLocationsNearClade", args: {searchUrl: searchUrl, rootId: rootId, callback: callback}}, "*");
+    }
 }
 
 function clearBadge() {
@@ -480,16 +469,13 @@ function clearBadge() {
 
 // CRL: changed embedded call to distinguish this case from other uses of searchLocations and highlight the clade in the tree
 function mapAllChildNodes(d, node) {
-	// ensure our helper functions have been included via javascript includes
-	if (typeof createMarker != 'undefined' && typeof google.maps.LatLng != 'undefined') {
-		// this process can take a long time, so put up a processing sign
-		$('#treebuttons').badger('Processing');
-		searchLocationsNearClade('service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
-			'/?boundary_type=id' + '&_id=' + d._id, d._id, clearBadge);
-				// this happens immediately regardless of gating
-		//$('#treebuttons').badger('');
-		//$(document).ready(function() {$('#treebuttons').badger('');});
-	}
+    // this process can take a long time, so put up a processing sign
+    $('#treebuttons').badger('Processing');
+    searchLocationsNearClade('service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
+            '/?boundary_type=id' + '&_id=' + d._id, d._id, "clearBadge");
+    // this happens immediately regardless of gating
+    //$('#treebuttons').badger('');
+    //$(document).ready(function() {$('#treebuttons').badger('');});
 }
 
 var phylotree = {}
@@ -640,37 +626,64 @@ vis.append("svg:rect")
 	.attr("width", width + lMargin + rMargin)
 	.attr("height", height + tMargin + bMargin)
 	.attr("fill", "white")
-	.attr("class", "background");
+    .attr("class", "background");
 
-addLoadEvent(function () {
-	mongo = phylotree.getMongoDBInfo();
+function receiveMessage(e) {
+    var d = e.data;
 
-    $("#navbar").navbar({
-        // Display the configuration dialog when clicked
-        onConfigLoad: function () {
-            var cfg;
+    switch (d.type) {
+        case "ready":
+            phylotree.phylomap.postMessage({type: "mongo", mongo: mongo}, "*");
+            break;
 
-            cfg = phylotree.getMongoDBInfo();
-            d3.select("#mongodb-server").property("value", cfg.server);
-            d3.select("#mongodb-db").property("value", cfg.db);
-            d3.select("#mongodb-coll").property("value", cfg.coll);
-        },
+        case "clearBadge":
+            clearBadge();
+            break;
 
-        // Update the internal datastore when the user saves the configuration.
-        onConfigSave: phylotree.updateConfig,
+        default:
+            throw "unknown message type '" + d.type + "'";
+            break;
+    }
+}
 
-        // Use default configuration values when the defaults button is pressed.
-        onConfigDefault: phylotree.setConfigDefaults
+$(function () {
+    addLoadEvent(function () {
+        mongo = phylotree.getMongoDBInfo();
+
+        $("#navbar").navbar({
+            // Display the configuration dialog when clicked
+            onConfigLoad: function () {
+                var cfg;
+
+                cfg = phylotree.getMongoDBInfo();
+                d3.select("#mongodb-server").property("value", cfg.server);
+                d3.select("#mongodb-db").property("value", cfg.db);
+                d3.select("#mongodb-coll").property("value", cfg.coll);
+            },
+
+            // Update the internal datastore when the user saves the configuration.
+            onConfigSave: phylotree.updateConfig,
+
+            // Use default configuration values when the defaults button is pressed.
+            onConfigDefault: phylotree.setConfigDefaults
+        });
+
+        window.addEventListener("message", receiveMessage);
+
+        d3.select("#open-map")
+            .on("click", function () {
+                phylotree.phylomap = window.open("phylomap.html");
+            });
+
+        // Can probably make this a better API
+        d3.json('service/phylomongo/' + mongo.server + '/' + mongo.db + '/' + mongo.coll + '?maxdepth=3', function(err, json) {
+            root = json;
+            root.x0 = height / 2;
+            root.y0 = 0;
+
+            // initialize the display to show children nodes
+            root.clades.forEach(toggleAll);
+            update(root);
+        });
     });
-
-    // Can probably make this a better API
-	d3.json('service/phylomongo/' + mongo.server + '/' + mongo.db + '/' + mongo.coll + '?maxdepth=3', function(err, json) {
-		root = json;
-		root.x0 = height / 2;
-		root.y0 = 0;
-
-		// initialize the display to show children nodes
-		root.clades.forEach(toggleAll);
-		update(root);
-	});
 });

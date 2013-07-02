@@ -96,10 +96,13 @@ function searchLocationsNearClade(searchUrl, rootId, callback) {
 			// highlight the path on the tree between the rootId and this node if a valid id was passed
 			if (rootId != null) {
 			        var colorToUse = getIconColor(id)
-			        highlightLimitedPath(d,rootId,colorToUse)
+					//highlightLimitedPath(d,rootId,colorToUse)
 			}
 		});
-		if (callback != null) callback();
+		//if (callback != null) callback();
+        if (callback) {
+            window.opener.postMessage({type: callback}, "*");
+        }
 	});
 	
 }
@@ -275,54 +278,111 @@ phylomap.setConfigDefaults = function () {
 
 //function load() {
 
-addLoadEvent(function () {
-	mapOptions = {
-		//center: new google.maps.LatLng(18.994609, -71.345215),
-		//zoom: 6,
-		center: new google.maps.LatLng(1.65, -70.0),
-		zoom: 4,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	};
-	map = new google.maps.Map(d3.select("#map_canvas").node(),
-		mapOptions);
-	var drawingManager = new google.maps.drawing.DrawingManager({
-		drawingMode: google.maps.drawing.OverlayType.CIRCLE,
-		drawingControl: true,
-		drawingControlOptions: {
-			position: google.maps.ControlPosition.TOP_CENTER,
-			drawingModes: [
-			  google.maps.drawing.OverlayType.MARKER,
-			  google.maps.drawing.OverlayType.CIRCLE,
-			  google.maps.drawing.OverlayType.RECTANGLE
-			]
-		},
-		markerOptions: {
-			icon: new google.maps.MarkerImage('http://www.example.com/icon.png')
+function mapItem(item) {
+// update the phylomap!
+	// ensure our helper functions have been included via javascript includes
+	if (typeof createMarker != 'undefined' && typeof google.maps.LatLng != 'undefined') {
+		// do we have location data, also must be an end node
+		if (typeof item.loc != 'undefined') {
+			// do markers already exist?
+			if (markerExists(item._id)) {
+				clearOneId(item._id);
+			} else {
+				// add markers
+				var icon = getIcon();
+				item.loc.forEach(function(d){
+					var latlng = new google.maps.LatLng(
+						parseFloat(d[1]),
+						parseFloat(d[0]));
+					var text = "location: " + latlng + "<br>id: " + item._id;
+					var name = item.taxonomies[0].scientific_name;
+					createMarker(latlng, name, text, item._id, icon);
+				});
+			}
 		}
-	});
-	drawingManager.setMap(map);
+		//createMarker ()
+	}
+}
 
-	google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event) {
-		var searchUrl;
-		// create the restful style url to load data
-		if (event.type == google.maps.drawing.OverlayType.CIRCLE) {
-            searchUrl = 'service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
-	 			'/?boundary_type=circle' + 
-	 			'&lng=' + event.overlay.getCenter().lng() + 
-	 			'&lat=' + event.overlay.getCenter().lat() + 
-	 			'&radius=' + event.overlay.getRadius();
-	 	} else if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
-            searchUrl = 'service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
-	 			'/?boundary_type=rect' + 
-				'&swlng=' + event.overlay.bounds.getSouthWest().lng() + 
-				'&swlat=' + event.overlay.bounds.getSouthWest().lat() + 
-				'&nelng=' + event.overlay.bounds.getNorthEast().lng() + 
-				'&nelat=' + event.overlay.bounds.getNorthEast().lat();
-		}
-		searchLocationsNear(searchUrl);
-		overlays.push(event.overlay);
-	});
+function receiveMessage(e) {
+    var d = e.data;
+    switch (d.type) {
+        case "mongo":
+            mongo = d.mongo;
 
-	var mylatlng = new google.maps.LatLng(-25.363882,131.044922);
-	infoWindow = new google.maps.InfoWindow();
+            (function () {
+                mapOptions = {
+                    //center: new google.maps.LatLng(18.994609, -71.345215),
+                    //zoom: 6,
+                    center: new google.maps.LatLng(1.65, -70.0),
+                    zoom: 4,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+                map = new google.maps.Map(d3.select("#map_canvas").node(),
+                    mapOptions);
+                var drawingManager = new google.maps.drawing.DrawingManager({
+                    drawingMode: google.maps.drawing.OverlayType.CIRCLE,
+                    drawingControl: true,
+                    drawingControlOptions: {
+                        position: google.maps.ControlPosition.TOP_CENTER,
+                        drawingModes: [
+                            google.maps.drawing.OverlayType.MARKER,
+                            google.maps.drawing.OverlayType.CIRCLE,
+                            google.maps.drawing.OverlayType.RECTANGLE
+                        ]
+                    },
+                    markerOptions: {
+                        icon: new google.maps.MarkerImage('http://www.example.com/icon.png')
+                    }
+                });
+                drawingManager.setMap(map);
+
+                google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event) {
+                    var searchUrl;
+                    // create the restful style url to load data
+                    if (event.type == google.maps.drawing.OverlayType.CIRCLE) {
+                        searchUrl = 'service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
+                            '/?boundary_type=circle' +
+                            '&lng=' + event.overlay.getCenter().lng() +
+                            '&lat=' + event.overlay.getCenter().lat() +
+                            '&radius=' + event.overlay.getRadius();
+                    } else if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
+                        searchUrl = 'service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
+                            '/?boundary_type=rect' +
+                            '&swlng=' + event.overlay.bounds.getSouthWest().lng() +
+                            '&swlat=' + event.overlay.bounds.getSouthWest().lat() +
+                            '&nelng=' + event.overlay.bounds.getNorthEast().lng() +
+                            '&nelat=' + event.overlay.bounds.getNorthEast().lat();
+                    }
+                    searchLocationsNear(searchUrl);
+                    overlays.push(event.overlay);
+                });
+
+                var mylatlng = new google.maps.LatLng(-25.363882,131.044922);
+                infoWindow = new google.maps.InfoWindow();
+            })();
+            break;
+
+        case "mapItem":
+            mapItem(d.item);
+            break;
+
+        case "searchLocationsNearClade":
+            searchLocationsNearClade(d.args.searchUrl, d.args.rootId, d.args.callback);
+            break;
+
+        default:
+            throw "unknown message type '" + d.type + "'";
+            break;
+    }
+}
+
+$(function () {
+    if (!window.opener) {
+        document.write("ERROR: this page must be opened from the Phylomap application.");
+        return;
+    }
+    window.addEventListener("message", receiveMessage);
+
+    window.opener.postMessage({type: "ready"}, "*");
 });
