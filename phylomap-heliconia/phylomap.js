@@ -62,7 +62,7 @@ function markerExists(id) {
 }
 
 function searchLocationsNear(searchUrl) {
-	d3.json(searchUrl, function(json) {
+	d3.json(searchUrl, function(err, json) {
 		var icon = getIcon();
 		var bounds = new google.maps.LatLngBounds();
 		json.result.data.forEach(function(d){
@@ -81,7 +81,7 @@ function searchLocationsNear(searchUrl) {
 // CRL: created special version of this search to avoid accidental confusion.  This search used only
 // during highlight of entire clade
 function searchLocationsNearClade(searchUrl, rootId, callback) {
-	d3.json(searchUrl, function(json) {
+	d3.json(searchUrl, function(err, json) {
 		var icon = getIcon();
 		var bounds = new google.maps.LatLngBounds();
 		json.result.data.forEach(function(d){
@@ -306,13 +306,13 @@ addLoadEvent(function () {
 		var searchUrl;
 		// create the restful style url to load data
 		if (event.type == google.maps.drawing.OverlayType.CIRCLE) {
-	 		searchUrl = '/app/phylomap-heliconia/service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
+            searchUrl = 'service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
 	 			'/?boundary_type=circle' + 
 	 			'&lng=' + event.overlay.getCenter().lng() + 
 	 			'&lat=' + event.overlay.getCenter().lat() + 
 	 			'&radius=' + event.overlay.getRadius();
 	 	} else if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
-	 		searchUrl = '/app/phylomap-heliconia/service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
+            searchUrl = 'service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
 	 			'/?boundary_type=rect' + 
 				'&swlng=' + event.overlay.bounds.getSouthWest().lng() + 
 				'&swlat=' + event.overlay.bounds.getSouthWest().lat() + 
