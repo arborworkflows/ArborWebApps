@@ -317,7 +317,7 @@ workflow = function (selection) {
         .range(["#ccc", "#ccc", "#cdf", "#cfc"]);
 
     // Create main SVG object
-    vis = selection.append("svg");
+    vis = selection.append("svg").attr("width", 1000).attr("height", 1000);
 
     // Create group containing all connections
     conn = vis.append("g");
