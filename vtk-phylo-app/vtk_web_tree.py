@@ -75,6 +75,8 @@ class _WebTree(vtkweb_wamp.ServerProtocol):
             # read in  a table
             tableReader = vtk.vtkDelimitedTextReader()
             tableReader.SetFileName(_WebTree.csvFilePath)
+            tableReader.SetHaveHeaders(1)
+            tableReader.DetectNumericColumnsOn()
             tableReader.Update()
             table = tableReader.GetOutput()
 
