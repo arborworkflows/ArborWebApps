@@ -66,24 +66,30 @@ class _WebTree(wamp.ServerProtocol):
 
         # Create default pipeline (Only once for all the session)
         if not _WebTree.view:
+            #play with the heatmap vis
+            treeHeatmapItem = vtk.vtkTreeHeatmapItem()
+
             # read in  a tree
             treeReader = vtk.vtkNewickTreeReader()
             treeReader.SetFileName(_WebTree.treeFilePath)
             treeReader.Update()
-            reader = treeReader.GetOutput()
+            tree = treeReader.GetOutput()
 
-            # read in  a table
-            tableReader = vtk.vtkDelimitedTextReader()
-            tableReader.SetFileName(_WebTree.csvFilePath)
-            tableReader.SetHaveHeaders(1)
-            tableReader.DetectNumericColumnsOn()
-            tableReader.Update()
-            table = tableReader.GetOutput()
+            treeHeatmapItem.SetTree(tree);
 
-            #play with the heatmap vis
-            treeHeatmapItem = vtk.vtkTreeHeatmapItem()
-            treeHeatmapItem.SetTree(reader);
-            treeHeatmapItem.SetTable(table);
+
+            if( _WebTree.csvFilePath):
+              # read in  a table
+              tableReader = vtk.vtkDelimitedTextReader()
+              tableReader.SetFileName(_WebTree.csvFilePath)
+              tableReader.SetHaveHeaders(1)
+              tableReader.DetectNumericColumnsOn()
+              tableReader.Update()
+              table = tableReader.GetOutput()
+
+              treeHeatmapItem.SetTable(table);
+
+
 
             # setup the window
             view = vtk.vtkContextView()
