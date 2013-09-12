@@ -1,4 +1,14 @@
 [
-  {name : "asdf"},
-  {name : "hethetg"},
-];
+    {
+        "name": "anolis",
+        "treeFile": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/anolis.phy",
+        "tableFile": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/anolisDataAppended.csv",
+        "visualizationType": "TreeHeatmap"
+    },
+    {
+        "name": "Plolytomies",
+        "treeFile": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/tempo_scrubbed_CONSTRAINT_rooted.dated.POLYTOMIES.tre",
+        "tableFile": "",
+        "visualizationType": "TreeHeatmap"
+    }
+]
