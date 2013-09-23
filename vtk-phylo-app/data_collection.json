@@ -1,0 +1,33 @@
+[
+    {
+        "name": "anolis",
+        "treeFile": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/anolis.phy",
+        "tableFile": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/anolisDataAppended.csv",
+        "visualizationType": "Tree Heatmap"
+    },
+    {
+        "name": "Plolytomies",
+        "treeFile": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/tempo_scrubbed_CONSTRAINT_rooted.dated.POLYTOMIES.tre",
+        "tableFile":"none",
+        "visualizationType": "Tree Heatmap"
+    },
+    {
+        "name": "Ghoper",
+        "treeFile": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/GopherTree.newick",
+        "tableFile": "none",
+        "visualizationType": "Tree Heatmap"
+    },
+    {
+        "name": "Lice",
+        "treeFile": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/LiceTree.newick",
+        "tableFile": "none",
+        "visualizationType": "Tree Heatmap"
+    },
+    {
+        "name": "gopherlice",
+        "tree1File": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/GopherTree.newick",
+        "tree2File": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/LiceTree.newick",
+        "tableFile": "/home/xiaoxiao/work/src/ArborWebApps/vtk-phylo-app/data/GopherLice_HostParasite_Pairs.csv",
+        "visualizationType": "Tanglegram"
+    },
+]
