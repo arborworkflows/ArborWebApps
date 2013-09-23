@@ -1,0 +1,14 @@
+[
+    {
+        "name": "anolis",
+        "treeFile": "data/anolis.phy",
+        "tableFile": "data/anolisDataAppended.csv",
+        "visualizationType": "TreeHeatmap"
+    },
+    {
+        "name": "Plolytomies",
+        "treeFile": "data/tempo_scrubbed_CONSTRAINT_rooted.dated.POLYTOMIES.tre",
+        "tableFile": [],
+        "visualizationType": "TreeHeatmap"
+    },
+]
