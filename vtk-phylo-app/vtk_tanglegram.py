@@ -22,18 +22,18 @@ def initialize(self, VTKWebApp, args):
     if not VTKWebApp.view:
         # read the trees
         treeReader1 = vtk.vtkNewickTreeReader()
-        treeReader1.SetFileName(vtkWebApp.tree1FilePath)
+        treeReader1.SetFileName(VTKWebApp.tree1FilePath)
         treeReader1.Update()
         tree1 = treeReader1.GetOutput()
 
         treeReader2 = vtk.vtkNewickTreeReader()
-        treeReader2.SetFileName(vtkWebApp.tree2FilePath)
+        treeReader2.SetFileName(VTKWebApp.tree2FilePath)
         treeReader2.Update()
         tree2 = treeReader2.GetOutput()
 
         # read the table
         tableReader = vtk.vtkDelimitedTextReader()
-        tableReader.SetFileName(vtkWebApp.csvFilePath)
+        tableReader.SetFileName(VTKWebApp.csvFilePath)
         tableReader.SetHaveHeaders(True)
         tableReader.DetectNumericColumnsOn()
         tableReader.ForceDoubleOn()

@@ -91,6 +91,7 @@ function run_vtk_tree_heatmap(treeFile, tableFile) {
 
 function run_vtk_tanglegram(tree1File, tree2File, tableFile) {
     tURL =  "/vtkweb/arbor/vtk-phylo-app/vtk_tanglegram.py?progargs=" + encodeURIComponent("--tree1 "+tree1File+" --tree2 "+tree2File+" --table "+tableFile);
+    console.log(tree1File + "  " + tree2File +"  "+ tableFile);
     run_vtk_vis(tURL);
 }
 
@@ -124,7 +125,6 @@ $(document).ready(function () {
            if (result.visualizationType === "Tree Heatmap"){
                run_vtk_tree_heatmap(result.treeFile, result.tableFile);
            }else if (result.visualizationType === "Tanglegram"){
-               console.log("tanglegram!");
                run_vtk_tanglegram(result.tree1File, result.tree2File, result.tableFile);
            }else{
                console.log("unknown visulization type: "+ result.visualizationType)
