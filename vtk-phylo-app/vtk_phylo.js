@@ -8,17 +8,18 @@ app.viewport = null;
 // Method call at exit time
 function stop() {
     if (app.key) {
-        if (app.viewport) {
-            app.viewport.unbind();
-            //for future  RPC calls
-            //connection.session.call('vtk:exit'); connection.session.close(); connection.session = null;
-        }
         req = d3.json("/vtkweb/" + app.key);
         req.send("DELETE", function (e, resp) {
             if (resp.status !== "complete") {
                console.log(" error: could not shut down vtkweb process");
             }
-        });
+            if (app.viewport) {
+              app.viewport.unbind();
+              $("#viewport").empty();
+              //for future  RPC calls
+              //connection.session.call('vtk:exit'); connection.session.close(); connection.session = null;
+            }
+      });
     }
 }
 
@@ -86,6 +87,7 @@ function run_vtk_vis(tURL){
 
 function run_vtk_tree_heatmap(treeFile, tableFile) {
     tURL =  "/vtkweb/arbor/vtk-phylo-app/vtk_tree_heatmap.py?progargs=" + encodeURIComponent("--tree "+treeFile+" --table "+tableFile);
+    console.log(treeFile  +"  "+ tableFile);
     run_vtk_vis(tURL);
 }
 
@@ -100,7 +102,7 @@ function run_vtk_tanglegram(tree1File, tree2File, tableFile) {
 $(document).ready(function () {
   "use strict";
   var treeFile, tableFile;
-  //Populate data list, call data_collection.py, which returns a list
+  //Populate data list, call data_collection.py, which returns a list in json format
   d3.json("phylodata", function (error, list) {
       if (list){
           list.unshift({"id": "Select data to visualize", "name": "Select data"});
@@ -134,10 +136,10 @@ $(document).ready(function () {
 
  //upload data
 
- // init the widgets
+// init the widgets
 // $("#progressbar").progressbar({ value: false });
 
- });
+});
 
 
 
