@@ -85,15 +85,16 @@ function run_vtk_vis(tURL){
     });
 }
 
-function run_vtk_tree_heatmap(treeFile, tableFile) {
-    tURL =  "/vtkweb/arbor/vtk-phylo-app/vtk_tree_heatmap.py?progargs=" + encodeURIComponent("--tree "+treeFile+" --table "+tableFile);
-    console.log(treeFile  +"  "+ tableFile);
+function run_vtk_tree_heatmap(id) {
+    tURL =  "/vtkweb/arbor/vtk-phylo-app/vtk_tree_heatmap.py?progargs=" + encodeURIComponent("--id " + id);
+    console.log(tURL);
     run_vtk_vis(tURL);
+
 }
 
-function run_vtk_tanglegram(tree1File, tree2File, tableFile) {
-    tURL =  "/vtkweb/arbor/vtk-phylo-app/vtk_tanglegram.py?progargs=" + encodeURIComponent("--tree1 "+tree1File+" --tree2 "+tree2File+" --table "+tableFile);
-    console.log(tree1File + "  " + tree2File +"  "+ tableFile);
+function run_vtk_tanglegram(id) {
+    tableFile = id + ".csv";
+    tURL =  "/vtkweb/arbor/vtk-phylo-app/vtk_tanglegram.py?progargs=" + encodeURIComponent("--id" + id);
     run_vtk_vis(tURL);
 }
 
@@ -105,7 +106,7 @@ $(document).ready(function () {
   //Populate data list, call data_collection.py, which returns a list in json format
   d3.json("phylodata", function (error, list) {
       if (list){
-          list.unshift({"id": "Select data to visualize", "name": "Select data"});
+          list.unshift({"id": "Select data", "name": "Select data"}); //add "Select data" to the top of the list
           d3.select("#datalist")
             .selectAll("option")
             .data(list).enter().append("option")
@@ -116,28 +117,160 @@ $(document).ready(function () {
       }
   });
 
-  //select data set
-  d3.select("select")
-      .on("change",function(){
-        var selectedDataId = $("#datalist").val();
-        console.log("data id=" + selectedDataId);
-        //calling the tangelo pythong service "phylodata.py" with the input argument selectedDataId
+
+  function showVis(selectedDataId) {
         d3.json("phylodata/" + selectedDataId, function (error, result){
+           if (!result){
+             console.log("error finding data with id:"+ selectedDataId);
+           }
            $("#vistype").val(result.visualizationType);
-           if (result.visualizationType === "Tree Heatmap"){
-               run_vtk_tree_heatmap(result.treeFile, result.tableFile);
+           if (result.visualizationType === "Tree Heatmap" || result.visualizationType == "Tree" ){
+               run_vtk_tree_heatmap(selectedDataId);
            }else if (result.visualizationType === "Tanglegram"){
-               run_vtk_tanglegram(result.tree1File, result.tree2File, result.tableFile);
+               run_vtk_tanglegram(selectedDataId);
            }else{
                console.log("unknown visulization type: "+ result.visualizationType)
            }
         });
+  }
+
+
+
+  //select data set
+  d3.select("select")
+      .on("change",function(){
+        var selectedDataId = $("#datalist").val();
+        //calling the tangelo pythong service "phylodata.py" with the input argument selectedDataId
+        if (selectedDataId !== "Select data"){
+            showVis(selectedDataId);
+        }else{
+            $("#vistype").val("");
+        }
      });
 
+    function handleReaderProgress(evt) {
+        if (evt.lengthComputable) {
+            var loaded = (evt.loaded / evt.total);
+
+            //$("#progressbar").progressbar({ value: loaded * 100 });
+        }
+    }
+
+    function handleReaderLoadEnd(evt) {
+       /* $("#progressbar").progressbar({ value: 100 });
+        $("#droplabel").html("");
+        $("#dropstatus").hide();
+      */
+        var data = d3.csv.parse(evt.target.result);
+    }
+
  //upload data
+  d3.select("body")
+        .on("dragenter", function () {
+            d3.event.stopPropagation();
+            d3.event.preventDefault();
+        })
+        .on("dragexit", function () {
+            d3.event.stopPropagation();
+            d3.event.preventDefault();
+        })
+        .on("dragover", function () {
+            d3.event.stopPropagation();
+            d3.event.preventDefault();
+        })
+        .on("drop", function () {
+            var file, files, count, reader;
+
+            d3.event.stopPropagation();
+            d3.event.preventDefault();
+
+            files = d3.event.dataTransfer.files;
+            count = files.length;
+            console.log(count + " file is dropped");
+
+            // Only call the handler if 1 or more files was dropped.
+            if (count > 0) {
+                file = files[0];
+
+                console.log(file.name);
+                /*
+                $("#dropstatus").show();
+                $("#droplabel").html("Processing " + file.name);
+                 */
+                reader = new FileReader();
+                // init the reader event handlers
+                reader.onprogress = function (evt) {
+                    if (evt.lengthComputable) {
+                        var loaded = (evt.loaded / evt.total);
+                       // $("#progressbar").progressbar({ value: loaded * 100 });
+                    }
+                };
+                reader.onloadend = function (evt) {
+                    var data, a;
+                    /*
+                    $("#progressbar").progressbar({ value: 100 });
+                    $("#droplabel").html("");
+                    $("#dropstatus").hide();
+                     */
+                    function endsWith(str, suffix) {
+                        return str.indexOf(suffix, str.length - suffix.length) !== -1;
+                    }
+
+                    data = null;
+                    if (endsWith(file.name, ".csv")) {
+                        // TODO: Load data into the database
+                        console.log("TODO:load table data to database")
+                        console.log(evt.target.result);
+
+                    } else if (endsWith(file.name, ".phy") || endsWith(file.name, ".newick") || endsWith(file.name, ".tre")){
+                        // Load data into the database
+                        var treeString = evt.target.result;
+                        if (treeString[treeString.length-1] == '\n'){
+                            treeString = treeString.slice(0,-1); // get rid of '\n'
+                        }
+                        //console.log("tree string:["+treeString+"]");
+
+                        // create a json format data entry
+                        var dataentry = new Object();
+                        dataentry.name = file.name;
+                        dataentry.tree = treeString;
+                        dataentry.table = "none";
+                        dataentry.visualizationType = "Tree";
+
+                       d3.json("phylodata").post(JSON.stringify(dataentry), function(error, id){
+                            d3.select("#datalist").append("option")
+                              .datum({id: id, name: file.name})
+                              .attr("value",id)
+                              .text(file.name);
+                            $("#datalist").val(id);
+                            showVis(id);
+                    });
+                   }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+
+ //delete data from mongo db
+  d3.select("#delete").on("click", function () {
+     var cur = $("#datalist").val();
+     if (cur !== "Select data") {
+         d3.json("phylodata/" + cur).send("delete", "", function (error, result) {
+             d3.select("#datalist").selectAll("option")
+               .each(function (d) {
+                   if (d.id === cur) {
+                       d3.select(this).remove();
+                       $("#vistype").val("");
+                   }
+               });
+        });
+     }
+  });
+
 
 // init the widgets
-// $("#progressbar").progressbar({ value: false });
+// $("#progressbar").progressbar();
 
 });
 

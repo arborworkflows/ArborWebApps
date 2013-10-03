@@ -8,14 +8,31 @@ Protocol class's own initialize() method.  The VTK application logic goes here."
 
 import vtk
 import math
+import os.path
+import csv
+import pymongo
+import json
+import bson.objectid
+import bson.json_util
 
 def add_arguments(parser):
-    parser.add_argument("--tree", help="path to phy tree file", dest="tree")
-    parser.add_argument("--table", help="path to csv file", dest="table")
+    parser.add_argument("--id", help="mongo data id", dest="id")
+
+def getDBdata(id = None):
+    coll = pymongo.Connection("mongo")["arbor"]["phylotree"]
+    if id == None:
+        return [{"id": str(doc["_id"]), "name": doc["name"]} for doc in coll.find(fields=["name"])]
+    doc = coll.find_one(bson.objectid.ObjectId(id))
+    if doc:
+        del doc["_id"]
+    return doc
+
 
 def initialize(self, VTKWebApp, args):
-    VTKWebApp.treeFilePath = args.tree
-    VTKWebApp.csvFilePath = args.table
+    dataid = args.id
+    treedata = getDBdata(dataid)
+    VTKWebApp.tree = treedata["tree"]
+    VTKWebApp.table = dataid+ ".csv"
 
     # Create default pipeline (Only once for all the session)
     if not VTKWebApp.view:
@@ -23,15 +40,16 @@ def initialize(self, VTKWebApp, args):
 
         # read in  a tree
         treeReader = vtk.vtkNewickTreeReader()
-        treeReader.SetFileName(VTKWebApp.treeFilePath)
+        treeReader.SetReadFromInputString(1)
+        treeReader.SetInputString(VTKWebApp.tree)
         treeReader.Update()
         tree = treeReader.GetOutput()
         treeHeatmapItem.SetTree(tree)
 
-        if (VTKWebApp.csvFilePath != "none"):
+        if (VTKWebApp.table != "none" and os.path.isfile(VTKWebApp.table)):
           # read in  a table
           tableReader = vtk.vtkDelimitedTextReader()
-          tableReader.SetFileName(VTKWebApp.csvFilePath)
+          tableReader.SetFileName(VTKWebApp.table)
           tableReader.SetHaveHeaders(1)
           tableReader.DetectNumericColumnsOn()
           tableReader.Update()

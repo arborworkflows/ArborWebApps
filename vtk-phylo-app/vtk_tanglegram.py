@@ -7,6 +7,8 @@ The initialize() function will be invoked by the VTKWeb framework in the
 Protocol class's own initialize() method.  The VTK application logic goes here."""
 
 import vtk
+import math
+import os.path
 
 def add_arguments(parser):
     parser.add_argument("--tree1", help="path to phy tree1 file", dest="tree1")
@@ -14,26 +16,28 @@ def add_arguments(parser):
     parser.add_argument("--table", help="path to csv file", dest="table")
 
 def initialize(self, VTKWebApp, args):
-    VTKWebApp.tree1FilePath = args.tree1
-    VTKWebApp.tree2FilePath = args.tree2
-    VTKWebApp.csvFilePath = args.table
+    VTKWebApp.tree1= args.tree1
+    VTKWebApp.tree2= args.tree2
+    VTKWebApp.table= args.table
 
     # Create default pipeline (Only once for all the session)
     if not VTKWebApp.view:
         # read the trees
         treeReader1 = vtk.vtkNewickTreeReader()
-        treeReader1.SetFileName(VTKWebApp.tree1FilePath)
+        treeReader1.SetReadFromInputString(1)
+        treeReader1.SetInputString(VTKWebApp.tree1)
         treeReader1.Update()
         tree1 = treeReader1.GetOutput()
 
         treeReader2 = vtk.vtkNewickTreeReader()
-        treeReader2.SetFileName(VTKWebApp.tree2FilePath)
+        treeReader2.SetReadFromInputString(1)
+        treeReader2.SetInputString(VTKWebApp.tree2)
         treeReader2.Update()
         tree2 = treeReader2.GetOutput()
 
         # read the table
         tableReader = vtk.vtkDelimitedTextReader()
-        tableReader.SetFileName(VTKWebApp.csvFilePath)
+        tableReader.SetFileName(VTKWebApp.table)
         tableReader.SetHaveHeaders(True)
         tableReader.DetectNumericColumnsOn()
         tableReader.ForceDoubleOn()
