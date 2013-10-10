@@ -29,7 +29,8 @@ window.onunload = window.onbeforeunload = stop;
 
 function run_vtk_vis(tURL){
     stop();
-
+    console.log(" cursor wait");
+    d3.select("body").style("cursor","wait");
     proc = d3.json(tURL);
     proc.post(function (e, resp) {
         console.log(resp);
@@ -138,7 +139,7 @@ $(document).ready(function () {
 
   //select data set
   d3.select("select")
-      .on("change",function(){
+    .on("change",function(){
         var selectedDataId = $("#datalist").val();
         //calling the tangelo pythong service "phylodata.py" with the input argument selectedDataId
         if (selectedDataId !== "Select data"){
@@ -148,23 +149,29 @@ $(document).ready(function () {
         }
      });
 
-    function handleReaderProgress(evt) {
+
+  d3.select("#viewport")
+    .on("click", function(){
+       d3.select("body").style("cursor", "default");
+      });
+
+
+  function handleReaderProgress(evt) {
         if (evt.lengthComputable) {
             var loaded = (evt.loaded / evt.total);
-
             //$("#progressbar").progressbar({ value: loaded * 100 });
         }
-    }
+  }
 
-    function handleReaderLoadEnd(evt) {
+  function handleReaderLoadEnd(evt) {
        /* $("#progressbar").progressbar({ value: 100 });
         $("#droplabel").html("");
         $("#dropstatus").hide();
       */
         var data = d3.csv.parse(evt.target.result);
-    }
+  }
 
- //upload data
+ //drag and drop data file into the viewport
   d3.select("body")
         .on("dragenter", function () {
             d3.event.stopPropagation();
@@ -187,6 +194,7 @@ $(document).ready(function () {
             files = d3.event.dataTransfer.files;
             count = files.length;
             console.log(count + " file is dropped");
+            console.log("start");
 
             // Only call the handler if 1 or more files was dropped.
             if (count > 0) {
@@ -248,6 +256,7 @@ $(document).ready(function () {
                    }
                 };
                 reader.readAsText(file);
+                console.log("over");
             }
         });
 
@@ -269,7 +278,6 @@ $(document).ready(function () {
   });
 
 
-// init the widgets
 // $("#progressbar").progressbar();
 
 });
