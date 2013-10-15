@@ -15,26 +15,20 @@
         <script src="ext/js-core/gl-matrix-min.js"></script>
 
         <script src="lib/js/vtkweb-all.js"></script>
+
         <style>
         text {
             fill: black;
             font-family: Helvetica, Arial, sans;
             font-size: 12px;
         }
+
         #viewport {
             background: lightgray;
             position: relative;
             height: 500px;
-         }
-      .viewport-container {
-             margin: 0;
-             position: absolute;
-             left: 0;
-             top: 0;
-             width: 100%;
-             height: 100%;
         }
-        </style>
+       </style>
     </head>
 
     <body class="page" onbeforeunload="stop()" onunload="stop()">
@@ -61,7 +55,7 @@
 
         <div id=bordercontainer class="container" style="border-style:solid;border-color:green;margin-top:15px">
             <div class=row>
-                <div id=viewport class=span12 ></div>
+                <div id="viewport" class=span12 ></div>
             </div>
         </div>
 
