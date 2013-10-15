@@ -127,7 +127,6 @@ function showLastItem(){
   $('select#datalist').prop("text",$("#datalist").text());
   var id = $("#datalist").val();
   if (id !== "Select data"){
-     console.log("show last item:" + id);
      showVis(id);
   }
 }
@@ -196,7 +195,6 @@ function  uploadTreeFile(file) {
         .attr("value", id)
         .text(file.name);
       $("#datalist").val(id);
-      //showVis(id);
       });
 
     d3.select("body").style("cursor","default");
@@ -209,42 +207,47 @@ function  uploadTreeFile(file) {
 //----------------------------------------------------
 function  uploadTreeTableFilePair(treefile, tablefile) {
 //read csv file into a json string
-  var reader;
-  reader = new FileReader();
+  var treereader, tablereader;
+  treereader = new FileReader();
+
   // init the reader event handlers
-  reader.onprogress = function (evt) {
+  treereader.onprogress = function (evt) {
     if (evt.lengthComputable) {
       var loaded = (evt.loaded / evt.total);
       // $("#progressbar").progressbar({ value: loaded * 100 });
     }
   };
-  reader.onloadend = function (evt) {
-    var data, a;
-    /*
-    $("#progressbar").progressbar({ value: 100 });
-    $("#droplabel").html("");
-    $("#dropstatus").hide();
-     */
-    data = null;
-    // Load data into the database
-    tableString = evt.target.result;
-     // create a json format data entry
-     var dataentry = new Object();
-     dataentry.name = treefile.name;
-     dataentry.tree = treeString;
-     dataentry.table = tableString;
-     dataentry.visualizationType = "Tree Heatmap";
 
-     d3.json("phylodata").post(JSON.stringify(dataentry), function(error, id){
-       d3.select("#datalist").append("option")
-         .selectAll("option")
-         .datum({"id": id, "name": treefile.name})
-         .attr("value",id)
-         .text(treefile.name);
-        // $("#datalist").val(id);
-     });
+  treereader.onloadend = function (evt) {
+    var treeString = evt.target.result;
+
+    //read the csv table file
+    tablereader = new FileReader();
+    tablereader.onloadend = function (evt) {
+      var tableString = evt.target.result;
+      var tableJSON = d3.csv.parse(tableString);
+
+      // create a json format data entry
+      var dataentry = new Object();
+
+      var treeTableItemName  = treefile.name.substr(0, treefile.name.lastIndexOf('.'));
+      dataentry.name = treeTableItemName;
+      dataentry.tree = treeString;
+      dataentry.table = tableJSON;
+      dataentry.visualizationType = "Tree Heatmap";
+
+      d3.json("phylodata").post(JSON.stringify(dataentry), function(error, id){
+        d3.select("#datalist")
+          .append("option")
+          .datum({"id": id, "name": treeTableItemName})
+          .attr("value", id)
+          .text(treeTableItemName);
+        $("#datalist").val(id);
+      });
+    };
+    tablereader.readAsText(tablefile);
   };
-  reader.readAsText(file);
+  treereader.readAsText(treefile);
 }
 
 
@@ -344,24 +347,20 @@ d3.select("body")
             var treefile, tablefile;
             var IsTreeTablePair = false;
             if (isTable(file1.name) &&  isTree(file2.name)) {
-                treefile = file1;
-                tablefile = file2;
-                IsTreeTablePair = true;
-            } else if (isTable(file2.name) &&  isTree(file1.name)) {
                 treefile = file2;
                 tablefile = file1;
+                IsTreeTablePair = true;
+            } else if (isTable(file2.name) &&  isTree(file1.name)) {
+                treefile = file1;
+                tablefile = file2;
                 IsTreeTablePair = true;
             }
 
             if (IsTreeTablePair){
               uploadTreeTableFilePair(treefile, tablefile);
-              d3.select("body").style("cursor","wait");
-              setTimeout(function(){showLastItem()}, 3000);
             } else if (isTree(file2.name) &&  isTree(file1.name)) {
               uploadTreeFile(file1);
               uploadTreeFile(file2);
-              d3.select("body").style("cursor","wait");
-              setTimeout(function(){showLastItem();}, 3000);
             } else {
               alert("Two csv files have been dropped: can not visualize tree data without the tree file!");
             }
@@ -373,10 +372,11 @@ d3.select("body")
                  uploadTreeFile(file);
               }
             }
-
-            setTimeout(function(){showLastItem();}, 3000);
           }
        }
+      // only visualize the last one uploaded
+      d3.select("body").style("cursor","wait");
+      setTimeout(function(){showLastItem()}, 3000);
     });
 
 //delete data from mongo db
