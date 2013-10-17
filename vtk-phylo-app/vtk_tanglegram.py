@@ -9,16 +9,30 @@ Protocol class's own initialize() method.  The VTK application logic goes here."
 import vtk
 import math
 import os.path
+import csv
+import pymongo
+import json
+import bson.objectid
+import bson.json_util
 
 def add_arguments(parser):
-    parser.add_argument("--tree1", help="path to phy tree1 file", dest="tree1")
-    parser.add_argument("--tree2", help="path to phy tree2 file", dest="tree2")
-    parser.add_argument("--table", help="path to csv file", dest="table")
+    parser.add_argument("--id", help="mongo data id", dest="id")
+
+def getDBdata(id = None):
+    coll = pymongo.Connection("mongo")["arbor"]["phylotree"]
+    if id == None:
+        return [{"id": str(doc["_id"]), "name": doc["name"]} for doc in coll.find(fields=["name"])]
+    doc = coll.find_one(bson.objectid.ObjectId(id))
+    if doc:
+        del doc["_id"]
+    return doc
 
 def initialize(self, VTKWebApp, args):
-    VTKWebApp.tree1= args.tree1
-    VTKWebApp.tree2= args.tree2
-    VTKWebApp.table= args.table
+    dataid = args.id
+    treedata = getDBdata(dataid)
+    VTKWebApp.tree1 = treedata["tree1"]
+    VTKWebApp.tree2 = treedata["tree2"]
+    VTKWebApp.table = dataid+ ".csv"
 
     # Create default pipeline (Only once for all the session)
     if not VTKWebApp.view:

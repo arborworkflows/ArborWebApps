@@ -11,6 +11,7 @@ app.viewport = null;
 function stop() {
     if (app.key) {
         req = d3.json("/vtkweb/" + app.key);
+        console.log(req);
         req.send("DELETE", function (e, resp) {
             if (resp.status !== "complete") {
                console.log(" warning: could not shut down vtkweb process, might be closed already");
@@ -98,7 +99,8 @@ function run_vtk_tree_heatmap(id) {
 
 //----------------------------------------------------
 function run_vtk_tanglegram(id) {
-    tURL =  "/vtkweb/arbor/vtk-phylo-app/vtk_tanglegram.py?progargs=" + encodeURIComponent("--id" + id);
+    tURL =  "/vtkweb/arbor/vtk-phylo-app/vtk_tanglegram.py?progargs=" + encodeURIComponent("--id " + id);
+    console.log(tURL);
     run_vtk_vis(tURL);
 }
 
