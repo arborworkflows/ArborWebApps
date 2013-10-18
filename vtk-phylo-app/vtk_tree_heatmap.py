@@ -86,16 +86,21 @@ def initialize(self, VTKWebApp, args):
         newWidth = view.GetScene().GetSceneWidth()
         newHeight = view.GetScene().GetSceneHeight()
 
-        sx = newWidth * 0.9 / itemSize[0]
-        sy = newHeight * 0.9 / itemSize[1]
-
-        dx = math.fabs(sx - 1.0)
-        dy = math.fabs(sy - 1.0)
-
-        if dy > dx:
-          transformItem.Scale(sy, sy)
+        pageWidth = newWidth
+        pageHeight = newHeight
+        sx = pageWidth  / itemSize[0]
+        sy = pageHeight / itemSize[1]
+        if sy < sx:
+           scale = sy;
         else:
-          transformItem.Scale(sx, sx)
+           scale = sx;
+
+        if scale > 1:
+           scale = scale * 0.5
+        else:
+           scale = scale * 0.9
+
+        transformItem.Scale(scale, scale)
 
         # center the item within the screen
         itemCenter = [0, 0]
