@@ -227,7 +227,6 @@ function  uploadTreeTableFilePair(treefile, tablefile) {
     tablereader = new FileReader();
     tablereader.onloadend = function (evt) {
       var tableString = evt.target.result;
-      var tableJSON = d3.csv.parse(tableString);
 
       // create a json format data entry
       var dataentry = new Object();
@@ -235,7 +234,7 @@ function  uploadTreeTableFilePair(treefile, tablefile) {
       var treeTableItemName  = treefile.name.substr(0, treefile.name.lastIndexOf('.'));
       dataentry.name = treeTableItemName;
       dataentry.tree = treeString;
-      dataentry.table = tableJSON;
+      dataentry.table = tableString;
       dataentry.visualizationType = "Tree Heatmap";
 
       d3.json("phylodata").post(JSON.stringify(dataentry), function(error, id){
