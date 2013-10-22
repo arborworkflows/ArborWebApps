@@ -31,18 +31,14 @@ def get(id = None):
         del doc["_id"]
         treedata = json.dumps(doc, default=bson.json_util.default)
         #---------------------------------
-        # Temp solution: save the table json blob into a csv file
-        tableString = json.dumps(doc["table"])
+        # Temp solution: save the table  blob into a csv file
+        tableString = doc["table"]
         if (not tableString == "\"none\""):
-            table = json.loads(tableString)
             filename = id + ".csv"
             print("query "+ doc["name"]+ " save table file into " +filename)
             o = open(filename,'wb+')
-            ocsv = csv.writer(o)
-            ocsv.writerow(table[0].keys())  # header row
-            for row in table:
-                ocsv.writerow(row.values())
-            #---------------------------------
+            o.write(tableString)
+            o.close()
         return treedata
     return tangelo.HTTPStatusCode(404)
 
