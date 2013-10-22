@@ -79,7 +79,8 @@ function run_vtk_vis(tURL){
 
         function updateView() {
             if(app.viewport) {
-                app.viewport.invalidateScene();
+                app.viewport.invalidateScene(function(){
+                d3.select("body").style("cursor","default");});
             }
            console.log("updateView");
         }
