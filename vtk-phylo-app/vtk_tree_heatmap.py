@@ -48,6 +48,7 @@ def initialize(self, VTKWebApp, args):
 
         if (VTKWebApp.table != "none" and os.path.isfile(VTKWebApp.table)):
           # read in  a table
+          print("read table"+ VTKWebApp.table)
           tableReader = vtk.vtkDelimitedTextReader()
           tableReader.SetFileName(VTKWebApp.table)
           tableReader.SetHaveHeaders(1)

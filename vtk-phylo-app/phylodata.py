@@ -33,9 +33,9 @@ def get(id = None):
         #---------------------------------
         # Temp solution: save the table  blob into a csv file
         tableString = doc["table"]
-        if (not tableString == "\"none\""):
+        if (not tableString == "none"):
             filename = id + ".csv"
-            print("query "+ doc["name"]+ " save table file into " +filename)
+            #print("query "+ doc["name"]+ " save table file into " +filename)
             o = open(filename,'wb+')
             o.write(tableString)
             o.close()
