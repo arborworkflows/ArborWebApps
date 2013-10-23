@@ -64,6 +64,7 @@ function run_vtk_vis(tURL){
             app.viewport.bind("#viewport");
 
             loading.hide();
+            d3.select("body").style("cursor","default");
 
             // Handle window resize
             $(window).resize(function() {
@@ -73,6 +74,7 @@ function run_vtk_vis(tURL){
             }).trigger('resize');
         }, function(code, reason) {
             loading.hide();
+            d3.select("body").style("cursor","default");
             alert(reason);
         });
 
