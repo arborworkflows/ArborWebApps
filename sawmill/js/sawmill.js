@@ -1,7 +1,10 @@
 /*globals $, d3, console, window */
+if (!tangelo) {
+    var tangelo = {};
+}
 
-var tangelo = {};
 tangelo.celery = {};
+
 tangelo.celery.run = function(op, data, done) {
     "use strict";
 
@@ -35,8 +38,8 @@ tangelo.celery.run = function(op, data, done) {
     "use strict";
 
     d3.select("#run").on("click", function () {
-        tangelo.celery.run("add", [10, 20], function (error, data) {
-            console.log(data);
+        tangelo.celery.run("add", [10, 20], function (error, result) {
+            d3.select("#result").text(JSON.stringify(result));
         });
     });
 }());
