@@ -277,4 +277,14 @@
         reset();
     });
 
+    d3.select("#pdf").on("click", function () {
+        var s = new XMLSerializer();
+        var d = d3.select("svg").node();
+        var str = s.serializeToString(d);
+        console.log(str);
+        d3.json("svg2pdf").send("POST", str, function (error, data) {
+            window.location = "svg2pdf?id=" + data.result;
+        });
+    });
+
 }());
