@@ -110,7 +110,7 @@ function run_vtk_tanglegram(id) {
 
 //----------------------------------------------------
 function showVis(selectedDataId) {
-    d3.json("phylodata/" + selectedDataId, function (error, result){
+    d3.json("dbaccess/phylodata/" + selectedDataId, function (error, result){
        if (!result){
          console.log("error finding data with id:"+ selectedDataId);
        }
@@ -193,7 +193,7 @@ function  uploadTreeFile(file) {
     dataentry.table = "none";
     dataentry.visualizationType = "Tree";
 
-    d3.json("phylodata").post(JSON.stringify(dataentry), function(error, id){
+    d3.json("dbaccess/phylodata").post(JSON.stringify(dataentry), function(error, id){
       d3.select("#datalist")
         .append("option")
         .datum({"id": id, "name": file.name})
@@ -240,7 +240,7 @@ function  uploadTreeTableFilePair(treefile, tablefile) {
       dataentry.table = tableString;
       dataentry.visualizationType = "Tree Heatmap";
 
-      d3.json("phylodata").post(JSON.stringify(dataentry), function(error, id){
+      d3.json("dbaccess/phylodata").post(JSON.stringify(dataentry), function(error, id){
         d3.select("#datalist")
           .append("option")
           .datum({"id": id, "name": treeTableItemName})
@@ -291,7 +291,7 @@ window.onunload = window.onbeforeunload = stop;
 $(document).ready(function () {
   "use strict";
   //Populate data list, call data_collection.py, which returns a list in json format
-  d3.json("phylodata", function (error, list) {
+  d3.json("dbaccess/phylodata", function (error, list) {
       if (list){
           //add "Select data" to the top of the list
           list.unshift({"id": "Select data", "name": "Select data"});
@@ -388,7 +388,7 @@ d3.select("#delete")
   .on("click", function () {
    var cur = $("#datalist").val();
    if (cur !== "Select data") {
-       d3.json("phylodata/" + cur)
+       d3.json("dbaccess/phylodata/" + cur)
          .send("delete", "", function (error, result) {
            d3.select("#datalist").selectAll("option")
              .each(function (d) {
