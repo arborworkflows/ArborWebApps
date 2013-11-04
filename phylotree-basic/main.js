@@ -98,6 +98,26 @@
         update(root);
     }
 
+    function firstChild(d) {
+        if (d.children) {
+            return firstChild(d.children[0]);
+        }
+        if (d._children) {
+            return firstChild(d._children[0]);
+        }
+        return d;
+    }
+
+    function lastChild(d) {
+        if (d.children) {
+            return lastChild(d.children[d.children.length - 1]);
+        }
+        if (d._children) {
+            return lastChild(d._children[d._children.length - 1]);
+        }
+        return d;
+    }
+
     function update(source) {
 
         // Compute the new tree layout.
@@ -138,7 +158,7 @@
 
         // Update the nodes…
         node = svg.selectAll("g.node")
-            .data(nodes, function(d) { return d._id.$oid;; });
+            .data(nodes, function(d) { return d._id.$oid; });
 
         // Enter any new nodes at the parent's previous position.
         nodeEnter = node.enter().append("g")
@@ -153,9 +173,11 @@
             .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
         nodeEnter.append("text")
-            .attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+            //.attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+            .attr("x", 10)
             .attr("dy", ".35em")
-            .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+            //.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+            .attr("text-anchor", "start")
             .style("font-size", "10px")
             .text(function(d) { return d.name; })
             .style("fill-opacity", 1e-6);
@@ -171,6 +193,7 @@
             .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
         nodeUpdate.select("text")
+            .text(function (d) { return d._children ? firstChild(d).name + " ... " + lastChild(d).name : d.name; })
             .style("fill-opacity", 1);
 
         // Transition exiting nodes to the parent's new position.
