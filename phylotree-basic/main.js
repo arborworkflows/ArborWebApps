@@ -14,8 +14,6 @@
             children: {field: "clades"}
         });
 
-        console.log(root);
-
         vis = tangelo.vis.dendrogram({
             data: root,
             el: d3.select("#main").node(),
