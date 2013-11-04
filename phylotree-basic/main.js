@@ -40,7 +40,7 @@
                     nodeMap[d._id.$oid] = d;
                     d.hasParent = false;
                     if (!d.name) {
-                        d.name = d._id.$oid;
+                        d.name = "";
                     }
                 });
                 collection.forEach(function (d) {
@@ -116,13 +116,16 @@
         // Normalize for fixed-depth.
         //nodes.forEach(function(d) { d.y = d.depth * 180; });
         function setPosition(node, pos) {
+            var xSum = 0;
             node.y = pos;
             node.x = node.x + node.dx / 2;
             console.log(pos);
             if (node.children) {
                 node.children.forEach(function (d) {
                     setPosition(d, pos + 10 * d.branch_length);
+                    xSum += d.x;
                 });
+                node.x = xSum / node.children.length;
             }
         }
         setPosition(root, 0);
@@ -135,7 +138,7 @@
 
         // Update the nodes…
         node = svg.selectAll("g.node")
-            .data(nodes, function(d) { return d.name; });
+            .data(nodes, function(d) { return d._id.$oid;; });
 
         // Enter any new nodes at the parent's previous position.
         nodeEnter = node.enter().append("g")
@@ -154,7 +157,7 @@
             .attr("dy", ".35em")
             .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
             .style("font-size", "10px")
-            .text(function(d) { return d.children || d._children ? "" : d.name; })
+            .text(function(d) { return d.name; })
             .style("fill-opacity", 1e-6);
 
         // Transition nodes to their new position.
@@ -184,7 +187,7 @@
 
         // Update the links…
         link = svg.selectAll("path.link")
-            .data(links, function(d) { return d.target.name; });
+            .data(links, function(d) { return d.target._id.$oid; });
 
         // Enter any new links at the parent's previous position.
         link.enter().insert("path", "g")
