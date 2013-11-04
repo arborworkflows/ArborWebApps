@@ -34,6 +34,14 @@
             vis.update({mode: "label"});
         });
 
+        d3.select("#distance-unit").on("click", function () {
+            vis.update({distance: {value: 1}});
+        });
+
+        d3.select("#distance-branch-length").on("click", function () {
+            vis.update({distance: {field: "branch_length"}});
+        });
+
         d3.select("#reset").on("click", function () {
             vis.reset();
         });
