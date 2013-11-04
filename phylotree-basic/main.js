@@ -174,7 +174,7 @@
 
         nodeEnter.append("circle")
             .attr("r", 1e-6)
-            .style("stroke", "black")
+            .style("stroke", "none")
             .style("opacity", function(d) { return d._children ? 1 : 0; })
             .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
@@ -278,9 +278,17 @@
     });
 
     d3.select("#pdf").on("click", function () {
+        // Prepare for PDF render
+        var node = svg.selectAll("g.node").select("circle")
+            .attr("r", function (d) { return d._children ? 7.5 : 0; });
+
         var s = new XMLSerializer();
         var d = d3.select("svg").node();
         var str = s.serializeToString(d);
+
+        // Change back
+        node.attr("r", 7.5);
+
         console.log(str);
         d3.json("svg2pdf").send("POST", str, function (error, data) {
             window.location = "svg2pdf?id=" + data.result;
