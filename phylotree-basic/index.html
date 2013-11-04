@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+    <head>
+        <link href="css/bootstrap-readable.css" rel="stylesheet" type="text/css">
+        <title>Database tree viewer</title>
+    </head>
+    <body>
+        <div id="main" class="container">
+            <h1>Database tree viewer</h1>
+            <div id="result"></div>
+            <div class="row">
+                <div class="span4">
+                    <div class="btn-group" data-toggle="buttons-radio">
+                        <button id="mode-hide" class="btn btn-small active">Collapase/Expand</button>
+                        <button id="mode-focus" class="btn btn-small">Focus</button>
+                    </div>
+                    <button id="reset" class="btn btn-small">Reset</button>
+                </div>
+            </div>
+        </div>
+        <script src="js/jquery-1.8.2.js"></script>
+        <script src="js/bootstrap-2.3.0.js"></script>
+        <script src="js/d3.v3.js"></script>
+        <script src="main.js"></script>
+    </body>
+</html>
