@@ -77,8 +77,10 @@
                 d.children = d._children;
                 d._children = null;
             }
-        } else {
+        } else if (mode === "focus") {
             root = d;
+        } else if (mode === "label") {
+            d.showLabel = d.showLabel ? false : true;
         }
         update(d);
     }
@@ -128,13 +130,15 @@
             nodeUpdate,
             nodeExit,
             link,
-            maxY;
+            maxY,
+            visibleLeaves;
 
         console.log(nodes);
         console.log(links);
 
         // Normalize for fixed-depth.
         //nodes.forEach(function(d) { d.y = d.depth * 180; });
+        visibleLeaves = 0;
         function setPosition(node, pos) {
             var xSum = 0;
             node.y = pos;
@@ -146,6 +150,8 @@
                     xSum += d.x;
                 });
                 node.x = xSum / node.children.length;
+            } else {
+                visibleLeaves += 1;
             }
         }
         setPosition(root, 0);
@@ -193,7 +199,15 @@
             .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
 
         nodeUpdate.select("text")
-            .text(function (d) { return d._children ? firstChild(d).name + " ... " + lastChild(d).name : d.name; })
+            .text(function (d) {
+                if (d._children || (d.children && d.showLabel)) {
+                    return firstChild(d).name + " ... " + lastChild(d).name;
+                }
+                if (visibleLeaves < height / 8) {
+                    return d.name;
+                }
+                return "";
+            })
             .style("fill-opacity", 1);
 
         // Transition exiting nodes to the parent's new position.
@@ -254,6 +268,9 @@
     });
     d3.select("#mode-focus").on("click", function () {
         mode = "focus";
+    });
+    d3.select("#mode-label").on("click", function () {
+        mode = "label";
     });
 
     d3.select("#reset").on("click", function () {
