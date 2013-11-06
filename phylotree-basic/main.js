@@ -1,5 +1,4 @@
 /*jslint browser: true, nomen: true, unparam: true */
-/*globals console */
 
 (function (tangelo, $, d3) {
     "use strict";
@@ -105,18 +104,15 @@
                 var project = d3.select("#project").node(),
                     projectName = project.options[project.selectedIndex].text;
                 d3.json("/arborapi/projmgr/project/" + projectName + "/PhyloTree", function (error, datasets) {
-                    console.log("list of data!");
                     d3.select("#data").selectAll("option").remove();
                     d3.select("#data").selectAll("option")
                         .data(datasets)
                         .enter().append("option")
                         .text(function (d) { return d; });
                     d3.select("#data").on("change", function () {
-                        console.log("change!");
                         var projectName = project.options[project.selectedIndex].text,
                             dataName = data.options[data.selectedIndex].text;
                         d3.json("/arborapi/projmgr/project/" + projectName + "/PhyloTree/" + dataName, function (error, collection) {
-                            console.log("hi");
                             root = tangelo.data.tree({
                                 data: collection,
                                 id: {field: "_id.$oid"},
