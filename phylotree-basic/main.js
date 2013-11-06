@@ -123,6 +123,12 @@
                             vis.update({data: root});
                         });
                     });
+                    for (i = 0; i < data.options.length; i += 1) {
+                        if (data.options[i].text === initialData) {
+                            data.selectedIndex = i;
+                        }
+                    }
+                    performEvent(data, "change");
                 });
             });
             for (i = 0; i < project.options.length; i += 1) {
@@ -131,12 +137,6 @@
                 }
             }
             performEvent(project, "change");
-            for (i = 0; i < data.options.length; i += 1) {
-                if (data.options[i].text === initialData) {
-                    data.selectedIndex = i;
-                }
-            }
-            performEvent(data, "change");
         });
     }
 
