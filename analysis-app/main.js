@@ -43,7 +43,7 @@ function initialize() {
     });
 }
 
-// function to populate our select menus
+// function to populate our select menus (except for parameter)
 function populate_selects() {
     d3.json("/arborapi/projmgr/project/" + project + "/PhyloTree", function (error, trees) {
         trees.unshift("Select...");
@@ -126,13 +126,68 @@ d3.select("#vis_table").on("change", function() {
     update_vis();
 });
 
+// actions performed when the user selects an analysis
+d3.select("#analysis").on("change", function() {
+    update_analyze_button();
+});
+
+// actions performed when the user selects a tree for analysis
+d3.select("#analysis_tree").on("change", function() {
+    update_analyze_button();
+});
+
+// actions performed when the user selects a parameter for analysis
+d3.select("#parameter").on("change", function() {
+    update_analyze_button();
+});
+
+// actions performed when the user selects a table for analysis
+d3.select("#analysis_table").on("change", function() {
+    var selected_table = $("#analysis_table").val();
+    if (selected_table != "Select...") {
+        populate_parameter(selected_table);
+    }
+    update_analyze_button();
+
+});
+
+// enable or disable the analyze button
+function update_analyze_button() {
+    if ($("#analysis").val() != "Select..." &&
+        $("#analysis_tree").val() != "Select..." &&
+        $("#analysis_table").val() != "Select..." &&
+        $("#parameter").val() &&
+        $("#parameter").val() != "Select...") {
+        $("#analyze").prop("disabled", false);
+    } else {
+        $("#analyze").prop("disabled", true);
+    }
+}
+
+// populate the parameter element with a list of column names
+function populate_parameter(selected_table) {
+    d3.json("/arborapi/projmgr/project/" + project + "/CharacterMatrix/" + selected_table, function (error, result) {
+        // clear out previous contents
+        $("#parameter").empty();
+
+        var contents = "<option>Select...</option>";
+        var headerRow = result[0];
+        $.each(headerRow, function(key, value) {
+            if (key != "_id") {
+                contents += "<option>" + key + "</option>";
+            }
+        });
+        $("#parameter").append(contents);
+    });
+}
+
 // display a visualization if appropriate
 function update_vis() {
     var selected_vis = $("#vis").val();
     var selected_tree = $("#vis_tree").val();
     var selected_table = $("#vis_table").val();
     if (selected_vis == "VTK TreeHeatmap") {
-        if (selected_tree != "Select..." && selected_table != "Select...") {
+        if (selected_tree != "Select..." || selected_table != "Select...") {
             $("#d3_tools").hide();
             $("#d3_vis").hide();
             $("#viewport").show();
@@ -163,8 +218,12 @@ function vtk_tree_heatmap(tree, table) {
     var vis_URL = "/vtkweb/arbor/analysis-app/vtk_tree_heatmap.py?progargs=";
     vis_URL += encodeURIComponent("--baseURL " + baseURL);
     vis_URL += encodeURIComponent(" --projectName " + project);
-    vis_URL += encodeURIComponent(" --tableName " + table);
-    vis_URL += encodeURIComponent(" --treeName " + tree);
+    if (table != "Select...") {
+        vis_URL += encodeURIComponent(" --tableName " + table);
+    }
+    if (tree != "Select...") {
+        vis_URL += encodeURIComponent(" --treeName " + tree);
+    }
     run_vtk_vis(vis_URL);
 }
 
@@ -218,6 +277,7 @@ d3.select("#analyze").on("click", function () {
     var tree = $("#analysis_tree").val();
     var table = $("#analysis_table").val();
     var prefix = $("#prefix").val();
+    var parameter = $("#parameter").val();
     if ($("#analysis").val() == "Early Burst") {
         var analysis_URL = "/arbor/analysis-app/EB?";
         analysis_URL += "baseURL=" + encodeURIComponent(baseURL);
@@ -225,6 +285,7 @@ d3.select("#analyze").on("click", function () {
         analysis_URL += "&tableName=" + encodeURIComponent(table);
         analysis_URL += "&treeName=" + encodeURIComponent(tree);
         analysis_URL += "&prefix=" + encodeURIComponent(prefix);
+        analysis_URL += "&parameter=" + encodeURIComponent(parameter);
         run_analysis(analysis_URL);
     }
 });

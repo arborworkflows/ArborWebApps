@@ -30,23 +30,24 @@ def add_arguments(parser):
 def initialize(self, VTKWebApp, args):
     # Create default pipeline (Only once for all the session)
     if not VTKWebApp.view:
-
-        # get the input data in newick & csv format
-        r = requests.get(
-          "%s/arborapi/projmgr/project/%s/PhyloTree/%s/newick" % (args.baseURL, args.projectName, args.treeName))
-        newickTree = r.text
-        r = requests.get(
-          "%s/arborapi/projmgr/project/%s/CharacterMatrix/%s/csv" % (args.baseURL, args.projectName, args.tableName))
-        csvTable = r.text
-
-        # read these into VTK format
-        tree = vtk_arbor_utils.NewickToVTKTree(newickTree)
-        table = vtk_arbor_utils.CSVToVTKTable(csvTable)
-
         # create our visualization item
         treeHeatmapItem = vtk.vtkTreeHeatmapItem()
-        treeHeatmapItem.SetTree(tree)
-        treeHeatmapItem.SetTable(table)
+
+        # get our input data, read it into VTK format,
+        # and load it into our visualization item.
+        if args.treeName:
+            r = requests.get(
+                "%s/arborapi/projmgr/project/%s/PhyloTree/%s/newick" % (args.baseURL, args.projectName, args.treeName))
+            newickTree = r.text
+            tree = vtk_arbor_utils.NewickToVTKTree(newickTree)
+            treeHeatmapItem.SetTree(tree)
+
+        if args.tableName:
+            r = requests.get(
+                "%s/arborapi/projmgr/project/%s/CharacterMatrix/%s/csv" % (args.baseURL, args.projectName, args.tableName))
+            csvTable = r.text
+            table = vtk_arbor_utils.CSVToVTKTable(csvTable)
+            treeHeatmapItem.SetTable(table)
 
         # setup the window
         view = vtk.vtkContextView()

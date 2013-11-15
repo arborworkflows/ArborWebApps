@@ -22,6 +22,7 @@ def get(*pargs, **query_args):
   tableName = query_args["tableName"]
   treeName = query_args["treeName"]
   prefix = query_args["prefix"]
+  parameter = query_args["parameter"]
 
   # Populate the request for the analysis server
   # TODO: move this analysis-specific initialization into a separate file
@@ -32,7 +33,7 @@ def get(*pargs, **query_args):
     { "name": "EB_table", "type": "Table"}]
   analysisJson["parameters"] = [
     { "name": "column_name", "type": "String", "value": "" }]
-  analysisJson["script"] = "library(geiger)\ndata<-as.numeric(input_table$SVL)\nnames(data)<-input_table[[1]]\no<-fitContinuous(input_tree, data, model=\"EB\",SE=0)\nresult=o$opt\nEB_table=list(parameter=\"value\",z0=result$z0,sigsq=result$sigsq,a=result$a,\" \"=\" \",lnL=result$lnL,AIC=result$aic,AICc=result$aicc)\nEB_tree<-transform(input_tree, \"EB\", o$opt$a)\n"
+  analysisJson["script"] = "library(geiger)\ndata<-as.numeric(input_table$%s)\nnames(data)<-input_table[[1]]\no<-fitContinuous(input_tree, data, model=\"EB\",SE=0)\nresult=o$opt\nEB_table=list(parameter=\"value\",z0=result$z0,sigsq=result$sigsq,a=result$a,\" \"=\" \",lnL=result$lnL,AIC=result$aic,AICc=result$aicc)\nEB_tree<-transform(input_tree, \"EB\", o$opt$a)\n" % parameter
 
   # initialize input information for this analysis
   inputs = []
