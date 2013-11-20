@@ -357,7 +357,11 @@ function run_vtk_vis(tURL) {
             connection = serverConnection;
 
             // Create viewport
-            app.viewport = vtkWeb.createViewport({session:connection.session});
+            app.viewport = vtkWeb.createViewport(
+              {
+              session:connection.session,
+              "interactiveQuality": 100
+              });
             //app.viewport.bind(".viewport-container");
             app.viewport.bind("#viewport");
 
