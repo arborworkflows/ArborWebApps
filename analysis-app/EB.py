@@ -23,17 +23,23 @@ def get(*pargs, **query_args):
   treeName = query_args["treeName"]
   prefix = query_args["prefix"]
   parameter = query_args["parameter"]
+  analysis = query_args["analysis"]
 
   # Populate the request for the analysis server
   # TODO: move this analysis-specific initialization into a separate file
   analysisJson = {}
+  if analysis == "Early Burst model fitting":
+    model = "EB"
+    analysisJson["script"] = "library(geiger)\ndata<-as.numeric(input_table$%s)\nnames(data)<-input_table[[1]]\no<-fitContinuous(input_tree, data, model=\"%s\",SE=0)\nresult=o$opt\n%s_table=list(parameter=\"value\",z0=result$z0,sigsq=result$sigsq,a=result$a,\" \"=\" \",lnL=result$lnL,AIC=result$aic,AICc=result$aicc)\n%s_tree<-transform(input_tree, \"%s\", o$opt$a)\n" % (parameter, model, model, model,model)
+  else:
+    model = "OU"
+    analysisJson["script"] = "library(geiger)\ndata<-as.numeric(input_table$%s)\nnames(data)<-input_table[[1]]\no<-fitContinuous(input_tree, data, model=\"%s\",SE=0)\nresult=o$opt\n%s_table=list(parameter=\"value\",z0=result$z0,sigsq=result$sigsq,alpha=result$alpha,\" \"=\" \",lnL=result$lnL,AIC=result$aic,AICc=result$aicc)\n%s_tree<-transform(input_tree, \"%s\", o$opt$alpha)\n" % (parameter, model, model, model,model)
   analysisJson["name"] = "Early-burst model fitting";
   analysisJson["outputs"] = [
-    { "name": "EB_tree", "type": "Tree"},
-    { "name": "EB_table", "type": "Table"}]
+    { "name": "%s_tree" % model, "type": "Tree"},
+    { "name": "%s_table" % model, "type": "Table"}]
   analysisJson["parameters"] = [
     { "name": "column_name", "type": "String", "value": "" }]
-  analysisJson["script"] = "library(geiger)\ndata<-as.numeric(input_table$%s)\nnames(data)<-input_table[[1]]\no<-fitContinuous(input_tree, data, model=\"EB\",SE=0)\nresult=o$opt\nEB_table=list(parameter=\"value\",z0=result$z0,sigsq=result$sigsq,a=result$a,\" \"=\" \",lnL=result$lnL,AIC=result$aic,AICc=result$aicc)\nEB_tree<-transform(input_tree, \"EB\", o$opt$a)\n" % parameter
 
   # initialize input information for this analysis
   inputs = []

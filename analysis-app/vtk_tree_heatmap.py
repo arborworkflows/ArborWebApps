@@ -26,6 +26,8 @@ def add_arguments(parser):
     parser.add_argument("--projectName", help="name of current project", dest="projectName")
     parser.add_argument("--tableName", help="name of character matrix in Mongo", dest="tableName")
     parser.add_argument("--treeName", help="name of phylotree in Mongo", dest="treeName")
+    parser.add_argument("--width", help="desired width of render window", dest="width")
+    parser.add_argument("--height", help="desired height of render window", dest="height")
 
 def initialize(self, VTKWebApp, args):
     # Create default pipeline (Only once for all the session)
@@ -51,8 +53,8 @@ def initialize(self, VTKWebApp, args):
 
         # setup the window
         view = vtk.vtkContextView()
+        view.GetRenderWindow().SetSize(int(args.width), int(args.height))
         view.GetRenderer().SetBackground(1,1,1)
-        view.GetRenderWindow().SetSize(800,600)
 
         iren = view.GetInteractor()
         iren.SetRenderWindow(view.GetRenderWindow())
