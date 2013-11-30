@@ -1,3 +1,7 @@
+var currentProjectName = "";
+var currentDatasetName = "";
+
+
 function addLoadEvent(func) {
 	var oldonload = window.onload;
 	if (typeof window.onload != 'function') {
@@ -78,7 +82,8 @@ function zoomGraph()
 {
 	vis.attr("transform", "translate(" + d3.event.translate.join(",") + ")scale(" + d3.event.scale + ")");
 	if (d3.event.sourceEvent.type === "mousewheel") {
-	        var verticalScale = localStorage.getItem('phylotree:verticalScale') || '4.0'
+	        var verticalScale = localStorage.getItem('phylotree:verticalScale') || '2.0'
+	        //var verticalScale = 0.5
 		increaseHeight(d3.event.sourceEvent.wheelDelta * verticalScale);
 		//console.log(d3.event.sourceEvent.wheelDelta);
 	}
@@ -219,10 +224,12 @@ function update(source) {
 		  if (d.name) {
                     msg += "name: " + d.name + "\n";
                   }
-                  if (d.date) {
-                    msg += "date: " + d.date + "\n";
+                  if (d.Species) {
+                    msg += "Species: " + d.Species + "\n";
                   }
-                  msg += "branch_length: " + d.branch_length + "\n";
+                   if (d.branch_length) {
+                        msg += "branch_length: " + d.branch_length + "\n";
+                  }
                   return msg;
 		});
 
@@ -237,6 +244,8 @@ function update(source) {
 			// truncate ID's to last 4 characters
 			if (d.name ) {
 			    return d.name;
+			} else if (d.Species) {
+			    return d.Species;
 			} else if (d.scientific_name) {
 			    return d.scientific_name;
 			} else if (d.display_name) {
@@ -254,6 +263,7 @@ function update(source) {
 		})
 			//return d.taxonomies ? d.taxonomies[0].scientific_name : d._id.substring(d._id.length - 4); })
 		.style("fill-opacity", 1e-6)
+		.style("font-size", fontsize.toString()+"px")
 		.style("visibility", function() {
 			return d3.select("#nodeNames").property("checked") ? "visible" : "hidden";
 		});
@@ -348,8 +358,8 @@ function updateJSON(options) {
 		d3.select(node.childNodes[0]).style("fill", "red");
 	}
 
-	d3.json('/app/phylomap/service/phylomongo/' + mongo.server + '/' + mongo.db + '/' +
-			mongo.coll + '?maxdepth=' + maxDepth + '&_id=' + oldJSON._id, function(json) {
+	d3.json('service/phylomongo-v2/' + mongo.server + '/' + currentProjectName + '/' +
+			currentDatasetName + '?maxdepth=' + maxDepth + '&_id=' + oldJSON._id, function(json) {
 		toggleAll (json, function() {
 			oldJSON.clades = json._clades;
 			oldJSON._clades = null;
@@ -493,7 +503,7 @@ function mapAllChildNodes(d, node) {
 	if (typeof createMarker != 'undefined' && typeof google.maps.LatLng != 'undefined') {
 		// this process can take a long time, so put up a processing sign
 		$('#treebuttons').badger('Processing');
-		searchLocationsNearClade('/app/phylomap/service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
+		searchLocationsNearClade('service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
 			'/?boundary_type=id' + '&_id=' + d._id, d._id, clearBadge);
 				// this happens immediately regardless of gating
 		//$('#treebuttons').badger('');
@@ -509,9 +519,12 @@ phylotree.getMongoDBInfo = function() {
     // Read in the config options regarding which MongoDB
     // server/database/collection to use.
     return {
-        server: localStorage.getItem('phylotree:mongodb-server') || 'localhost',
-        db: localStorage.getItem('phylotree:mongodb-db') || 'xdata',
-        coll: localStorage.getItem('phylotree:mongodb-coll') || 'heliconia_new',
+        //server: localStorage.getItem('phylotree:mongodb-server') || 'localhost',
+        //db: localStorage.getItem('phylotree:mongodb-db') || 'arbor',
+        //coll: localStorage.getItem('phylotree:mongodb-coll') || 'apeTree',
+        server: 'localhost',
+        db: 'xdata',
+        coll:  'ar_anolis_PhyloTree_svlø',
         verticalScale: localStorage.getItem('phylotree:verticalScale') || '4.0'
     };
 };
@@ -576,6 +589,8 @@ function increaseHeight(delta) {
 
 // CRL: added based on increaseHeight
 function increaseWidth(delta) {
+
+  //if (width < $(window).width()*0.8) {
 	var oldWidth = width;
 	width = width + delta;
 	width = Math.max(width, 20);
@@ -590,25 +605,35 @@ function increaseWidth(delta) {
 		d.y0 = scale(d.y0);
 	});
 	updateVisualization();
+   //}
 }
 
 // FIXME: this callback was removed, because it doesn't reset d3's state, so the first
 // mouse event after reset goes back
 
 function resetVisualization() {
- width =  1600 - lMargin - rMargin;
- height = 1000 - tMargin - bMargin;
+ width =  $("#tree").width() - lMargin - rMargin;
+ height = $("#tree").height() - tMargin - bMargin;
  vis.attr("transform", "translate(0,0), scale(1,1)");
  //vis.attr("transform", "scale(1,1)");
  updateVisualization();
 }
 
 
+// resize the rendering if the window changes
+function resizeRendering() {
+    width = $("#tree").width()*0.95;
+    height = $("#tree").height()*0.8;
+    console.log("setting h,w to:",height,width,"\n")
+    //cluster.size([height,width-160])
+}
+
 function updateVisualization() {
 	var duration = 500;
+	//resizeRendering()
 	vis.selectAll("rect.background")
-		.attr("width", width + lMargin + rMargin)
-		.attr("height", height + tMargin + bMargin);
+		.attr("width", $(window).width()*0.95 + lMargin + rMargin)
+		.attr("height", $(window).height()*0.9 + tMargin + bMargin);
 
 	vis.selectAll("g.node")
 //		.duration(duration)
@@ -619,26 +644,36 @@ function updateVisualization() {
 	vis.selectAll("path.link")
 //		.duration(duration)
 		.attr("d", elbow);
+	console.log("update\n");
+}
+
+function increaseFontSize(delta) {
+        console.log("increase font")
+        fontsize = fontsize + delta
+        fontstring = fontsize.toString()
+        $('.node').css('font-size',fontstring)
 }
 
 // GLOBAL VARIABLES
-var lMargin = 50, rMargin = 30, tMargin = 50, bMargin = 50,
-	width = 1600 - lMargin - rMargin,
-    height = 1000 - tMargin - bMargin,
+var lMargin = 50, rMargin = 30, tMargin = 50, bMargin = 150,
+	width = $("#tree").width() - lMargin - rMargin,
+    height = ($("#tree").height())*0.9 - tMargin - bMargin,
 	i = 0,
 	pathWidth = "1.5px", pathColor = "#ccc",
 	root,
-	togCount = 0;
+	togCount = 0,
+	fontsize = 11,
+	loadComplete = 0;
 
 var cluster = d3.layout.cluster()
-	.size([height, width - 160])
+	.size([$(window).height()*0.75, ($(window).width()*0.9)-150])
 	.children(function(d) {
 		return (!d.clades || d.clades.length === 0) ? null : d.clades;
 	});
 
 var vis = d3.select("#tree").append("svg:svg")
-	.attr("width", width + lMargin + rMargin)
-	.attr("height", height + tMargin + bMargin)
+	.attr("width", $("#tree").width() + lMargin + rMargin)
+	.attr("height", $("#tree").height() + tMargin + bMargin)
 	.attr("pointer-events", "all") // receives all pointer events
 	.append("svg:g")
 	.attr("transform", "translate(" + lMargin + "," + tMargin + ")")
@@ -646,32 +681,37 @@ var vis = d3.select("#tree").append("svg:svg")
 	.append("svg:g");
 
 vis.append("svg:rect")
-	.attr("width", width + lMargin + rMargin)
-	.attr("height", height + tMargin + bMargin)
+	.attr("width", $("#tree").width() + lMargin + rMargin)
+	.attr("height", $("#tree").height() + tMargin + bMargin)
 	.attr("fill", "white")
 	.attr("class", "background");
 
+
+
+function drawSelectedTree(projectName,datasetName) {
+        currentProjectName = projectName;
+        currentDatasetName = datasetName
+	// Can probably make this a better API
+	d3.json('service/phylomongo-v2/' + mongo.server + '/' + projectName + '/' + datasetName + '?maxdepth=3', function(json) {
+		root = json;
+		root.x0 = height / 2;
+		root.y0 = 0;
+		// initialize the display to show children nodes
+		root.clades.forEach(toggleAll);
+		update(root);
+	});
+}
+
+
 addLoadEvent(function () {
 	mongo = phylotree.getMongoDBInfo();
+		d3.select("#mongodb-server").property("value", mongo.server);
+		d3.select("#mongodb-db").property("value", mongo.db);
+		d3.select("#mongodb-coll").property("value", mongo.coll);
 
-	// Display the configuration dialog when clicked
-	tangelo.onConfigLoad(function () {
-		var cfg;
-
-		cfg = phylotree.getMongoDBInfo();
-		d3.select("#mongodb-server").property("value", cfg.server);
-		d3.select("#mongodb-db").property("value", cfg.db);
-		d3.select("#mongodb-coll").property("value", cfg.coll);
-	});
-
-	// Update the internal datastore when the user saves the configuration.
-	tangelo.onConfigSave(phylotree.updateConfig);
-
-	// Use default configuration values when the defaults button is pressed.
-	tangelo.onConfigDefault(phylotree.setConfigDefaults);
 
 	// Can probably make this a better API
-	d3.json('/app/phylomap/service/phylomongo/' + mongo.server + '/' + mongo.db + '/' + mongo.coll + '?maxdepth=3', function(json) {
+	d3.json('service/phylomongo-v2/' + mongo.server + '/' + currentProjectName + '/' + currentDatasetName + '?maxdepth=3', function(json) {
 		root = json;
 		root.x0 = height / 2;
 		root.y0 = 0;
@@ -681,3 +721,60 @@ addLoadEvent(function () {
 		update(root);
 	});
 });
+
+function performEvent(element, name) {
+  if (document.createEvent !== undefined) {
+    var evt = document.createEvent("HTMLEvents");
+    evt.initEvent(name, false, true);
+    element.dispatchEvent(evt);
+  } else {
+    element.fireEvent("on" + name);
+  }
+}
+
+
+function initializeDataSelection(initialProject, initialData) {
+var project = d3.select("#project").node();
+var data = d3.select("#data").node();
+var i;
+
+d3.json("/~clisle/ArborWebApps/ProjectManager/tangelo//projmgr/project", function (error, projects) {
+    console.log(projects);
+    d3.select("#project").selectAll("option").remove();
+    d3.select("#project").selectAll("option")
+        .data(projects)
+        .enter().append("option")
+        .text(function (d) { return d; });
+
+    d3.select("#project").on("change", function () {
+        var project = d3.select("#project").node(),
+            projectName = project.options[project.selectedIndex].text;
+        d3.json("/~clisle/ArborWebApps/ProjectManager/tangelo//projmgr/project/" + projectName + "/PhyloTree", function (error, datasets) {
+            d3.select("#data").selectAll("option").remove();
+            d3.select("#data").selectAll("option")
+                .data(datasets)
+                .enter().append("option")
+                .text(function (d) { return d; });
+            d3.select("#data").on("change", function () {
+                var projectName = project.options[project.selectedIndex].text,
+                    dataName = data.options[data.selectedIndex].text;
+                    drawSelectedTree(projectName,dataName);
+                });
+            for (i = 0; i < data.options.length; i += 1) {
+                if (data.options[i].text === initialData) {
+                    data.selectedIndex = i;
+                }
+            }
+            performEvent(data, "change");
+        });
+    });
+    for (i = 0; i < project.options.length; i += 1) {
+        if (project.options[i].text === initialProject) {
+            project.selectedIndex = i;
+        }
+    }
+    performEvent(project, "change");
+});
+}
+
+initializeDataSelection("anolis")
