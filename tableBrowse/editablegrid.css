@@ -21,7 +21,7 @@ th.boolean {
 	margin-bottom: 5px;
 }
 
-#paginator a { color:  #0078cc; text-decoration: none; font-size: 12px; }           
+#paginator a { color:  #0078cc; text-decoration: none; font-size: 12px; }
 #paginator a:hover { color: #000; }
 #paginator a:active { color: #777; }
 #paginator a:focus { outline: 1px; }
@@ -29,9 +29,10 @@ th.boolean {
 #pagecontrol {
 	padding-bottom: 5px;
 	float: right;
+	margin-right: 20px;
 }
 
-#filter { 
+#filter {
 	width: 250px;
-	margin-bottom: 10px; 
+	margin-bottom: 10px;
 }

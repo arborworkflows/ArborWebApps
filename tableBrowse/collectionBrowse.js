@@ -30,12 +30,24 @@
  // to browse and the number of records to explore.
 
 var querydata = [];
-metadata = [];
+var metadata = [];
+var rowdata= [];
 var editableGrid;
 var currentProjectName = "";
 var currentDatasetName = "";
 
+// The arbor API is not installed correctly on my machine, so put a variable here so it can be relocated
 var arborapiurl = "/~clisle/ArborWebApps/ProjectManager/tangelo/projmgr/"
+// var arborapiurl = "/arborapi/"
+
+// We want to tell the difference between ints and floats when filling the table, so we need to define this test.
+// it is supposed to become part of the standard eventually:
+
+if (!Number.isInteger) {
+  Number.isInteger = function isInteger (nVal) {
+    return typeof nVal === "number" && isFinite(nVal) && nVal > -9007199254740992 && nVal < 9007199254740992 && Math.floor(nVal) === nVal;
+  };
+}
 
 
 var template = [
@@ -55,12 +67,44 @@ var template = [
     "{{UPDATE_MARKS}}"
 ];
 
+// fill the control panels dialog box with the column values.  User can delete/add to show less of a wide table.
+function  initializeColumnController(metadata) {
+    var columnText = ''
+    for (i=0; i<metadata.length; i++) {
+        dataobject = metadata[i]
+        columnText += dataobject.name+","
+    }
+    // strip off last comma
+    var resultList = columnText.substring(0,columnText.length-1)
+    console.log("column text:",resultList)
+
+    // must set BOTH the value and the text. Without text, the values never show...  The
+    // selectize plug-in is used to control the input and make it pretty to edit the values in
+    $('#selectcolumn').attr('text',resultList)
+    $('#selectcolumn').attr('value',resultList)
+    $('#selectcolumn').selectize({
+                        plugins: ['drag_drop','remove_button'],
+			delimiter: ',',
+		        persist: false,
+			createOnBlur: true,
+			create: function(input) {
+				return {
+				        value: input,
+					text: input
+					}
+				}
+			});
+    //  The control panel might have changed size, so try to update it so that when it is closed
+    //  and re-opened, the panel will open to a good size
+
+    //$('#control-panel').resize();
+    //d3.select("#selectcolumn").property("text", resultList);
+    //$("#select-column").change()
+}
+
+
 function update() {
     "use strict";
-
-    // create a variable to render into
-    var rowdata=[];
-
 
     // learn how to browse javaScript objects introspectively
 
@@ -90,13 +134,28 @@ function update() {
             if (attriblist.indexOf(attrib)<0) {
                 // don't display the "_id" attribute, since it is not interesting to non-technical users
                 if (attrib != '_id') {
-                    console.log("pushing: ",attrib)
-                    metadata.push({ name: attrib, label:attrib, datatype: (typeof thisObject[attrib]), editable: false});
+                    //console.log("pushing: ",attrib)
+                    // special purpose code here to further refine what javascript returns (which is 'string' or 'number').
+                    // We further test for integer-ness in order to tell the editable grid the correct types to support sorting.
+                    var thisType = typeof thisObject[attrib];
+                    if (thisType != "number") {
+                        metadata.push({ name: attrib, label:attrib, datatype: (typeof thisObject[attrib]), editable: false});
+                    }
+                    else if (Number.isInteger(thisObject[attrib])) {
+                        metadata.push({ name: attrib, label:attrib, datatype: "integer", editable: false});
+                    }
+                    else {
+                        metadata.push({ name: attrib, label:attrib, datatype: "double", editable: false});
+                    }
                     attriblist.push(attrib)
                 }
             }
         }
     }
+
+    // now that we know the column types, lets set up the control to render them and allow enable/disable per column
+    //console.log(metadata)
+    initializeColumnController(metadata)
 
     // loop through the returned data and get it in the form the editableGrid is expecting.
     //  Study of the editableGrid code shows that the json is expected an array of the form:
@@ -146,12 +205,17 @@ function load() {
         query,
         limit;
 
+    // these entries have been removed from the panel to simplify the interface for non-specialists.
     //host = d3.select("#host")[0][0].value;
     //db = d3.select("#db")[0][0].value;
     //collection = d3.select("#collection")[0][0].value;
-    query = d3.select("#query")[0][0].value;
-    limit = +d3.select("#limit")[0][0].value;
-    //console.log(query);
+
+    // these used to work when the app connected directly to mongo, but the Arbor API doesn't currently
+    // support filtering or limit options.
+
+    //query = d3.select("#query")[0][0].value;
+    //limit = +d3.select("#limit")[0][0].value;
+    query = '{}'; limit = 50;
 
     // instantiate the grid with a fixed pageSize, so pagination is enabled.  Other advanced features, not yet supported,
     // by this demo, can be attached to the grid cells to enable updates.  the pageSize is updated by a spinbox on the
@@ -192,7 +256,7 @@ function load() {
                 d,
                 e;
 
-            console.log('response length= ',response.length);
+            //console.log('response length= ',response.length);
             //console.log(response);
             querydata = response;
                 update();
@@ -205,8 +269,28 @@ window.onload = function () {
     "use strict";
 
     var idx;
+
+
+$(document).ready(function(){
     initializeDataSelection("anolis")
 
+    $('#selectcolumn').on("change", function() {
+        // loop through the metadata and pass the elements that are enabled
+        var newcolumlist = $(this).val();
+        var filteredMetadata = [];
+        for (i=0; i<metadata.length; i++) {
+          // if the attribute for this column is found in the string somewhere, then add the attribute
+          if (newcolumlist.indexOf(metadata[i].name)>-1) {
+            filteredMetadata.push(metadata[i])
+          }
+        }
+        // rerender the table with only the enabled attributes
+        editableGrid.load({"metadata": filteredMetadata, "data": rowdata});
+        editableGrid.renderGrid("tablecontent","testgrid");
+        editableGrid.refreshGrid();
+        // update paginator whenever the table is rendered (after a sort, filter, page change, etc.)
+        editableGrid.updatePaginator();
+        });
 /*
     // initialize the metadata array to match the collection
     metadata.push({ name: "_id", label: "ObjectId", datatype: "object", editable: true});
@@ -216,10 +300,9 @@ window.onload = function () {
 */
     d3.select("#load").on("click", load);
 
+});
 
-
-};
-
+}
 // helper function to get path of a demo image.  Used by the paginator
 function image(relativePath) {
 	return "images/" + relativePath;
