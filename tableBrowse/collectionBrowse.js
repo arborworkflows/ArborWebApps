@@ -70,13 +70,24 @@ var template = [
 // fill the control panels dialog box with the column values.  User can delete/add to show less of a wide table.
 function  initializeColumnController(metadata) {
     var columnText = ''
+    var nonameCount = 1
     for (i=0; i<metadata.length; i++) {
         dataobject = metadata[i]
-        columnText += dataobject.name+","
+        // create names for columns that have no header name. If there is a nonzero name, then use it
+        // if name is missing, create "unnamed_1, unnamed_2, etc.
+        if (dataobject.name.length<1) {
+           var newName = 'unnamed_'+nonameCount.toString();
+           columnText += newName +",";
+           nonameCount = nonameCount+1;
+           // since the column was unnamed, assign the same name
+           metadata[i].name = newName;
+        } else {
+         columnText += dataobject.name+",";
+        }
     }
     // strip off last comma
     var resultList = columnText.substring(0,columnText.length-1)
-    console.log("column text:",resultList)
+    //console.log("column text:",resultList)
 
     // must set BOTH the value and the text. Without text, the values never show...  The
     // selectize plug-in is used to control the input and make it pretty to edit the values in
@@ -274,15 +285,27 @@ window.onload = function () {
 $(document).ready(function(){
     initializeDataSelection("anolis")
 
+    // Loop through the selectcolumn input field and only display the metadata categories that
+    // are included in the list.  We first split the list by "," in order to create a list from the
+    // character string.  Then two nested loops are used so the display can be re-ordered according to
+    // the order of the tags
+
     $('#selectcolumn').on("change", function() {
         // loop through the metadata and pass the elements that are enabled
-        var newcolumlist = $(this).val();
+
+        var newcolumnlist = $(this).val().split(",");
+        //console.log(newcolumnlist)
         var filteredMetadata = [];
-        for (i=0; i<metadata.length; i++) {
-          // if the attribute for this column is found in the string somewhere, then add the attribute
-          if (newcolumlist.indexOf(metadata[i].name)>-1) {
-            filteredMetadata.push(metadata[i])
-          }
+        var i,j;
+        for (i=0; i<newcolumnlist.length; i++) {
+           for (j=0; j<metadata.length; j++) {
+              // if the attribute for this column is found in the string somewhere, then add the attribute
+              //console.log(newcolumnlist[i],metadata[j])
+             if (newcolumnlist[i] == metadata[j].name) {
+               filteredMetadata.push(metadata[j])
+               //console.log("found match")
+              }
+            }
         }
         // rerender the table with only the enabled attributes
         editableGrid.load({"metadata": filteredMetadata, "data": rowdata});
