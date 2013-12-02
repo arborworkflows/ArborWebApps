@@ -225,7 +225,7 @@ d3.select("#new_project").on("click", function () {
   var new_project = prompt("Please enter the name of your new project");
   if (new_project != null) {
     d3.json("/arborapi/projmgr/project/" + new_project)
-    .send("put", content, function (error, data) {
+    .send("put", new_project, function (error, data) {
       populate_projects();
       $("#project").val(new_project);
       project = new_project;
