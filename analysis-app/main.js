@@ -35,14 +35,13 @@ function initialize() {
     children: {field: "clades"}
   });
 
-  d3_vis = tangelo.vis.dendrogram({
-    data: root,
-    el: d3.select("#d3_vis").node(),
-    id: {field: "_id.$oid"},
-    label: {field: "name"},
-    distance: {field: "branch_length"},
-    nodeLimit: 1000
-  });
+  d3_vis = $("#d3_vis").dendrogram({
+      data: root,
+      id: {field: "_id.$oid"},
+      label: {field: "name"},
+      distance: {field: "branch_length"},
+      nodeLimit: 1000
+  }).data("dendrogram");
 }
 
 function populate_projects() {
@@ -343,14 +342,24 @@ function vtk_tree_heatmap(tree, table) {
 // display a D3 phylotree
 function d3_tree(selected_tree) {
   d3.json("/arborapi/projmgr/project/" + project + "/PhyloTree/" + selected_tree, function (error, collection) {
+
+    // Get rid of "handle" node
+    var filtered = [];
+    collection.forEach(function (d) {
+        if (!d.rooted) {
+            filtered.push(d);
+        }
+    });
+
     root = tangelo.data.tree({
-      data: collection,
+      data: filtered,
       id: {field: "_id.$oid"},
       idChild: {field: "$oid"},
       children: {field: "clades"}
     });
 
-    d3_vis.update({data: root});
+    d3_vis.option({data: root});
+    d3_vis.reset();
   });
 }
 
