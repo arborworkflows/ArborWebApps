@@ -28,38 +28,38 @@ $(function () {
         label: {field: "name"},
         distance: {field: "branch_length"},
         nodeLimit: 1000
-    });
+    }).data("dendrogram");
 
     d3.select("#mode-hide").on("click", function () {
-        vis.dendrogram({mode: "hide"});
+        vis.option({mode: "hide"});
     });
 
     d3.select("#mode-focus").on("click", function () {
-        vis.dendrogram({mode: "focus"});
+        vis.option({mode: "focus"});
     });
 
     d3.select("#mode-label").on("click", function () {
-        vis.dendrogram({mode: "label"});
+        vis.option({mode: "label"});
     });
 
     d3.select("#distance-unit").on("click", function () {
-        vis.dendrogram({distance: {value: 1}});
+        vis.option({distance: {value: 1}});
     });
 
     d3.select("#distance-branch-length").on("click", function () {
-        vis.dendrogram({distance: {field: "branch_length"}});
+        vis.option({distance: {field: "branch_length"}});
     });
 
     d3.select("#node-limit-500").on("click", function () {
-        vis.dendrogram({nodeLimit: 500});
+        vis.option({nodeLimit: 500});
     });
 
     d3.select("#node-limit-1000").on("click", function () {
-        vis.dendrogram({nodeLimit: 1000});
+        vis.option({nodeLimit: 1000});
     });
 
     d3.select("#node-limit-2000").on("click", function () {
-        vis.dendrogram({nodeLimit: 2000});
+        vis.option({nodeLimit: 2000});
     });
 
     d3.select("#reset").on("click", function () {
@@ -138,7 +138,7 @@ $(function () {
                                 children: {field: "clades"}
                             });
 
-                            vis.dendrogram({data: root});
+                            vis.option({data: root});
                         });
                     });
                     for (i = 0; i < data.options.length; i += 1) {
