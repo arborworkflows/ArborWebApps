@@ -71,6 +71,61 @@
       <!-- D3 Dendrogram -->
       <div id="d3_vis" class="row" style="display: none"></div>
 
+      <!-- OneZoom -->
+      <div id="onezoom" class="row" style="display: none">
+         <a href="http://www.OneZoom.org" target="_blank"><FONT COLOR="FFFFFF">OneZoom</FONT></a><FONT COLOR="FFFFFF"> - Tree of Life &nbsp;</FONT>
+        <button id = "hbutton1" onclick="searchoptions();">Search</button> 
+        <button id = "hbutton2" onclick="growoptions();">Grow</button> 
+        <button id = "hbutton3" onclick="viewoptions();">Options</button>
+        <button id = "hbutton9" onclick="dataoptions();">Data</button>
+        <button id = "hbutton4" onclick="Reset();">Reset</button>
+        <button id = "hbutton5" onclick="tutorialstart();">Tutorial</button>
+        <button id = "hbutton6" onclick="Link2OZ();">More</button>
+        <button id = "hbutton7" onclick="AboutOZ();">About</button>
+        <button id = "hbutton8" onclick="LicenseOZ();">License</button>
+      <center>
+        <canvas id="onezoom_canvas" ></canvas>
+      </center>
+      <p id="textout"></p>
+      
+      <form name="myform">
+          <FONT COLOR="FFFFFF" id = "viewtxt"> Look and Feel </FONT> 
+          <button style = "cursor:pointer"id = "detailincbutton" type="button" onclick="detaildown();">Detail -</button> 
+          <button style = "cursor:pointer"id = "detaildecbutton" type="button" onclick="detailup();">Detail +</button> 
+          <button style = "cursor:pointer"id = "info button" type="button" onclick="toggledisplay();">Zoom Level</button> 
+          <button style = "cursor:pointer"id = "formbutton" type="button" onclick="form_change();">View Type</button> 
+          <button style = "cursor:pointer"id = "colourbutton" type="button" onclick="colour_change();">Colour Scheme</button> 
+          <button style = "cursor:pointer"id = "polybutton"type="button" onclick="polyt_change();">Show Polytomies</button> 
+          
+          <FONT COLOR="FFFFFF" id = "viewtxt2"> </FONT>
+            
+          <button style = "cursor:pointer"id = "startgbutton" type="button" onclick="growstart();">Beginning</button>  		
+          <button style = "cursor:pointer"id = "revgbutton" type="button" onclick="growrev();">Reverse</button>  		
+          <button style = "cursor:pointer"id = "pausegbutton" type="button" onclick="growpause();">Pause</button>  
+          <button style = "cursor:pointer"id = "playgbutton" type="button" onclick="growplay();">Play</button> 
+          <button style = "cursor:pointer"id = "endgbutton" type="button" onclick="growend();">End</button>  	
+          <button style = "cursor:pointer"id = "fastergbutton" type="button" onclick="growfaster();">Faster</button>  
+          <button style = "cursor:pointer"id = "slowergbutton" type="button" onclick="growslower();">Slower</button>  
+          <FONT COLOR="FFFFFF" id = "growtxt"> </FONT>
+          
+          <FONT COLOR="FFFFFF" id = "searchtxt"> Search </FONT> 
+          <input id = "searchtf" type="text" name="tosearchfor" /> 
+          <input id = "latincheckbox" type="checkbox" name="latinsearch" value="latinsearch" checked="checked" />  
+          <FONT COLOR="FFFFFF" id = "latintxt"> Latin </FONT> 
+          <input id = "commoncheckbox" type="checkbox" name="commonsearch" value="commonsearch" checked="checked" />  
+          <FONT COLOR="FFFFFF" id = "commontxt"> Common </FONT>
+          <input id = "traitcheckbox" type="checkbox" name="traitsearch" value="traitsearch" checked="checked" />  
+          <FONT COLOR="FFFFFF" id = "traittxt"> Conservation </FONT>
+          <button style = "cursor:pointer"id = "searchbutton" type="button" id= "markbutton" onclick="marksearch();">Mark Results</button> 
+          <button style = "cursor:pointer"id = "searchbutton2" type="button" id= "markbutton" onclick="unmarksearch();">Unmark Results</button>  
+          <button style = "cursor:pointer"id = "leapbutton" name="Flybutton" type="button" onclick="performleap();">Show Results</button> 
+          <button style = "cursor:pointer"id = "flybutton" name="Flybutton" type="button" onclick="performfly();">Fly to Results</button> 
+          
+          <FONT COLOR="FFFFFF" id = "datatxt"> Data in newick format, ultrametric, polytomies as branch length zero - </FONT>
+          <input type="text" id = "datatxtin" name="datain" width = "35" /> 
+          <button type="button" id = "databutton" onclick="init();">Load data</button> 
+      </form>
+      </div>
       <!-- bootstrap table viewer -->
       <div id="grid" class="row" style="display: none">
         <table id="grid_table" class="table table-bordered table-striped"></table>
@@ -184,6 +239,7 @@
                 <option>Select...</option>
                 <option>VTK TreeHeatmap</option>
                 <option>D3 Tree</option>
+                <option>OneZoom Tree</option>
                 <option>Table</option>
               </select>
             </div>
@@ -220,5 +276,6 @@
   <script src="js/analysis.js"></script>
   <script src="js/data-management.js"></script>
   <script src="js/UI.js"></script>
+  <script src="js/onezoom.js"></script>
   </body>
 </html>
