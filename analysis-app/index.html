@@ -5,12 +5,15 @@
 
     <!-- tangelo styling -->
     <link href=/css/tangelo.css rel=stylesheet type=text/css>
-    <link href="http://code.jquery.com/ui/1.9.1/themes/smoothness/jquery-ui.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
 
     <!-- custom styling for this app -->
     <style>
-      html, body, select {
+      html, body {
+        width: 100%;
+        height: 100%;
+      }
+      select, input {
         width: 100%;
       }
       .row {
@@ -125,43 +128,12 @@
 
         <div class="tab-pane" id="analysis_tab">
           <div class="row">
-            <div class="span2">
-              Analysis
-            </div>
-            <div class="span2">
-              Tree
-            </div>
-            <div class="span2">
-              Character Matrix
-            </div>
-            <div class="span2">
-              Parameter
-            </div>
-            <div class="span2">
-              Output Prefix
-            </div>
-          </div>
-          <div class="row">
-            <div class="span2">
+            <div class="span4">
               <select id="analysis">
-                <option selected>Early Burst model fitting</option>
-                <option>Ornstein-Uhlenbeck model fitting</option>
               </select>
             </div>
-            <div class="span2">
-              <select id="analysis_tree"></select>
-            </div>
-            <div class="span2">
-              <select id="analysis_table"></select>
-            </div>
-            <div class="span2">
-              <select id="parameter"></select>
-            </div>
-            <div class="span2">
-              <input id="prefix" type="text" class="span2"> </input>
-            </div>
-            <div class="span2">
-              <button id="analyze" disabled>Analyze</button>
+            <div class="span4">
+              <button id="configure_analysis">Configure Analysis</button>
             </div>
           </div>
         </div> <!-- end analysis tab -->
@@ -206,9 +178,37 @@
 
     </div> <!-- end control panel -->
 
+    <!-- modal dialog for analysis inputs, outputs, and parameters -->
+    <div class="modal fade" id="analysis_dialog" tabindex="-1" role="dialog" aria-labelledby="dialog_title" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="analysis_dialog_title">Analysis Dialog</h4>
+            <button type="button" class="btn btn-info btn-small" id="view_script">View Script</button>
+          </div>
+          <div class="modal-body">
+            <div id="analysis_dialog_inputs" class="container-fluid">
+              <h5 class="text-left">Inputs</h5>
+            </div>
+            <div id="analysis_dialog_outputs" class="container-fluid">
+              <h5 class="text-left">Outputs</h5>
+            </div>
+            <div id="analysis_dialog_parameters" class="container-fluid">
+              <h5 class="text-left">Parameters</h5>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="analyze">Perform Analysis</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-  <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
   <script src="http://netdna.bootstrapcdn.com/bootstrap/2.3.0/js/bootstrap.min.js"></script>
   <script src="js/vtkweb-all.js"></script>
   <script src="js/autobahn.min.js"></script>

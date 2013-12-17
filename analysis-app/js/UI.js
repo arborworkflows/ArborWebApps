@@ -25,7 +25,7 @@ function populate_projects() {
   d3.json("/arborapi/projmgr/project", function (error, projects) {
     d3.select("#project").selectAll("option").remove();
     d3.select("#project").selectAll("option")
-      .data(projects)
+      .data(projects.sort())
       .enter().append("option")
       .text(function (d) { return d; });
 
@@ -34,47 +34,45 @@ function populate_projects() {
     });
 }
 
-// populate the table & tree selects
-function populate_selects() {
+// populate our tree selects
+function populate_trees() {
   d3.json("/arborapi/projmgr/project/" + project + "/PhyloTree", function (error, trees) {
     trees.unshift("Select...");
     d3.select("#vis_tree").selectAll("option").remove();
     d3.select("#vis_tree").selectAll("option")
-      .data(trees)
-      .enter().append("option")
-      .text(function (d) { return d; });
-    d3.select("#analysis_tree").selectAll("option").remove();
-    d3.select("#analysis_tree").selectAll("option")
-      .data(trees)
+      .data(trees.sort())
       .enter().append("option")
       .text(function (d) { return d; });
     d3.select("#delete_tree").selectAll("option").remove();
     d3.select("#delete_tree").selectAll("option")
-      .data(trees)
+      .data(trees.sort())
       .enter().append("option")
       .text(function (d) { return d; });
-
-    d3.json("/arborapi/projmgr/project/" + project + "/CharacterMatrix", function (error, tables) {
-      $.each(tables, function(key, value) {
-        $("#delete_list").append($("<option>", value).text(value))});
-      tables.unshift("Select...");
-      d3.select("#vis_table").selectAll("option").remove();
-      d3.select("#vis_table").selectAll("option")
-        .data(tables)
-        .enter().append("option")
-        .text(function (d) { return d; });
-      d3.select("#analysis_table").selectAll("option").remove();
-      d3.select("#analysis_table").selectAll("option")
-        .data(tables)
-        .enter().append("option")
-        .text(function (d) { return d; });
-      d3.select("#delete_table").selectAll("option").remove();
-      d3.select("#delete_table").selectAll("option")
-        .data(tables)
-        .enter().append("option")
-        .text(function (d) { return d; });
-      });
   });
+}
+
+// populate our table selects
+function populate_tables() {
+  d3.json("/arborapi/projmgr/project/" + project + "/CharacterMatrix", function (error, tables) {
+    tables.unshift("Select...");
+    d3.select("#vis_table").selectAll("option").remove();
+    d3.select("#vis_table").selectAll("option")
+      .data(tables.sort())
+      .enter().append("option")
+      .text(function (d) { return d; });
+    d3.select("#delete_table").selectAll("option").remove();
+    d3.select("#delete_table").selectAll("option")
+      .data(tables.sort())
+      .enter().append("option")
+      .text(function (d) { return d; });
+    });
+}
+
+// populate table, tree, and analysis selects
+function populate_selects() {
+  populate_trees();
+  populate_tables();
+  populate_analyses();
 }
 
 // actions performed when the user selects a project
@@ -104,79 +102,13 @@ d3.select("#vis").on("change", function() {
 
 // actions performed when the user selects a tree to visualize
 d3.select("#vis_tree").on("change", function() {
-  if ($("#analysis_tree").val() == "Select...") {
-    $("#analysis_tree").val($("#vis_tree").val());
-  }
   update_visualize_button();
 });
 
 // actions performed when the user selects a table to visualize
 d3.select("#vis_table").on("change", function() {
-  if ($("#analysis_table").val() == "Select...") {
-    $("#analysis_table").val($("#vis_table").val());
-    check_populate_parameter();
-  }
   update_visualize_button();
 });
-
-// actions performed when the user selects an analysis
-d3.select("#analysis").on("change", function() {
-  update_analyze_button();
-});
-
-// actions performed when the user selects a tree for analysis
-d3.select("#analysis_tree").on("change", function() {
-  update_analyze_button();
-});
-
-// actions performed when the user selects a parameter for analysis
-d3.select("#parameter").on("change", function() {
-  update_analyze_button();
-});
-
-// actions performed when the user selects a table for analysis
-d3.select("#analysis_table").on("change", function() {
-  check_populate_parameter();
-});
-
-// attempt to populate the parameter select
-function check_populate_parameter() {
-  var selected_table = $("#analysis_table").val();
-  if (selected_table != "Select...") {
-    populate_parameter(selected_table);
-  }
-  update_analyze_button();
-}
-
-// enable or disable the analyze button
-function update_analyze_button() {
-  if ($("#analysis").val() != "Select..." &&
-    $("#analysis_tree").val() != "Select..." &&
-    $("#analysis_table").val() != "Select..." &&
-    $("#parameter").val() &&
-    $("#parameter").val() != "Select...") {
-    $("#analyze").prop("disabled", false);
-  } else {
-    $("#analyze").prop("disabled", true);
-  }
-}
-
-// populate the parameter element with a list of column names
-function populate_parameter(selected_table) {
-  d3.json("/arborapi/projmgr/project/" + project + "/CharacterMatrix/" + selected_table, function (error, result) {
-    // clear out previous contents
-    $("#parameter").empty();
-
-    var contents = "<option>Select...</option>";
-    var headerRow = result[0];
-    $.each(headerRow, function(key, value) {
-      if (key != "_id") {
-        contents += "<option>" + key + "</option>";
-      }
-    });
-    $("#parameter").append(contents);
-  });
-}
 
 // check if we should enable or disable the "Visualize" button
 function update_visualize_button() {
