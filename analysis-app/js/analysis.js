@@ -246,26 +246,23 @@ function setup_analysis_parameter(parameter)
       d3.select("#" + table_input_name).on("change." + name, function()
         {
         var selected_table = $(this).val();
-        d3.json("/arborapi/projmgr/project/" + project + "/CharacterMatrix/" + selected_table, function (error, result)
+        d3.text("/arborapi/projmgr/project/" + project + "/CharacterMatrix/" + selected_table + "/header", function (error, result)
           {
           // clear out previous contents
           $param.empty();
           var contents = "";
-          var headerRow = result[0];
+          var headers = result.split(",");
           var itr = 1;
-          $.each(headerRow, function(key, value)
+          $.each(headers, function(key, value)
             {
-            if (key != "_id")
+            if (type == "Range")
               {
-              if (type == "Range")
-                {
-                contents += "<option value=" + itr + ">" + key + "</option>";
-                itr += 1;
-                }
-              else
-                {
-                contents += "<option>" + key + "</option>";
-                }
+              contents += "<option value=" + itr + ">" + value + "</option>";
+              itr += 1;
+              }
+            else
+              {
+              contents += "<option>" + value + "</option>";
               }
             });
           $param.append(contents);
