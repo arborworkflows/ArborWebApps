@@ -90,6 +90,9 @@ d3.select("#vis").on("change", function() {
   } else if (selected_vis == "D3 Tree") {
     $("#vis_tree").prop("disabled", false);
     $("#vis_table").prop("disabled", true);
+  } else if (selected_vis == "OneZoom Tree") {
+    $("#vis_tree").prop("disabled", false);
+    $("#vis_table").prop("disabled", true);
   } else if (selected_vis == "Table") {
     $("#vis_tree").prop("disabled", true);
     $("#vis_table").prop("disabled", false);
@@ -120,6 +123,8 @@ function update_visualize_button() {
     $("#visualize").prop("disabled", false);
   } else if (selected_vis == "D3 Tree" && selected_tree != "Select...") {
     $("#visualize").prop("disabled", false);
+  } else if (selected_vis == "OneZoom Tree" && selected_tree != "Select...") {
+    $("#visualize").prop("disabled", false);
   } else if (selected_vis == "Table" && selected_table != "Select...") {
     $("#visualize").prop("disabled", false);
   } else {
@@ -139,6 +144,7 @@ d3.select("#visualize").on("click", function () {
       $("#viewport").show();
       $("#grid").hide();
       $("#intro").hide();
+      $("#onezoom").hide();
       vtk_tree_heatmap(selected_tree, selected_table);
     }
   } else if (selected_vis == "D3 Tree") {
@@ -148,7 +154,18 @@ d3.select("#visualize").on("click", function () {
       $("#viewport").hide();
       $("#grid").hide();
       $("#intro").hide();
+      $("#onezoom").hide();
       d3_tree(selected_tree);
+    }
+  } else if (selected_vis == "OneZoom Tree") {
+    if (selected_tree != "Select...") {
+      $("#d3_tools").hide();
+      $("#d3_vis").hide();
+      $("#viewport").hide();
+      $("#grid").hide();
+      $("#intro").hide();
+      $("#onezoom").show();
+      onezoom_tree(selected_tree);
     }
   } else if (selected_vis == "Table") {
     if (selected_table != "Select...") {
@@ -157,6 +174,7 @@ d3.select("#visualize").on("click", function () {
       $("#viewport").hide();
       $("#grid").show();
       $("#intro").hide();
+      $("#onezoom").hide();
       display_table(selected_table);
     }
   }

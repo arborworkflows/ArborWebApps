@@ -9,7 +9,9 @@ framework, which may be installed by following
 To use these web applications, install and start Tangelo, then
 open a command shell and execute the following:
 
-    ln -s /path/to/ArborWebApps /path/to/tangelo-build/deploy/web/arbor
+    ln -s /path/to/ArborWebApps WEBROOT/arbor
+
+`WEBROOT` is the Tangelo web root seen by `tangelo status`.
 
 You should then be able to visit the web apps on your Tangelo instance, e.g.
 [http://localhost:8080/arbor/](http://localhost:8080/arbor/).
@@ -24,6 +26,13 @@ These applications require that you have a running
 Use the Arbor
 [ProjectManager](https://github.com/arborworkflows/ProjectManager)
 to load phylogenetic trees into MongoDB.
+
+Some of the apps require ProjectManager REST API. To mount that, link it to Tangelo
+with the following command:
+
+    ln -s /path/to/ProjectManager/tangelo WEBROOT/arborapi
+
+Again, `WEBROOT` is the Tangelo web root seen by `tangelo status`.
 
 # Get Involved
 
