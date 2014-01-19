@@ -36,9 +36,8 @@ var editableGrid;
 var currentProjectName = "";
 var currentDatasetName = "";
 
-// The arbor API is not installed correctly on my machine, so put a variable here so it can be relocated
-var arborapiurl = "/~clisle/ArborWebApps/ProjectManager/tangelo/projmgr/"
-// var arborapiurl = "/arborapi/"
+// use a variable in case we want to move the location of the Arbor API
+var arborapiurl = "/arborapi/projmgr"
 
 // We want to tell the difference between ints and floats when filling the table, so we need to define this test.
 // it is supposed to become part of the standard eventually:
@@ -81,6 +80,7 @@ function  initializeColumnController(metadata) {
            nonameCount = nonameCount+1;
            // since the column was unnamed, assign the same name
            metadata[i].name = newName;
+           metadata[i].label = newName;
         } else {
          columnText += dataobject.name+",";
         }
@@ -173,6 +173,7 @@ function update() {
     //      [ {id: 1, values: { "fieldname": value, "fieldname2": value2, ...},
     //        {id: 2, values: { "fieldname": value, "fieldname2": value2, ...},...]
 
+    rowdata = []
     for (var i = 0; i < querydata.length; i++)
     {
       rowdata.push({id:i,values: querydata[i]})
@@ -398,7 +399,7 @@ var project = d3.select("#project").node(),
     i;
 
 d3.select("#project").selectAll("option").remove();
-d3.json("/~clisle/ArborWebApps/ProjectManager/tangelo//projmgr/project", function (error, projects) {
+d3.json(arborapiurl+"/project", function (error, projects) {
     console.log(projects,"\n");
     d3.select("#project").selectAll("option")
         .data(projects)
@@ -408,7 +409,7 @@ d3.json("/~clisle/ArborWebApps/ProjectManager/tangelo//projmgr/project", functio
     d3.select("#project").on("change", function () {
         var project = d3.select("#project").node(),
             projectName = project.options[project.selectedIndex].text;
-        d3.json("/~clisle/ArborWebApps/ProjectManager/tangelo//projmgr/project/" + projectName + "/CharacterMatrix", function (error, datasets) {
+        d3.json(arborapiurl+"/project/" + projectName + "/CharacterMatrix", function (error, datasets) {
             d3.select("#data").selectAll("option").remove();
             d3.select("#data").selectAll("option")
                 .data(datasets)

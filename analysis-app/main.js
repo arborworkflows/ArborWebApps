@@ -2,6 +2,8 @@
 
 // hardcoded project name for now
 var project = "anolis";
+//var arborapi = '/arborapi';
+var arborapi = '/~clisle/ArborWebApps/ProjectManager/tangelo'
 
 // used by Python services to communicate with this server.
 var baseURL = window.location.protocol + "//" + window.location.host;
@@ -46,7 +48,7 @@ function initialize() {
 }
 
 function populate_projects() {
-  d3.json("/arborapi/projmgr/project", function (error, projects) {
+  d3.json(arborapi+"/projmgr/project", function (error, projects) {
     d3.select("#project").selectAll("option").remove();
     d3.select("#project").selectAll("option")
       .data(projects)
@@ -60,7 +62,7 @@ function populate_projects() {
 
 // function to populate the table & tree selects
 function populate_selects() {
-  d3.json("/arborapi/projmgr/project/" + project + "/PhyloTree", function (error, trees) {
+  d3.json(arborapi+"/projmgr/project/" + project + "/PhyloTree", function (error, trees) {
     trees.unshift("Select...");
     d3.select("#vis_tree").selectAll("option").remove();
     d3.select("#vis_tree").selectAll("option")
@@ -78,7 +80,7 @@ function populate_selects() {
       .enter().append("option")
       .text(function (d) { return d; });
 
-    d3.json("/arborapi/projmgr/project/" + project + "/CharacterMatrix", function (error, tables) {
+    d3.json(arborapi+"/projmgr/project/" + project + "/CharacterMatrix", function (error, tables) {
       $.each(tables, function(key, value) {
         $("#delete_list").append($("<option>", value).text(value))});
       tables.unshift("Select...");

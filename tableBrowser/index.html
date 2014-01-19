@@ -49,8 +49,12 @@
             <div data-tangelo-type=info>
                 <p>This application lets you explore a tabular dataset, such as a character matrix.
 
-                <p>Generally, each row of the table corresponds to a separate species and the columns
-                of the table correspond to individual characteristics (or "characters") observed in the species.
+                <p>Generally in character matrices, each row of the matrix corresponds to a separate species and the columns
+                of the table correspond to individual characteristics (or "characters") observed in the species. At the bottom
+                of the window, each characteristic is listed.  The user can disable a column by clicking the 'x' next to the column name,
+                restore a column by reselecting the tag, and rearrange the columns by directly dragging the tags into the order desired.
+                Clicking the heading on a column sorts the matrix accordingly.  Entering text in the "Filter" box will mask the matrix
+                so that only rows containing matching text will be displays (like the unix "grep" command).
             </div>
 
         </div>
@@ -79,7 +83,7 @@
                 Dataset
                 <select id="data" class="input" style="margin-top:10px;" >
                 </select>
-                <button id="load" style="margin-left:20px;">load data</button>
+                <button id="load" style="margin-left:20px;">display character matrix</button>
 
         </div>
 

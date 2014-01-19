@@ -485,8 +485,8 @@ function mapAllChildNodes(d, node) {
 	if (typeof createMarker != 'undefined' && typeof google.maps.LatLng != 'undefined') {
 		// this process can take a long time, so put up a processing sign
 		$('#treebuttons').badger('Processing');
-		searchLocationsNearClade('/app/phylomap/service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
-			'/?boundary_type=id' + '&_id=' + d._id, d._id, clearBadge);
+		searchLocationsNearClade('service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
+			'/id/' + d._id, d._id, clearBadge);
 				// this happens immediately regardless of gating
 		//$('#treebuttons').badger('');
 		//$(document).ready(function() {$('#treebuttons').badger('');});
@@ -588,8 +588,8 @@ function increaseWidth(delta) {
 // mouse event after reset goes back
 
 function resetVisualization() {
- width =  1200 - lMargin - rMargin;
- height = 1000 - tMargin - bMargin;
+ width =  1000 - lMargin - rMargin;
+ height = 800 - tMargin - bMargin;
  vis.attr("transform", "translate(0,0), scale(1,1)");
  //vis.attr("transform", "scale(1,1)");
  updateVisualization();
@@ -615,8 +615,8 @@ function updateVisualization() {
 
 // GLOBAL VARIABLES
 var lMargin = 50, rMargin = 30, tMargin = 50, bMargin = 50,
-	width = 1200 - lMargin - rMargin,
-    height = 1000 - tMargin - bMargin,
+	width = 1000 - lMargin - rMargin,
+    height = 800 - tMargin - bMargin,
 	i = 0,
 	pathWidth = "1.5px", pathColor = "#ccc",
 	root,
