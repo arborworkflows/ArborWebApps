@@ -2,8 +2,7 @@
 
 // hardcoded project name for now
 var project = "anolis";
-//var arborapi = '/arborapi';
-var arborapi = '/~clisle/ArborWebApps/ProjectManager/tangelo'
+var arborapi = '/arborapi';
 
 // used by Python services to communicate with this server.
 var baseURL = window.location.protocol + "//" + window.location.host;
