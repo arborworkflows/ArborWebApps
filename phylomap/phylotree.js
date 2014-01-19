@@ -708,15 +708,4 @@ vis.append("svg:rect")
 // ---------
 
 
-addLoadEvent(function () {
-	mongo = phylotree.getMongoDBInfo();
-
-    $("#navbar").navbar({
-
-    });
-
-
-
-});
-
 
