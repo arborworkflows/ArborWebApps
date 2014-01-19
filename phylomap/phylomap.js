@@ -304,15 +304,21 @@ addLoadEvent(function () {
 
 	google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event) {
 		var searchUrl;
-		// create the restful style url to load data
+
+		// create the restful style url to load data.  The named arguments we used to use had to be
+		// replaced by positional arguments with a later version of Tangelo. Notice the /rect/id/long, etc.
+		// using up positions in the URL since the names of the arguments didn't work anymore.
+
 		if (event.type == google.maps.drawing.OverlayType.CIRCLE) {
-	 		searchUrl = 'service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
+	 		searchUrl = 'service/phylomap-v2/' + phylomap.mongoserver + '/' + phylomap.currentProjectName +
+	 		        '/' + phylomap.currentDatasetName +
 	 			'/circle/id' +
 	 			 '/'+ event.overlay.getCenter().lng() +
 	 			 '/'+ event.overlay.getCenter().lat() +
 	 			 '/'+ event.overlay.getRadius();
 	 	} else if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
-	 		searchUrl = 'service/phylomap/' + mongo.server + '/' + mongo.db + '/' + mongo.coll +
+	 		searchUrl = 'service/phylomap-v2/' + phylomap.mongoserver + '/' + phylomap.currentProjectName +
+	 		        '/' + phylomap.currentDatasetName +
 	 			'/rect/id/long/lat/radius/' +
 				'/' + event.overlay.bounds.getSouthWest().lng() +
 				'/' + event.overlay.bounds.getSouthWest().lat() +

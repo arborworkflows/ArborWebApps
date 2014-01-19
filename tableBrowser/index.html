@@ -1,0 +1,124 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <link rel="shortcut icon" href=/img/tangelo.ico>
+	<title>Arbor Table Browser</title>
+	<script type="text/javascript" charset="utf-8" src="http://d3js.org/d3.v3.min.js"></script>
+        <!--<script src="http:/js/lib/jquery-1.8.2.min.js"></script>  -->
+        <script src="js/jquery-1.9.1.js"></script>
+        <script src="js/jquery-ui.js"></script>
+        <script src="/js/tangelo.min.js"></script>
+        <script src="/js/lib/bootstrap-2.3.0.js"></script>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+        <!-- selectize.default = blue; selectize.legacy = green; selectize.bootstrap2=gray-gradient -->
+        <link rel="stylesheet" href="css/selectize.bootstrap2.css">
+        <link href="/css/tangelo.css" rel="stylesheet" type="text/css">
+
+
+        <!-- selectize2 (apache license) plug-in to allow browsing the character table columns more easily -->
+        <script src="js/selectize.js"></script>
+
+        <link rel="shortcut icon" href=/img/tangelo.ico>
+        <title>Table Browser</title>
+
+        <script src="js/editablegrid.js"></script>
+        <!-- [DO NOT DEPLOY] --> <script src="js/editablegrid_renderers.js" ></script>
+        <!-- [DO NOT DEPLOY] --> <script src="js/editablegrid_editors.js" ></script>
+        <!-- [DO NOT DEPLOY] --> <script src="js/editablegrid_validators.js" ></script>
+        <!-- [DO NOT DEPLOY] --> <script src="js/editablegrid_utils.js" ></script>
+        <!-- [DO NOT DEPLOY] --> <script src="js/editablegrid_charts.js" ></script>
+
+        <link rel="stylesheet" href="editablegrid.css" type="text/css" media="screen">
+
+        <style>
+            body { font-family:'lucida grande', tahoma, verdana, arial, sans-serif; font-size:12px; }
+            h1 { font-size: 16px; }
+            a { color: #548dc4; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            table.testgrid { border-collapse: collapse; border: 1px solid #CCB; width: 800px; }
+            table.testgrid td, table.testgrid th { padding: 5px; border: 1px solid #E0E0E0; }
+            table.testgrid th { background: #E5E5E5; text-align: left; }
+            input.invalid { background: red; color: #FDFDFD; }
+        </style>
+
+        <script src="collectionBrowse.js"></script>
+
+</head>
+<body>
+        <div data-tangelo-type=navbar data-tangelo-brand=Arbor data-tangelo-app="Table Browser">
+            <div data-tangelo-type=info>
+                <p>This application lets you explore a tabular dataset, such as a character matrix.
+
+                <p>Generally in character matrices, each row of the matrix corresponds to a separate species and the columns
+                of the table correspond to individual characteristics (or "characters") observed in the species. At the bottom
+                of the window, each characteristic is listed.  The user can disable a column by clicking the 'x' next to the column name,
+                restore a column by reselecting the tag, and rearrange the columns by directly dragging the tags into the order desired.
+                Clicking the heading on a column sorts the matrix accordingly.  Entering text in the "Filter" box will mask the matrix
+                so that only rows containing matching text will be displays (like the unix "grep" command).
+            </div>
+
+        </div>
+
+        <!-- add controls for pagination -->
+        <!--  Number of rows per page in chart -->
+        <div id="pagecontrol">
+                <label for="pagecontrol">Rows per page: </label>
+                <select id="pagesize" name="pagesize">
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="20">20</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                </select>
+        </div>
+
+<div class="row" style="margin-top:70px; margin-left:1px;">
+        <div class="span12" >
+                Project
+                <select  id="project" class="input" style="margin-top:10px;">
+                </select>
+                Dataset
+                <select id="data" class="input" style="margin-top:10px;" >
+                </select>
+                <button id="load" style="margin-left:20px;">display character matrix</button>
+
+        </div>
+
+</div>
+
+<div style="margin-left:15px;">
+
+
+<!--   Arbor API doesn't currently support query and limit options, so disabled controls
+query <input id="query" type="text" value="{}" style="margin-right:20px; width:200px;">
+limit <input id="limit" type="text" value="50" style="margin-right:20px; width:200px;">
+-->
+Filter: <input type="text" id="filter" style="margin-right:20px; " />
+</div>
+
+<!-- editableGrid library allows a filter for text searching, so this field is used to limit search
+<label for="filter">Filter :</label>
+<input type="text" id="filter"/>
+-->
+  <div id="tablecontent" style="margin-left: 20px; margin-top:20px;" ></div>
+
+<!-- Paginator control; leave room for collapsed control panel below the paginator -->
+<div id="paginator" style="margin-bottom:50px; "></div>
+
+<!-- Create a drawer panel with the controls in it.  This drawer is colored opaque to not interfere with the text.
+      It contains only the editable input of dataset fields.  Users can select the fields to set.  The size of the panel
+      should change dynamically when users add fields or deletes fields.  -->
+
+<div data-tangelo-type=control-panel id="control-panel" data-tangelo-callback style="z-index:10; background: none repeat scroll 0% 0% rgba(232, 232, 232, 1.0);"  >
+    <div class=container >
+        <h1>Select which columns to show.  Drag them to change the ordering</h1>
+        <input type="text" id="selectcolumn"  style="margin-right:20px; margin-bottom:40px; height:300px; width:800px; " />
+    </div>
+</div>
+
+
+</body>
+</html>

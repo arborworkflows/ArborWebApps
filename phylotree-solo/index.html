@@ -5,41 +5,15 @@
         <link rel="shortcut icon" href=/img/tangelo.ico>
 		<title>Arbor Tree Browser</title>
 		<script type="text/javascript" charset="utf-8" src="http://d3js.org/d3.v3.min.js"></script>
-        <script src=http://code.jquery.com/jquery-1.8.2.min.js></script>
-        <script src=/lib/tangelo.min.js></script>
-        <script src=/lib/bootstrap.js></script>
+        <script src=http:/js/lib/jquery-1.8.2.min.js></script>
+        <script src=/js/tangelo.min.js></script>
+        <script src=/js/lib/bootstrap-2.3.0.js></script>
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
         <link href=/css/tangelo.css rel=stylesheet type=text/css>
-        <!--
+       <!--
         <script type="text/javascript" src="Sive.js"></script>
         -->
 
-        <!-- declarations for password detection -->
-
-        <script type="text/javascript" src="apprise-1.5.min.js"></script>
-        <link rel="stylesheet" href="apprise.min.css" type="text/css" />
-        <script type="text/javascript" src="md5_crypt.js"></script>
-
-      <!--
-        <script>
-
-
-        // It would be better if we moved the URLs and the hashed value to a server-side JSON object
-        var passwordhash="9f112ed722c429b6694a9a5b623cf9e9";
-        $(document).ready(function() {
-                apprise('This demo uses an unpublished dataset. Please enter the password for access:', {'input':true}, function(r) {
-
-                        if(r) {
-                                if (returnHash(r) != passwordhash)
-                                        document.location.href="http://ec2-50-17-149-130.compute-1.amazonaws.com"
-                        } else {
-                                //console.log(r)
-                                document.location.href="http://ec2-50-17-149-130.compute-1.amazonaws.com"
-                        }
-                });
-        });
-        </script>
-        -->
 
         <!-- add badges for processing and other notifications -->
         <script type="text/javascript" src="badger.js"></script>
@@ -67,10 +41,8 @@
 		</style>
 
 
-
-
 	</head>
-	<body>
+	<body >
         <div data-tangelo-type=navbar data-tangelo-brand=Arbor data-tangelo-app=Phylotree-solo>
             <div data-tangelo-type=info>
                 <p>This application lets you explore a phylogenetic tree.  Click on a
@@ -82,34 +54,36 @@
                 lived at historic times.
             </div>
 
-            <div data-tangelo-type=config>
-                <div class="alert ">
-                    Set the amount of vertical expansion when zooming into the tree
-                </div>
-                MongoDB host <input id="mongodb-server" type="text"><br>
-                MongoDB database <input id="mongodb-db" type="text"><br>
-                MongoDB collection <input id="mongodb-coll" type="text"><br>
-                <!-- Vertical Scale Factor <input id="verticalScale" type="number">  -->
-            </div>
         </div>
+
+        <h1>Database tree viewer</h1>
+            <div class="row">
+                <div class="span12">
+                    Project
+                    <select id="project" class="input-medium">
+                    </select>
+                    Dataset
+                    <select id="data" class="input-medium">
+                    </select>
+                </div>
+            </div>
         <!-- attempt a wrapper to add a bit of margin around the tree and map -->
-        <div id="scenewrapper" style="float:left; margin-top:75px; margin-right:20px; width:95%; border style:solid; overflow:hidden; border-width:medium"></div>
+        <div id="scenewrapper" style="float:left; margin-top:15px;   width:1000px; border style:solid; overflow:hidden; border-width:medium"></div>
                         <div id="treebuttons" style="float:left; width: 80%; overflow: hidden;">
                                 <button type="button" onclick="emptyTree();">Empty Tree</button>
                                 <button type="button" onclick="entireTree();">Entire Cached Tree</button>
                                 <button type="button" onclick="onAllAndLoad(root);">Full Tree</button>
                                 <input type="checkbox" id="nodeNames" onchange="toggleText(this);" checked> Show Names
-                                <button type="button" onclick="increaseWidth(40);">Increase Depth</button>
-                                <button type="button" onclick="increaseWidth(-40);">Decrease Depth</button>
-                                <button type="button" onclick="increaseHeight(40);">Increase Height</button>
-                                <button type="button" onclick="increaseHeight(-40);">Decrease Height</button>
+                                <button type="button" onclick="increaseWidth(80);">Increase Depth</button>
+                                <button type="button" onclick="increaseWidth(-80);">Decrease Depth</button>
+                                <button type="button" onclick="increaseHeight(80);">Increase Height</button>
+                                <button type="button" onclick="increaseHeight(-80);">Decrease Height</button>
+                                 <button type="button" onclick="increaseFontSize(2);">Increase Font</button>
+                                 <button type="button" onclick="increaseFontSize(-2);">Decrease Font</button>
                                 <!-- <button type="button" onclick="resetVisualization();">Reset</button> -->
                         </div>
 
-                <div id="tree" style="margin-top:10px; width: 90%; height: 750px; margin-left: 10px; float:left;  border-style:solid; overflow:hidden; border-width:medium"></div>
-                        <!-- <div id="map_canvas" style=" margin-right:20px; float:right; width:39%; height:554px; border-style:solid; border-width:medium"></div>  -->
-
-                   <!--     <div id="map_canvas" style=" margin-top:10px; margin-right:20px; float:right;  border-style:solid; border-width:medium"></div> -->
+                <div id="tree" style="margin-top:10px; width: 95%; height:650px; margin-left: 10px; margin-bottom: 50px; float:left;  border-style:solid; overflow:hidden; border-width:medium"></div>
                         <script type="text/javascript" src="phylotree.js"></script>
 	</div>
     </body>
