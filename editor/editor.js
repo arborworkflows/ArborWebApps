@@ -1,5 +1,5 @@
 /*jslint browser: true, unparam: true */
-/*globals d3, $, workflow, FileReader */
+/*globals d3, $, workflow, FileReader, console, tangelo */
 
 $(document).ready(function () {
     "use strict";
@@ -13,7 +13,7 @@ $(document).ready(function () {
     $("#name").val(flow.data().name);
 
     // Populate analysis list
-    d3.json("/arborapi/projmgr/analysis", function (error, list) {
+    d3.json("/projectmanager/tangelo/projmgr/analysis", function (error, list) {
         analyses = list;
         d3.select("#analysis").selectAll("a")
             .data(list).enter().append("a")
@@ -21,7 +21,7 @@ $(document).ready(function () {
             .classed("list-group-item", true)
             .text(function (d) { return d; })
             .on("click", function (d) {
-                d3.json("/arborapi/projmgr/analysis/" + d, function (error, analysis) {
+                d3.json("/projectmanager/tangelo/projmgr/analysis/" + d, function (error, analysis) {
                     if (analysis.length !== 1) {
                         console.warn("[analysis on click]: Analysis not found");
                     }
@@ -43,16 +43,12 @@ $(document).ready(function () {
     });
 
     function loadWorkflow(d) {
-        if (d.name === "Select workflow") {
+        d3.json("workflow/" + d.id, function (error, w) {
             flow.clear();
+            flow.data(w);
             $("#name").val(flow.data().name);
-        } else {
-            d3.json("workflow/" + d.id, function (error, w) {
-                flow.clear();
-                flow.data(w);
-                $("#name").val(flow.data().name);
-            });
-        }
+            currentWorkflow = {id: d.id, name: flow.data().name};
+        });
         d3.event.preventDefault();
     }
 
@@ -81,10 +77,8 @@ $(document).ready(function () {
 
     // Save workflow
     d3.select("#save").on("click", function () {
-        var cur = currentWorkflow.id;
-
         flow.data().name = $("#name").val();
-        if (cur === "Select workflow") {
+        if (!currentWorkflow) {
             d3.json("workflow").post(JSON.stringify(flow.serialize()), function (error, id) {
                 currentWorkflow = {id: id, name: flow.data().name};
                 d3.select("#workflow").append("li").append("a")
@@ -94,7 +88,7 @@ $(document).ready(function () {
                     .on("click", loadWorkflow);
             });
         } else {
-            d3.json("workflow/" + cur).send("put", JSON.stringify(flow.serialize()), function (error, result) {
+            d3.json("workflow/" + currentWorkflow.id).send("put", JSON.stringify(flow.serialize()), function (error, result) {
                 // Update the name in the dropdown menu
                 currentWorkflow.name = flow.data().name;
                 d3.select("#workflow").selectAll("a")
@@ -105,20 +99,19 @@ $(document).ready(function () {
 
     // Delete workflow
     d3.select("#delete").on("click", function () {
-        var cur = $("#workflow").val();
-
-        if (cur === "Select workflow") {
+        if (!currentWorkflow) {
             flow.clear();
             $("#name").val(flow.data().name);
         } else {
-            d3.json("workflow/" + cur).send("delete", "", function (error, result) {
+            console.log(currentWorkflow);
+            d3.json("workflow/" + currentWorkflow.id).send("delete", "", function (error, result) {
                 flow.clear();
                 $("#name").val(flow.data().name);
 
                 // Remove workflow from list
                 d3.select("#workflow").selectAll("a")
                     .each(function (d) {
-                        if (d.id === cur) {
+                        if (d.id === currentWorkflow.id) {
                             d3.select(this.parentNode).remove();
                         }
                     });
@@ -222,7 +215,7 @@ $(document).ready(function () {
             name: file.name,
             inputs: [],
             parameters: [],
-            outputs: [{name: "output", type: "table"}]
+            outputs: [{name: "output", type: "table", data: data}]
         });
     }
 
@@ -333,5 +326,6 @@ $(document).ready(function () {
 
     // init the widgets
     $("#progressbar").progressbar();
+    $(".has-tooltip").tooltip();
 
 });
