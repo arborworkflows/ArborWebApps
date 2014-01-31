@@ -14,15 +14,17 @@ workflow = function (selection, details) {
         conn,
         analysisMap,
         stateScale,
-        detailContent;
+        detailContent,
+        portOffset = 20,
+        strokeColor = "#333";
 
 
     // Add properties to workflow to aid in interactive editing
     function prepare() {
         analysisMap = {};
         workflow.analyses.forEach(function (a) {
-            a.inputScale = d3.scale.linear().domain([0, a.inputs.input.length - 1]).range([25, 125]);
-            a.outputScale = d3.scale.linear().domain([0, a.outputs.output.length - 1]).range([25, 125]);
+            a.inputScale = d3.scale.linear().domain([0, a.inputs.input.length - 1]).range([25, 75]);
+            a.outputScale = d3.scale.linear().domain([0, a.outputs.output.length - 1]).range([25, 75]);
             analysisMap[a['@name']] = a;
         });
         workflow.connections.forEach(function (c) {
@@ -42,10 +44,10 @@ workflow = function (selection, details) {
         dist = Math.sqrt(delta[0] * delta[0] + delta[1] * delta[1]);
         offset = 0.4 * dist - 50;
         offset = offset < 0 ? 0 : offset;
-        return "M " + (d.outputAnalysis.x + d.outputPos) + " " + (d.outputAnalysis.y + 100)
-            + " C " + (d.outputAnalysis.x + d.outputPos) + " " + (d.outputAnalysis.y + 100 + offset)
-            + " " + (d.inputAnalysis.x + d.inputPos) + " " + (d.inputAnalysis.y - offset)
-            + " " + (d.inputAnalysis.x + d.inputPos) + " " + d.inputAnalysis.y;
+        return "M " + (d.outputAnalysis.x + 150 + portOffset) + " " + (d.outputAnalysis.y + d.outputPos)
+            + " C " + (d.outputAnalysis.x + 150 + portOffset + offset) + " " + (d.outputAnalysis.y + d.outputPos)
+            + " " + (d.inputAnalysis.x  - portOffset - offset) + " " + (d.inputAnalysis.y + d.inputPos)
+            + " " + (d.inputAnalysis.x - portOffset) + " " + (d.inputAnalysis.y + d.inputPos);
     }
 
     function updateConnections() {
@@ -59,8 +61,8 @@ workflow = function (selection, details) {
                 + d.outputIndex;
         }
         conn.selectAll("path").data(workflow.connections, connectionKey).enter().append("path")
-            .style("stroke", "black")
-            .style("stroke-width", 2)
+            .style("stroke", strokeColor)
+            .style("stroke-width", 10)
             .style("fill", "none")
             .attr("d", connectionPath);
         conn.selectAll("path").data(workflow.connections, connectionKey).exit().remove();
@@ -90,14 +92,30 @@ workflow = function (selection, details) {
                 + " a 10,10 0 1,0 -20,0";
         }
 
+        d3.select(this).selectAll("path.input-line")
+            .data(analysis.inputs.input)
+            .enter().append("path")
+            .classed("input-line", true)
+            .attr("d", function (d, i) { return "M 0 " + analysis.inputScale(i) + "l " + -portOffset + " 0"; })
+            .style("stroke", strokeColor)
+            .style("stroke-width", 2);
+
+        d3.select(this).selectAll("path.output-line")
+            .data(analysis.outputs.output)
+            .enter().append("path")
+            .classed("output-line", true)
+            .attr("d", function (d, i) { return "M 150 " + analysis.outputScale(i) + "l " + portOffset + " 0"; })
+            .style("stroke", strokeColor)
+            .style("stroke-width", 2);
+
         d3.select(this).selectAll("path.input").data(analysis.inputs.input).enter().append("path")
             .classed("input", true)
-            .attr("d", function (d, i) { return portShape(d.type, analysis.inputScale(i), 0); })
-            .style("fill", "#eee")
-            .style("stroke", "black")
+            .attr("d", function (d, i) { return portShape(d.type, -portOffset, analysis.inputScale(i)); })
+            .style("fill", "whitesmoke")
+            .style("stroke", strokeColor)
             .style("stroke-width", 2)
-            .on("mouseover", function (d) { d3.select(this).style("fill", "orange"); })
-            .on("mouseout", function (d) { d3.select(this).style("fill", "#eee"); })
+            .on("mouseover", function (d) { d3.select(this).style("fill", "#428BCA"); })
+            .on("mouseout", function (d) { d3.select(this).style("fill", "whitesmoke"); })
             .on("mouseup", function (d, i) {
                 var existing;
                 if (outputAnalysis !== undefined
@@ -130,12 +148,12 @@ workflow = function (selection, details) {
 
         d3.select(this).selectAll("path.output").data(analysis.outputs.output).enter().append("path")
             .classed("output", true)
-            .attr("d", function (d, i) { return portShape(d.type, analysis.outputScale(i), 100); })
+            .attr("d", function (d, i) { return portShape(d.type, 150 + portOffset, analysis.outputScale(i)); })
             .style("fill", "#eee")
-            .style("stroke", "black")
+            .style("stroke", strokeColor)
             .style("stroke-width", 2)
-            .on("mouseover", function (d) { d3.select(this).style("fill", "orange"); })
-            .on("mouseout", function (d) { d3.select(this).style("fill", "#eee"); })
+            .on("mouseover", function (d) { d3.select(this).style("fill", "#428BCA"); })
+            .on("mouseout", function (d) { d3.select(this).style("fill", "whitesmoke"); })
             .on("mousedown", function (o, i) {
                 outputAnalysis = analysis;
                 outputIndex = i;
@@ -153,6 +171,14 @@ workflow = function (selection, details) {
 
         g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
             .call(drag)
+            .on("mouseover", function (d) {
+                d3.select(this).select("rect").style("fill", "#428BCA");
+                d3.select(this).select("text").style("fill", "white");
+            })
+            .on("mouseout", function (d) {
+                d3.select(this).select("rect").style("fill", "whitesmoke");
+                d3.select(this).select("text").style("fill", strokeColor);
+            })
             .on("click", function (d) {
                 var panelBody;
 
@@ -211,24 +237,20 @@ workflow = function (selection, details) {
             .attr("height", 100)
             .attr("rx", 10)
             .attr("ry", 10)
-            .style("fill", "#ccc")
-            .style("stroke", "black")
+            .style("fill", "whitesmoke")
+            .style("stroke", strokeColor)
             .style("stroke-width", 2);
+
         g.append("text")
             .attr("x", 75)
-            .attr("y", 75)
+            .attr("y", 50)
+            .style("fill", strokeColor)
             .style("text-anchor", "middle")
             .style("alignment-baseline", "central")
             .text(function (d) { return d['@name']; })
             .style("user-select", "none")
             .style("-webkit-user-select", "none")
             .style("pointer-events", "none");
-        g.append("image")
-            .attr("x", 75 - 16)
-            .attr("y", 40 - 16)
-            .attr("width", 32)
-            .attr("height", 32)
-            .attr("xlink:href", "simple.png");
 
         g.each(updateAnalysis);
 
@@ -264,8 +286,8 @@ workflow = function (selection, details) {
             p.current = param.value;
             analysis.parameters.parameter.push(p);
         });
-        analysis.inputScale = d3.scale.linear().domain([0, analysis.inputs.input.length - 1]).range([25, 125]);
-        analysis.outputScale = d3.scale.linear().domain([0, analysis.outputs.output.length - 1]).range([25, 125]);
+        analysis.inputScale = d3.scale.linear().domain([0, analysis.inputs.input.length - 1]).range([25, 75]);
+        analysis.outputScale = d3.scale.linear().domain([0, analysis.outputs.output.length - 1]).range([25, 75]);
         count = 1;
         while (analysisMap[analysis['@name']] !== undefined) {
             analysis['@name'] = a['@name'] + " " + count;
@@ -319,7 +341,7 @@ workflow = function (selection, details) {
 
     stateScale = d3.scale.ordinal()
         .domain([undefined, "waiting", "running", "done"])
-        .range(["#ccc", "#ccc", "#cdf", "#cfc"]);
+        .range(["whitesmoke", "whitesmoke", "#cdf", "#cfc"]);
 
     // Create main SVG object
     vis = selection.append("svg").attr("width", "100%");
