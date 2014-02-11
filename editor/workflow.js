@@ -8,6 +8,7 @@ workflow = function (selection, details) {
     var that,
         workflow,
         drag,
+        dragPort,
         svg,
         vis,
         outputAnalysis,
@@ -16,6 +17,8 @@ workflow = function (selection, details) {
         analysisMap,
         stateScale,
         detailContent,
+        dragConnection,
+        dragPath,
         portOffset = 20,
         strokeColor = "#333";
 
@@ -158,8 +161,15 @@ workflow = function (selection, details) {
             .on("mousedown", function (o, i) {
                 outputAnalysis = analysis;
                 outputIndex = i;
+                dragConnection = {
+                    outputAnalysis: analysis,
+                    outputPos: outputAnalysis.outputScale(i),
+                    inputAnalysis: {x: analysis.x + 150 + portOffset + 20, y: analysis.y + analysis.outputScale(i)},
+                    inputPos: 0
+                };
                 d3.event.stopPropagation();
-            });
+            })
+            .call(dragPort);
     }
 
     function updateAnalyses() {
@@ -172,14 +182,6 @@ workflow = function (selection, details) {
 
         g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
             .call(drag)
-            .on("mouseover", function (d) {
-                //d3.select(this).select("rect").style("fill", "#428BCA");
-                //d3.select(this).select("text").style("fill", "white");
-            })
-            .on("mouseout", function (d) {
-                //d3.select(this).select("rect").style("fill", "whitesmoke");
-                //d3.select(this).select("text").style("fill", strokeColor);
-            })
             .on("click", function (d) {
                 var panelBody;
 
@@ -230,7 +232,6 @@ workflow = function (selection, details) {
                             }
                         });
                     });
-                //$(detail.node()).fadeIn(200);
             });
 
         g.append("rect")
@@ -267,7 +268,6 @@ workflow = function (selection, details) {
         workflow = {name: "New Workflow", analyses: [], connections: []};
         prepare();
         that.update();
-        //$(detail.node()).fadeOut(200);
     };
 
     that.add = function (a) {
@@ -367,6 +367,12 @@ workflow = function (selection, details) {
     // Create group containing all connections
     conn = vis.append("g");
 
+    // Create path for dragged path
+    dragPath = vis.append("path")
+        .style("stroke", strokeColor)
+        .style("stroke-width", 10)
+        .style("fill", "none");
+
     // Define behavior for dragging analysis "g" elements
     drag = d3.behavior.drag()
         .on("drag", function (d) {
@@ -379,12 +385,20 @@ workflow = function (selection, details) {
                 .attr("d", connectionPath);
         });
 
-    //detail = details.append("div")
-        //.classed("dropdown", true)
-        //.style("display", "none");
-        //.style("position", "fixed")
-        //.style("top", "100px")
-        //.style("right", "400px");
+    // Define behavior for dragging output port elements
+    dragPort = d3.behavior.drag()
+        .on("dragstart", function (d) {
+            dragPath.attr("visibility", "visible");
+            dragPath.attr("d", connectionPath(dragConnection));
+        })
+        .on("drag", function (d) {
+            dragConnection.inputAnalysis.x += d3.event.dx;
+            dragConnection.inputAnalysis.y += d3.event.dy;
+            dragPath.attr("d", connectionPath(dragConnection));
+        })
+        .on("dragend", function (d) {
+            dragPath.attr("visibility", "hidden");
+        });
 
     detailContent = details.append("div")
         .classed("panel", true)
@@ -395,11 +409,6 @@ workflow = function (selection, details) {
         + '<h3 class="panel-title">Analysis Settings</h3>'
         + '</div>'
         + '<div class="panel-body"></div>';
-        //.classed("dropdown-menu", true)
-        //.style("display", "block")
-        //.style("*width", "180px")
-        //.append("li").append("div");
-        //.classed("container", true);
 
     // Start with an empty workflow
     that.clear();
