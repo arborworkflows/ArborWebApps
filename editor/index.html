@@ -29,23 +29,17 @@
             font-family: Helvetica, Arial, sans;
             font-size: 12px;
         }
-        html, body, #main-container, #main-row, #workflow-editor {
-            height: 100%;
+        #workflow-editor {
+            position: fixed;
+            top:0; bottom:0; left:0; right:0;
         }
-        #workflow-details {
-        }
-        .container-fluid {
-            /*
-            margin-left: 15px;
-            margin-right: 15px;
-            */
-        }
-        #main {
-            /*margin-bottom: 0;*/
+        #palette-container, #workflow-details {
+            opacity: 0.9;
         }
         </style>
     </head>
     <body>
+        <div id="workflow-editor"></div>
         <div id="main" class="navbar navbar-default">
             <div id="dropstatus" style="display:none;">
                 <span id="droplabel"></span>
@@ -89,7 +83,7 @@
         </div>
         <div id="main-container" class="container-fluid">
             <div id="main-row" class="row">
-                <div class="col-sm-3">
+                <div id="palette-container" class="col-sm-3">
                     <div id="palette" class="panel panel-default">
                         <div class="panel-heading">
                             <h3 class="panel-title">Analyses</h3>
@@ -97,7 +91,7 @@
                         <div id="analysis" class="list-group"></div>
                     </div>
                 </div>
-                <div id="workflow-editor" class="col-sm-6"></div>
+                <div class="col-sm-6"></div>
                 <div id="workflow-details" class="col-sm-3">
                 </div>
             </div>

@@ -8,6 +8,7 @@ workflow = function (selection, details) {
     var that,
         workflow,
         drag,
+        svg,
         vis,
         outputAnalysis,
         outputIndex,
@@ -172,12 +173,12 @@ workflow = function (selection, details) {
         g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
             .call(drag)
             .on("mouseover", function (d) {
-                d3.select(this).select("rect").style("fill", "#428BCA");
-                d3.select(this).select("text").style("fill", "white");
+                //d3.select(this).select("rect").style("fill", "#428BCA");
+                //d3.select(this).select("text").style("fill", "white");
             })
             .on("mouseout", function (d) {
-                d3.select(this).select("rect").style("fill", "whitesmoke");
-                d3.select(this).select("text").style("fill", strokeColor);
+                //d3.select(this).select("rect").style("fill", "whitesmoke");
+                //d3.select(this).select("text").style("fill", strokeColor);
             })
             .on("click", function (d) {
                 var panelBody;
@@ -343,8 +344,25 @@ workflow = function (selection, details) {
         .domain([undefined, "waiting", "running", "done"])
         .range(["whitesmoke", "whitesmoke", "#cdf", "#cfc"]);
 
+    function zoom() {
+        vis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    }
+
     // Create main SVG object
-    vis = selection.append("svg").attr("width", "100%");
+    svg = selection.append("svg").append("g");
+
+    // Overlay to capture mouse events
+    // Add zoom behavior a la http://bl.ocks.org/mbostock/3680999
+    svg.append("rect")
+        .attr("class", "overlay")
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .attr("width", $(selection.node()).width())
+        .attr("height", $(selection.node()).height())
+        .call(d3.behavior.zoom().scaleExtent([0.25, 8]).on("zoom", zoom));
+
+    // Vis group for everything else
+    vis = svg.append("g");
 
     // Create group containing all connections
     conn = vis.append("g");
