@@ -4,7 +4,7 @@
         <title>Arbor Workflows</title>
         <!-- Tangelo -->
         <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
-        <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+        <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
         <script src=http://code.jquery.com/ui/1.9.1/jquery-ui.min.js></script>
         <script src="tangelo.min.js"></script>
 
@@ -54,21 +54,39 @@
                         <span class="glyphicon glyphicon-folder-open"></span>
                         <b class="caret"></b>
                     </a>
+                    <ul id="project" class="dropdown-menu">
+                    </ul>
+                </li>
+            </ul>
+            <div class="navbar-form navbar-left">
+                <div class="form-group">
+                    <input id="project-name" class="form-control" type="text" placeholder="New Project"></input>
+                </div>
+                <button id="new-project" class="btn btn-default has-tooltip" data-toggle="tooltip" data-placement="bottom" title="New Project">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
+            </div>
+            <ul class="nav navbar-nav">
+                <li>
+                    <a class="dropdown-toggle has-tooltip" data-toggle="dropdown" href="#">
+                        <span class="glyphicon glyphicon-folder-open"></span>
+                        <b class="caret"></b>
+                    </a>
                     <ul id="workflow" class="dropdown-menu">
                     </ul>
                 </li>
             </ul>
             <div class="navbar-form navbar-left">
                 <div class="form-group">
-                    <input id="name" class="form-control" type="text" placeholder="New Analysis"></input>
+                    <input id="name" class="form-control" type="text" placeholder="New Workflow"></input>
                 </div>
+                <button id="new" class="btn btn-default has-tooltip" data-toggle="tooltip" data-placement="bottom" title="New Workflow">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
             </div>
             <div class="navbar-form navbar-left">
                 <button id="save" class="btn btn-default has-tooltip" data-toggle="tooltip" data-placement="bottom" title="Save Workflow">
                     <span class="glyphicon glyphicon-floppy-disk"></span>
-                </button>
-                <button id="new" class="btn btn-default has-tooltip" data-toggle="tooltip" data-placement="bottom" title="New Workflow">
-                    <span class="glyphicon glyphicon-plus"></span>
                 </button>
                 <button id="copy" class="btn btn-default has-tooltip" data-toggle="tooltip" data-placement="bottom" title="Copy Workflow">Copy</button>
                 <button id="delete" class="btn btn-default has-tooltip" data-toggle="tooltip" data-placement="bottom" title="Delete Workflow">

@@ -5,9 +5,46 @@ $(document).ready(function () {
     "use strict";
 
     var analyses,
+        projects,
+        project,
         file,
         flow = workflow(d3.select("#workflow-editor"), d3.select("#workflow-details")),
         currentWorkflow;
+
+    function loadWorkflow(d) {
+        d3.json("/projectmanager/tangelo/projmgr/workflow/" + project + "/" + d, function (error, w) {
+            flow.clear();
+            flow.data(w);
+            $("#name").val(flow.data().name);
+            currentWorkflow = {id: d, name: flow.data().name};
+        });
+        d3.event.preventDefault();
+    }
+
+    // Populate project list
+    d3.json("/projectmanager/tangelo/projmgr/project", function (error, list) {
+        projects = list;
+        d3.select("#project").selectAll("li")
+            .data(list).enter().append("li").append("a")
+            .attr("href", "#")
+            .text(function (d) { return d; })
+            .on("click", function (d) {
+                project = d;
+                d3.json("/projectmanager/tangelo/projmgr/workflow/" + project, function (error, workflows) {
+                    d3.select("#workflow").selectAll("li")
+                        .data(workflows).enter().append("li").append("a")
+                        .attr("href", "#")
+                        .text(function (d) { return d; })
+                        .on("click", loadWorkflow);
+                });
+                d3.event.preventDefault();
+            });
+    });
+    d3.select("#new-project").on("click", function () {
+        d3.json("/projectmanager/tangelo/projmgr/project/" + $("#project-name").val()).send("put", function (error, d) {
+            console.log("Put it!");
+        });
+    });
 
     // Set the name editor value
     $("#name").val(flow.data().name);
@@ -42,29 +79,10 @@ $(document).ready(function () {
             });
     });
 
-    function loadWorkflow(d) {
-        d3.json("workflow/" + d.id, function (error, w) {
-            flow.clear();
-            flow.data(w);
-            $("#name").val(flow.data().name);
-            currentWorkflow = {id: d.id, name: flow.data().name};
-        });
-        d3.event.preventDefault();
-    }
-
-    // Populate workflow list
-    d3.json("workflow", function (error, list) {
-        d3.select("#workflow").selectAll("li")
-            .data(list).enter().append("li").append("a")
-            .attr("href", "#")
-            .text(function (d) { return d.name; })
-            .on("click", loadWorkflow);
-    });
-
     // Create new workflow
     d3.select("#new").on("click", function () {
         flow.data({name: "New Workflow", analyses: [], connections: []});
-        d3.json("workflow").post(JSON.stringify(flow.data()), function (error, id) {
+        d3.json("/projectmanager/tangelo/projmgr/workflow/" + project + "?operation=newWorkflow&workflowName=" + flow.data().name).send("put", JSON.stringify(flow.data()), function (error, id) {
             currentWorkflow = {id: id, name: flow.data().name};
             d3.select("#workflow").append("li").append("a")
                 .datum(currentWorkflow)
@@ -79,7 +97,7 @@ $(document).ready(function () {
     d3.select("#save").on("click", function () {
         flow.data().name = $("#name").val();
         if (!currentWorkflow) {
-            d3.json("workflow").post(JSON.stringify(flow.serialize()), function (error, id) {
+            d3.json("/projectmanager/tangelo/projmgr/workflow/" + project).send("put", JSON.stringify(flow.serialize()), function (error, id) {
                 currentWorkflow = {id: id, name: flow.data().name};
                 d3.select("#workflow").append("li").append("a")
                     .datum(currentWorkflow)
@@ -88,7 +106,7 @@ $(document).ready(function () {
                     .on("click", loadWorkflow);
             });
         } else {
-            d3.json("workflow/" + currentWorkflow.id).send("put", JSON.stringify(flow.serialize()), function (error, result) {
+            d3.json("/projectmanager/tangelo/projmgr/workflow/" + project + "/" + currentWorkflow.id).send("put", JSON.stringify(flow.serialize()), function (error, result) {
                 // Update the name in the dropdown menu
                 currentWorkflow.name = flow.data().name;
                 d3.select("#workflow").selectAll("a")
@@ -104,7 +122,7 @@ $(document).ready(function () {
             $("#name").val(flow.data().name);
         } else {
             console.log(currentWorkflow);
-            d3.json("workflow/" + currentWorkflow.id).send("delete", "", function (error, result) {
+            d3.json("/projectmanager/tangelo/projmgr/workflow/" + project + "/" + currentWorkflow.id).send("delete", "", function (error, result) {
                 flow.clear();
                 $("#name").val(flow.data().name);
 
@@ -123,7 +141,7 @@ $(document).ready(function () {
     d3.select("#copy").on("click", function () {
         $("#name").val("Copy of " + $("#name").val());
         flow.data().name = $("#name").val();
-        d3.json("workflow").post(JSON.stringify(flow.serialize()), function (error, id) {
+        d3.json("/projectmanager/tangelo/projmgr/workflow/" + project).post(JSON.stringify(flow.serialize()), function (error, id) {
             currentWorkflow = {id: id, name: workflow.name};
             d3.select("#workflow").append("li").append("a")
                 .datum(currentWorkflow)
