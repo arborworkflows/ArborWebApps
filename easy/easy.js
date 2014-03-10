@@ -8,7 +8,6 @@ $(document).ready(function () {
         editor,
         analysis,
         analyses = [],
-        analysisUri,
         analysisMap = {},
         token,
         taskId,
@@ -47,10 +46,12 @@ $(document).ready(function () {
         ];
 
     editor = ace.edit("editor");
-    editor.setTheme("ace/theme/github");
+    editor.setTheme("ace/theme/chrome");
     editor.setHighlightActiveLine(false);
+    editor.setHighlightGutterLine(false);
     editor.setShowPrintMargin(false);
     editor.setReadOnly(true);
+    editor.renderer.$cursorLayer.element.style.opacity = 0;
 
     d3.json("/girder/api/v1/user/authentication", function (error, result) {
         if (!error && result.authToken) {
@@ -201,27 +202,30 @@ $(document).ready(function () {
         d3.select("#show-script-icon").classed("glyphicon-eye-open", hide);
         d3.select("#show-script-icon").classed("glyphicon-eye-close", !hide);
         d3.select("#show-script-text").text(hide ? "Show script" : "Hide script");
-        d3.select("#edit").classed("hidden", hide);
-        d3.selectAll(".edit-controls").classed("hidden", !d3.select("#edit").classed("active") || hide);
+        if (analysis.collection._accessLevel > 0) {
+            d3.select("#edit").classed("hidden", hide);
+            d3.selectAll(".edit-controls").classed("hidden", !d3.select("#edit").classed("active") || hide);
+        }
     });
 
     d3.select("#edit").on("click", function () {
         var edit = d3.select("#edit").classed("active");
         editor.setReadOnly(edit);
+        editor.renderer.$cursorLayer.element.style.opacity = edit ? 0 : 1;
         d3.selectAll(".edit-controls").classed("hidden", edit);
     });
 
     $("#mode").change(function () {
         if (analysis) {
-            analysis.mode = $("#mode").val();
-            editor.getSession().setMode("ace/mode/" + analysis.mode);
+            analysis.data.mode = $("#mode").val();
+            editor.getSession().setMode("ace/mode/" + analysis.data.mode);
         }
     });
 
     $("#save").click(function () {
         if (analysis) {
-            analysis.script = editor.getValue();
-            d3.json(analysisUri + "/metadata").send("put", JSON.stringify({analysis: analysis}), function (error, result) {
+            analysis.data.script = editor.getValue();
+            d3.json(analysis.uri + "/metadata").send("put", JSON.stringify({analysis: analysis.data}), function (error, result) {
                 console.log(result);
             });
         }
@@ -236,7 +240,7 @@ $(document).ready(function () {
                             return d.uri || d.name;
                         });
                     options.enter().append("option")
-                        .text(function (d) { return d.name + " (" + d.collection + ")"; })
+                        .text(function (d) { return d.name + " (" + (d.collection ? d.collection.name : "Local") + ")"; })
                         .attr("value", function (d) { return d.uri || d.name; });
                     options.exit().remove();
                 });
@@ -247,7 +251,7 @@ $(document).ready(function () {
         var options = d3.select("#analysis").selectAll("option")
             .data(analyses, function (d) { return d.uri; });
         options.enter().append("option")
-            .text(function (d) { return d.data.name + " (" + d.collection + ")"; })
+            .text(function (d) { return d.data.name + " (" + (d.collection ? d.collection.name : "Local") + ")"; })
             .attr("value", function (d) { return d.uri; });
         options.exit().remove();
     }
@@ -256,7 +260,6 @@ $(document).ready(function () {
         d3.json("/girder/api/v1/item?folderId=" + folder, function (error, items) {
             items.forEach(function (d) {
                 var analysis;
-                console.log(d);
                 if (d.meta && d.meta.analysis) {
                     analysis = {
                         name: d.name,
@@ -319,7 +322,11 @@ $(document).ready(function () {
             .data(activeCollections, function (d) { return d._id; });
         items.enter().append("li")
             .classed("list-group-item", true)
-            .text(function (d) { return d.name; });
+            .text(function (d) { return d.name + " "; })
+            .append("span")
+            .classed("glyphicon", true)
+            .classed("glyphicon-pencil", function (d) { return d._accessLevel > 0; })
+            .attr("title", function (d) { return d._accessLevel > 0 ? "Can edit" : ""; });
         items.exit().remove();
     }
 
@@ -340,11 +347,11 @@ $(document).ready(function () {
             });
 
             if (analysisFolder) {
-                loadAnalysisItems(analysisFolder, collection.name);
+                loadAnalysisItems(analysisFolder, collection);
             }
 
             if (dataFolder) {
-                loadDataItems(dataFolder, collection.name);
+                loadDataItems(dataFolder, collection);
             }
             activeCollections.push(collection);
             updateActiveCollectionsList();
@@ -402,16 +409,16 @@ $(document).ready(function () {
     });
 
     $("#analysis").change(function() {
-        analysisUri = $("#analysis").val();
+        var analysisUri = $("#analysis").val();
         if (analysisUri) {
-            analysis = analysisMap[analysisUri].data;
-            editor.setValue(analysis.script);
+            analysis = analysisMap[analysisUri];
+            editor.setValue(analysis.data.script);
             editor.clearSelection();
-            editor.getSession().setMode("ace/mode/" + analysis.mode);
-            setupEditor("#inputs", "input-", analysis.inputs);
-            setupVariableEditor("input-edit-", analysis.inputs);
-            setupVariableEditor("output-edit-", analysis.outputs);
-            $("#mode").val(analysis.mode);
+            editor.getSession().setMode("ace/mode/" + analysis.data.mode);
+            setupEditor("#inputs", "input-", analysis.data.inputs);
+            setupVariableEditor("input-edit-", analysis.data.inputs);
+            setupVariableEditor("output-edit-", analysis.data.outputs);
+            $("#mode").val(analysis.data.mode);
         } else {
             analysis = null;
             editor.setValue("");
@@ -441,23 +448,22 @@ $(document).ready(function () {
     $("#analysis-new").click(function () {
         analysis = {
             name: $("#analysis-name").val(),
-            inputs: [],
-            outputs: [],
-            mode: "python",
-            script: ""
+            data: {
+                name: $("#analysis-name").val(),
+                inputs: [],
+                outputs: [],
+                mode: "python",
+                script: ""
+            }
         };
         d3.json(window.location.origin + "/girder/api/v1/item/?name=" + encodeURIComponent(analysis.name) + "&folderId=" + analysisFolder).post(function (error, result) {
-            analysisUri = window.location.origin + "/girder/api/v1/item/" + result._id;
-            d3.json(analysisUri + "/metadata").send("put", JSON.stringify({analysis: analysis}), function (error, result) {
-                var newAnalysis = {
-                    name: analysis.name,
-                    uri: analysisUri,
-                    data: analysis
-                };
-                analyses.push(newAnalysis);
-                analysisMap[newAnalysis.uri] = newAnalysis;
+            var analysisUri = window.location.origin + "/girder/api/v1/item/" + result._id;
+            d3.json(analysisUri + "/metadata").send("put", JSON.stringify({analysis: analysis.data}), function (error, result) {
+                analysis.uri = analysisUri;
+                analyses.push(analysis);
+                analysisMap[analysis.uri] = analysis;
                 updateAnalysisList();
-                $("#analysis").val(newAnalysis.uri);
+                $("#analysis").val(analysis.uri);
                 $("#analysis").change();
                 $("#analysis-name").val("");
             });
@@ -465,10 +471,10 @@ $(document).ready(function () {
     });
 
     function checkTaskResult() {
-        d3.json(analysisUri + "/cardoon/" + taskId + "/status", function (error, result) {
+        d3.json(analysis.uri + "/cardoon/" + taskId + "/status", function (error, result) {
             console.log(result.status);
             if (result.status === "SUCCESS") {
-                d3.json(analysisUri + "/cardoon/" + taskId + "/result", function (error, data) {
+                d3.json(analysis.uri + "/cardoon/" + taskId + "/result", function (error, data) {
                     var result = data.result;
                     // Put data into list
                     $.each(result, function (outputName, output) {
@@ -515,7 +521,7 @@ $(document).ready(function () {
             .classed("btn-default", true)
             .attr("disabled", true);
 
-        analysis.inputs.forEach(function (input) {
+        analysis.data.inputs.forEach(function (input) {
             var value = $("#input-" + input.name).val();
             if (input.type === "table" || input.type === "tree") {
                 bindings.inputs[input.name] = datasetMap[value];
@@ -523,11 +529,11 @@ $(document).ready(function () {
                 bindings.inputs[input.name] = {"type": input.type, "format": "text", "data": value};
             }
         });
-        analysis.outputs.forEach(function (output) {
+        analysis.data.outputs.forEach(function (output) {
             bindings.outputs[output.name] = {"type": output.type, "format": webFormat[output.type]};
         });
         taskBindings = bindings;
-        d3.json(analysisUri + "/cardoon").post(JSON.stringify(bindings), function (error, result) {
+        d3.json(analysis.uri + "/cardoon").post(JSON.stringify(bindings), function (error, result) {
             taskId = result.id;
             setTimeout(checkTaskResult, 1000);
         });
@@ -539,8 +545,8 @@ $(document).ready(function () {
             .classed("btn-primary", false)
             .classed("btn-default", true)
             .attr("disabled", true);
-        d3.select("#prov")
-            .classed("hidden", true);
+        // d3.select("#prov")
+        //     .classed("hidden", true);
         function loadInputs(inputs, options, done) {
             var input, dataset, value, uri, parts;
             if (inputs.length === 0) {
@@ -554,8 +560,8 @@ $(document).ready(function () {
                 dataset = datasetMap[value];
                 if (dataset.bindings) {
                     d3.select("#prov")
-                        .text(JSON.stringify(dataset.bindings.inputs, null, "    "))
-                        .classed("hidden", false);
+                        .text(JSON.stringify(dataset.bindings.inputs, null, "    "));
+                        // .classed("hidden", false);
                 }
                 if (dataset.hasOwnProperty("data")) {
                     options[input.name] = dataset.data;
@@ -588,6 +594,15 @@ $(document).ready(function () {
                 .classed("btn-default", false)
                 .attr("disabled", null);
         });
+    });
+
+    d3.select("#show-prov").on("click", function () {
+        var hide = d3.select("#show-prov").classed("active");
+        d3.select("#show-prov-icon").classed("glyphicon-eye-open", hide);
+        d3.select("#show-prov-icon").classed("glyphicon-eye-close", !hide);
+        d3.select("#show-prov-text").text(hide ? "Show provenance" : "Hide provenance");
+        d3.select("#prov")
+            .classed("hidden", hide);
     });
 
 });

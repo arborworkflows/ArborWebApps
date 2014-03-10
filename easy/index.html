@@ -25,9 +25,11 @@
     border-radius: 4px;
     background-color: rgb(245, 245, 245);
 }
+/*
 .ace_hidden-cursors {
     opacity:0
 }
+*/
 #error-message, #success-message {
     padding: 15px;
 }
@@ -161,11 +163,17 @@
                 </div>
                 <div class="col-sm-6">
                     <div id="vis-inputs"></div>
-                    <button class="btn btn-primary" id="show">
-                        <span class="glyphicon glyphicon-stats" id="show-icon"></span>
-                        <span id="show-text">Update</span>
-                    </button>
                 </div>
+           </div>
+           <div class="form-inline">
+                <button class="btn btn-primary" id="show">
+                    <span class="glyphicon glyphicon-stats" id="show-icon"></span>
+                    <span id="show-text">Update</span>
+                </button>
+                <button class="btn btn-default" id="show-prov" data-toggle="button">
+                    <span class="glyphicon glyphicon-eye-open" id="show-prov-icon"></span>
+                    <span id="show-prov-text">Show provenance</span>
+                </button>
             </div>
         </div>
         <div class="container">
