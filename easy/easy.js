@@ -81,7 +81,7 @@ $(document).ready(function () {
                     .selectAll("option")
                     .data(datasetTypes[input.type])
                     .enter().append("option")
-                    .text(function (d) { return d.name + " (" + d.collection + ")"; })
+                    .text(function (d) { return d.name + " (" + (d.collection ? d.collection.name : "Local") + ")"; })
                     .attr("value", function (d) { return d.uri || d.name; });
             } else if (input.type === "string" || input.type === "int" || input.type === "json") {
                 if (input.domain) {
@@ -370,14 +370,14 @@ $(document).ready(function () {
         updateActiveCollectionsList();
 
         $.each(analysisMap, function (key, value) {
-            if (value.collection === collection.name) {
+            if (value.collection.name === collection.name) {
                 delete analysisMap[key];
             }
         });
 
         toDelete = [];
         $.each(analyses, function (index, value) {
-            if (value.collection === collection.name) {
+            if (value.collection.name === collection.name) {
                 toDelete.push(index);
             }
         });
@@ -386,7 +386,7 @@ $(document).ready(function () {
         }
 
         $.each(datasetMap, function (key, value) {
-            if (value.collection === collection.name) {
+            if (value.collection.name === collection.name) {
                 delete datasetMap[key];
             }
         });
@@ -394,7 +394,7 @@ $(document).ready(function () {
         $.each(datasetTypes, function (key, list) {
             toDelete = [];
             $.each(list, function (index, value) {
-                if (value.collection === collection.name) {
+                if (value.collection.name === collection.name) {
                     toDelete.push(index);
                 }
             });
