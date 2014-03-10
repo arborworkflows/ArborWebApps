@@ -10,6 +10,7 @@ $(document).ready(function () {
         analyses = [],
         analysisUri,
         analysisMap = {},
+        token,
         taskId,
         taskBindings,
         activeCollections = [],
@@ -50,6 +51,12 @@ $(document).ready(function () {
     editor.setHighlightActiveLine(false);
     editor.setShowPrintMargin(false);
     editor.setReadOnly(true);
+
+    d3.json("/girder/api/v1/user/authentication", function (error, result) {
+        if (!error && result.authToken) {
+            token = result.authToken.token;
+        }
+    });
 
     function endsWith(str, suffix) {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
@@ -274,6 +281,9 @@ $(document).ready(function () {
                     collection: collection,
                     uri: window.location.origin + "/girder/api/v1/item/" + d._id + "/download"
                 };
+                if (token) {
+                    dataset.uri += "?token=" + token;
+                }
                 if (endsWith(d.name, ".phy")) {
                     dataset.type = "tree";
                     dataset.format = "newick";
