@@ -467,6 +467,7 @@ $(document).ready(function () {
     $("#analysis-new").click(function () {
         analysis = {
             name: $("#analysis-name").val(),
+            collection: currentCollection,
             data: {
                 name: $("#analysis-name").val(),
                 inputs: [],
