@@ -14,8 +14,7 @@ $(document).ready(function () {
         taskBindings,
         activeCollections = [],
         collectionMap = {},
-        analysisFolder,
-        dataFolder,
+        currentCollection = null,
         visualizations = [
             {
                 name: "table",
@@ -318,15 +317,30 @@ $(document).ready(function () {
     });
 
     function updateActiveCollectionsList() {
-        var items = d3.select("#active-collections").selectAll("li")
+        var items, itemsEnter;
+        items = d3.select("#active-collections").selectAll("li")
             .data(activeCollections, function (d) { return d._id; });
-        items.enter().append("li")
+        itemsEnter = items.enter().append("li")
             .classed("list-group-item", true)
             .text(function (d) { return d.name + " "; })
-            .append("span")
+            .on("click", function (d) {
+                if (d._accessLevel > 0) {
+                    currentCollection = d;
+                    d3.select("#active-collections").selectAll("li").selectAll(".current").classed("hidden", function (dd) { return dd !== d; });
+                    d3.select("#new-analysis-form").classed("hidden", false);
+                }
+            });
+        itemsEnter.append("span")
             .classed("glyphicon", true)
             .classed("glyphicon-pencil", function (d) { return d._accessLevel > 0; })
             .attr("title", function (d) { return d._accessLevel > 0 ? "Can edit" : ""; });
+        itemsEnter.append("span").text(" ");
+        itemsEnter.append("span")
+            .classed("glyphicon", true)
+            .classed("glyphicon-ok", true)
+            .classed("hidden", true)
+            .classed("current", true)
+            .attr("title", "New analyses saved here");
         items.exit().remove();
     }
 
@@ -336,22 +350,22 @@ $(document).ready(function () {
             return;
         }
         d3.json("/girder/api/v1/folder?parentType=collection&parentId=" + collection._id, function (error, folders) {
-            analysisFolder = null;
-            dataFolder = null;
+            collection.analysisFolder = null;
+            collection.dataFolder = null;
             folders.forEach(function (f) {
                 if (f.name === "Analyses") {
-                    analysisFolder = f._id;
+                    collection.analysisFolder = f._id;
                 } else if (f.name === "Data") {
-                    dataFolder = f._id;
+                    collection.dataFolder = f._id;
                 }
             });
 
-            if (analysisFolder) {
-                loadAnalysisItems(analysisFolder, collection);
+            if (collection.analysisFolder) {
+                loadAnalysisItems(collection.analysisFolder, collection);
             }
 
-            if (dataFolder) {
-                loadDataItems(dataFolder, collection);
+            if (collection.dataFolder) {
+                loadDataItems(collection.dataFolder, collection);
             }
             activeCollections.push(collection);
             updateActiveCollectionsList();
@@ -368,6 +382,11 @@ $(document).ready(function () {
         }
         activeCollections.splice(collectionIndex, 1);
         updateActiveCollectionsList();
+
+        if (currentCollection === collection) {
+            currentCollection = null;
+            d3.select("#new-analysis-form").classed("hidden", true);
+        }
 
         $.each(analysisMap, function (key, value) {
             if (value.collection.name === collection.name) {
@@ -456,7 +475,7 @@ $(document).ready(function () {
                 script: ""
             }
         };
-        d3.json(window.location.origin + "/girder/api/v1/item/?name=" + encodeURIComponent(analysis.name) + "&folderId=" + analysisFolder).post(function (error, result) {
+        d3.json(window.location.origin + "/girder/api/v1/item/?name=" + encodeURIComponent(analysis.name) + "&folderId=" + currentCollection.analysisFolder).post(function (error, result) {
             var analysisUri = window.location.origin + "/girder/api/v1/item/" + result._id;
             d3.json(analysisUri + "/metadata").send("put", JSON.stringify({analysis: analysis.data}), function (error, result) {
                 analysis.uri = analysisUri;
