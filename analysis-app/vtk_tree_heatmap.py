@@ -39,10 +39,13 @@ def initialize(self, VTKWebApp, args):
         # and load it into our visualization item.
         if args.treeName:
             r = requests.get(
-                "%s/arborapi/projmgr/project/%s/PhyloTree/%s/newick" % (args.baseURL, args.projectName, args.treeName))
-            newickTree = r.text
-            tree = vtk_arbor_utils.NewickToVTKTree(newickTree)
+                "%s/arborapi/projmgr/project/%s/PhyloTree/%s/phyloxml" % (args.baseURL, args.projectName, args.treeName))
+            phyloxmlTree = r.text
+            tree = vtk_arbor_utils.PhyloXMLToVTKTree(phyloxmlTree)
             treeHeatmapItem.SetTree(tree)
+            if tree.GetVertexData().GetArray("property.differences"):
+              treeHeatmapItem.GetDendrogram().SetColorArray("property.differences")
+              treeHeatmapItem.GetDendrogram().SetLineWidth(2.0)
 
         if args.tableName:
             r = requests.get(

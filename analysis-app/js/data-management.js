@@ -66,7 +66,12 @@ d3.select("#upload").on("click", function () {
       .send("put", content, function (error, data) {
         // TODO: verify that upload was actually successful somehow
         alert("Upload complete!");
-        populate_selects();
+        if (fileType == "csv") {
+          populate_tables();
+        }
+        else if (fileType == "newick") {
+          populate_trees();
+        }
       });
   };
   reader.readAsText(file);

@@ -61,6 +61,20 @@ def VTKTreeToNewick(tree):
   writer.Update()
   return writer.GetOutputString()
 
+def VTKTreeToPhyloXML(tree):
+  writer = vtk.vtkPhyloXMLTreeWriter()
+  writer.SetWriteToOutputString(1)
+  writer.SetInputData(tree)
+  writer.Update()
+  return writer.GetOutputString()
+
+def PhyloXMLToVTKTree(phyloxml):
+  reader = vtk.vtkPhyloXMLTreeReader()
+  reader.SetReadFromInputString(1)
+  reader.SetInputString(phyloxml)
+  reader.Update()
+  return reader.GetOutput()
+
 def CSVToVTKTable(csv):
   reader = vtk.vtkDelimitedTextReader()
   reader.SetReadFromInputString(1)

@@ -88,13 +88,20 @@ function setup_analysis_dialog(analysis_val)
   });
 
   // setup parameters
-  analysis_parameters.length = 0;
-  var $parameters = [].concat(analysis["parameters"]["parameter"]);
-  $.each($parameters, function(unused, parameter)
+  if ("parameters" in analysis)
     {
-    setup_analysis_parameter(parameter);
-    analysis_parameters.push(parameter);
-    });
+    analysis_parameters.length = 0;
+    var $parameters = [].concat(analysis["parameters"]["parameter"]);
+    $.each($parameters, function(unused, parameter)
+      {
+      setup_analysis_parameter(parameter);
+      analysis_parameters.push(parameter);
+      });
+    }
+  else
+    {
+    $("#parameter_label").hide();
+    }
 
   // display the dialog
   $("#analysis_dialog").modal();
@@ -276,7 +283,7 @@ function setup_analysis_parameter(parameter)
 // react to the user pressing the "Perform Analysis" button
 d3.select("#analyze").on("click", function ()
 {
-  var analysis_URL = "/arbor/analysis-app/R_analysis?";
+  var analysis_URL = "/arbor/analysis-app/analysis?";
   analysis_URL += "baseURL=" + encodeURIComponent(baseURL);
   analysis_URL += "&projectName=" + encodeURIComponent(project);
   var valid = true;

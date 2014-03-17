@@ -65,10 +65,14 @@ def get(*pargs, **query_args):
         del query_args[output_name]
       del query_args[key]
 
-  # get the script for this analysis
+  # get the script for this analysis and its type
   r = requests.get(
     "%s/arborapi/projmgr/analysis/%s/script" % (baseURL, analysis))
   script = r.text
+  r = requests.get(
+    "%s/arborapi/projmgr/analysis/%s" % (baseURL, analysis))
+  response = r.json()
+  analysis_type = response[0]["analysis"]["type"]
 
   # at this point, everything remaining in the query_args dict
   # is a parameter.  Replace each parameter key with its value in
@@ -84,8 +88,13 @@ def get(*pargs, **query_args):
   analysisJson["script"] = script
 
   # send the request to the analysis server & get the task ID
+  if analysis_type == "vtkpython":
+    post_URL = "http://arbor.kitware.com/service/tasks/celery/visomics/vtk/python"
+  else:
+    post_URL = "http://arbor.kitware.com/service/tasks/celery/visomics/vtk/r"
+
   r = requests.post(
-    "http://arbor.kitware.com/service/tasks/celery/visomics/vtk/r",
+    post_URL,
     json.dumps(analysisJson),
     auth=requests.auth.HTTPDigestAuth('bob', 'tree'))
   jResponse = r.json()
@@ -120,12 +129,12 @@ def get(*pargs, **query_args):
         table = vtk_arbor_utils.DeserializeVTKTable(tableSerialized)
         data = vtk_arbor_utils.VTKTableToCSV(table)
 
-      elif analysisOutput["type"] == "Tree":
-        fileType = "newick"
-        # get the tree (serialized VTK string) and convert it to newick
+      elif analysisOutput["type"] == "Tree" or analysisOutput["type"] == "vtkTree":
+        fileType = "phyloxml"
+        # get the tree (serialized VTK string) and convert it to PhyloXML
         treeSerialized = analysisOutput["data"]
         tree = vtk_arbor_utils.DeserializeVTKTree(treeSerialized)
-        data = vtk_arbor_utils.VTKTreeToNewick(tree)
+        data = vtk_arbor_utils.VTKTreeToPhyloXML(tree)
 
       # push this output into the database
       analysisOutputName = outputMap[analysisOutput["name"]]
@@ -144,11 +153,12 @@ def LoadInputTree(treeName, baseURL, projectName):
   inputTree["type"] = "Tree"
 
   r = requests.get(
-    "%s/arborapi/projmgr/project/%s/PhyloTree/%s/newick" % (baseURL, projectName, treeName))
-  newick = r.text
-  tree = vtk_arbor_utils.NewickToVTKTree(newick)
+    "%s/arborapi/projmgr/project/%s/PhyloTree/%s/phyloxml" % (baseURL, projectName, treeName))
+  phyloxml = r.text
+  tree = vtk_arbor_utils.PhyloXMLToVTKTree(phyloxml)
   treeSerialized = vtk_arbor_utils.SerializeVTKTree(tree)
   inputTree["data"] = treeSerialized
+  inputTree["format"] = "vtk"
   return inputTree
 
 # Download table from ArborAPI & load it into JSON in the format our
@@ -162,4 +172,5 @@ def LoadInputTable(tableName, baseURL, projectName):
   table = vtk_arbor_utils.CSVToVTKTable(csv)
   tableSerialized = vtk_arbor_utils.SerializeVTKTable(table)
   inputTable["data"] = tableSerialized
+  inputTable["format"] = "vtk"
   return inputTable
