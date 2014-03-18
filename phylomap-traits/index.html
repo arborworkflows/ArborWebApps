@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+                <link rel="shortcut icon" href=/img/tangelo.ico>
+	   <title>Arbor Tree and Distribution Browser</title>
+
+<script src=https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false></script>
+<script src=http://code.jquery.com/jquery-1.9.1.min.js></script>
+<script src=http://code.jquery.com/ui/1.9.1/jquery-ui.min.js></script>
+<script src=http://d3js.org/d3.v3.min.js charset=utf-8></script>
+
+<!-- source the API for Google Maps so we can draw layers on the map -->
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+
+<script src=/js/tangelo.min.js></script>
+
+<!-- Styling for UI elements -->
+<link href=http://bootswatch.com/cosmo/bootstrap.min.css rel=stylesheet type=text/css>
+<link href=http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css rel=stylesheet>
+<link href=//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css rel=stylesheet>
+<script src=http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js></script>
+
+<link rel="shortcut icon" href=/img/tangelo.ico>
+
+
+<script type="text/javascript" src="phylomap.js"></script>
+
+<!-- add badges for processing and other notifications -->
+<script type="text/javascript" src="badger.js"></script>
+<link rel="stylesheet" href="badger.css" type="text/css" />
+
+<style>
+        .node circle {
+                cursor: pointer;
+                fill: #fff;
+                stroke: steelblue;
+                stroke-width: 1.5px;
+        }
+        .node text {
+                font: 11px sans-serif;
+        }
+        path.link {
+                fill: none;
+                stroke: #ccc;
+                stroke-width: 1.5px;
+        }
+        .navbar {
+                z-index: 1;
+        }
+
+</style>
+
+</head>
+<body>
+
+<div id=info-panel class="modal fade">
+  <div class=modal-dialog>
+        <div class=modal-content>
+            <div class=modal-header>
+                <h3>Information</h3>
+            </div>
+
+            <div class=modal-body>
+                    <p>This application lets you explore a phylogenetic tree and associated species location data. Click on a
+                    node to expand/collapse its descendants recursively.  Shift-click (or use clade selection mode) on a
+                    node corresponding to a clade to highlight all locations and species contained with the clade.</p>
+
+                    <p>Modern species appear in the leaves of the tree, while the
+                     nodes represent common ancestors of the modern species that
+                    lived at various times in the past.</p>
+            </div>
+                <div class=modal-footer>
+                <a class="btn btn-default" data-dismiss=modal>OK</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class=navbar-header>
+        <a class=navbar-brand href=/examples>Arbor</a>
+    </div>
+
+    <ul class="nav navbar-nav">
+        <li class=active> <a>Arbor Trait Museum Explorer</a>
+        <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
+    </ul>
+</div>
+
+<!-- Add selection buttons at the top to allow picking the project and tree/map to display --->
+<div class="row" style="margin-top:75px; margin-left:1px;">
+    <div class="span12" >
+        Project
+        <select  id="project" class="input" style="margin-top:10px;">
+        </select>
+        Dataset
+        <select id="data" class="input" style="margin-top:10px;" >
+        </select>
+    </div>
+</div>
+
+
+<!-- attempt a wrapper to add a bit of margin around the tree and map -->
+<div id="scenewrapper" style="float:left; margin-top:10px; margin-right:20px; width:95%; border style:solid; overflow:hidden; border-width:medium"></div>
+                <div id="treebuttons" style="float:left; margin-left:10px; margin-bottom:10px; width: 58%; overflow: hidden;">
+                        <button type="button" onclick="emptyTree();">Empty Tree</button>
+                        <button type="button" onclick="entireTree();">Entire Cached Tree</button>
+                        <button type="button" onclick="onAllAndLoad(root);">Full Tree</button>
+                        <input type="checkbox" id="nodeNames" onchange="toggleText(this);" checked> Show Names
+                        <input type="checkbox" id="cladeSelect" onchange="toggleCladeSelect(this);" unchecked> Enable Clade Selection
+                        <button type="button" onclick="clearAllHighlights();">Clear Highlights</button>
+                        <button type="button" onclick="increaseWidth(40);">Increase Depth</button>
+                        <button type="button" onclick="increaseWidth(-40);">Decrease Depth</button>
+                        <!-- <button type="button" onclick="resetVisualization();">Reset</button> -->
+                </div>
+
+        <div id="tree" style="margin-top:10px; margin-left: 10px; float:left; border-style:solid; overflow:hidden; border-width:medium"></div>
+        <div id="map_canvas" style=" margin-right:10px; float:right; width:40%; height:800px; border-style:solid; border-width:medium"></div>
+             <div style="margin-right:100px;  width: 30%; overflow: hidden;">
+                        <button type="button" onclick="clearLocations();">Clear Map Markers</button>
+                </div>
+<script type="text/javascript" src="phylotree.js"></script>
+
+	</div>
+    </body>
+</html>
