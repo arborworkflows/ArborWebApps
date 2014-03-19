@@ -1,7 +1,16 @@
 <!doctype html>
 <html>
     <head>
+        <title>Arbor Web</title>
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.js" charset="utf-8"></script>
+        <script src="//code.jquery.com/jquery-1.9.1.js"></script>
+        <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel=stylesheet type=text/css>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+        <script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/tangelo.js"></script>
+        <script src="ui.js"></script>
         <!-- custom styling for this app -->
         <style>
             html, body {
@@ -27,18 +36,13 @@
                 bottom: 0;
                 left: 0;
             }
+            #error-message, #success-message {
+                padding: 15px;
+            }
             .spacer {
                 margin-top: 20px;
             }
         </style>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.js" charset="utf-8"></script>
-        <script src="//code.jquery.com/jquery-1.9.1.js"></script>
-        <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-        <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel=stylesheet type=text/css>
-        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
-        <script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
-        <script src="/js/tangelo.js"></script>
-        <script src="main.js"></script>
     </head>
     <body onbeforeunload="stop_vtkweb()" onunload="stop_vtkweb()">
         <div class="container" style="width:100%;height:100%;"/>
@@ -53,7 +57,7 @@
                     </p>
                 </div>
             </div>
-            <div id="vis">Hey here's a visualization!</div>
+            <div id="vis" class="hidden"></div>
             <div id="editor" class="hidden"></div>
         </div>
         <div id="control-panel">
@@ -179,7 +183,34 @@
                     </div>
                 </div>
                 <div class="tab-pane" id="vis_tab">
-                    C
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="visualization">Select visualization</label>
+                                    <select class="form-control" id="visualization"></select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div id="vis-inputs"></div>
+                            </div>
+                       </div>
+                       <div class="form-inline">
+                            <button class="btn btn-primary" id="show">
+                                <span class="glyphicon glyphicon-stats" id="show-icon"></span>
+                                <span id="show-text">Update</span>
+                            </button>
+                            <button class="btn btn-default" id="show-prov" data-toggle="button">
+                                <span class="glyphicon glyphicon-eye-open" id="show-prov-icon"></span>
+                                <span id="show-prov-text">Show provenance</span>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <pre id="prov" class="hidden"></pre>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row spacer"><div class="col-sm-12"></div></div>
