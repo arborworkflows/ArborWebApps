@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
+        <!-- custom styling for this app -->
+        <style>
+            html, body {
+                width: 100%;
+                height: 100%;
+            }
+            #intro {
+                margin-top: 60px;
+            }
+            #control-panel {
+                z-index:10;
+                background: none repeat scroll 0% 0% rgba(232, 232, 232, 1.0);
+            }
+            #upload {
+                width: 300px;
+                padding: 20px;
+                margin: 20px 0px 40px 0px;
+            }
+            #editor, #vis {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+            }
+            .spacer {
+                margin-top: 20px;
+            }
+        </style>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.js" charset="utf-8"></script>
+        <script src="//code.jquery.com/jquery-1.9.1.js"></script>
+        <script src="//code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel=stylesheet type=text/css>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+        <script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/js/tangelo.js"></script>
+        <script src="main.js"></script>
+    </head>
+    <body onbeforeunload="stop_vtkweb()" onunload="stop_vtkweb()">
+        <div class="container" style="width:100%;height:100%;"/>
+            <!-- introductory message & logo -->
+            <div id="intro">
+                <div class="row text-center">
+                    <img src="http://arborworkflows.com/uploads/6/6/6/4/6664052/header_images/1356059330.jpg" alt="Arbor Logo" class="img-rounded">
+                </div>
+                <div class="row">
+                    <p class="lead text-center">
+                    Use the panel below to visualize, analyze, or manage your data.
+                    </p>
+                </div>
+            </div>
+            <div id="vis">Hey here's a visualization!</div>
+            <div id="editor" class="hidden"></div>
+        </div>
+        <div id="control-panel">
+            <div class="container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#data_tab" data-toggle="tab">Data Management</a></li>
+                    <li><a href="#analysis_tab" data-toggle="tab">Analysis</a></li>
+                    <li><a href="#vis_tab" data-toggle="tab">Visualization</a></li>
+                </ul>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane active" id="data_tab">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="btn btn-primary" id="upload">
+                                    <i class="glyphicon glyphicon-file"></i> Browse or drop files
+                                </div>
+                                <div class="form-group hide">
+                                    <input id="g-files" type="file" multiple="multiple">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-inline">
+                                    <select class="form-control" id="collection"></select>
+                                    <button class="btn btn-primary" id="collection-add">
+                                        <span class="glyphicon glyphicon-plus"></span> Use collection
+                                    </button>
+                                    <button class="btn btn-primary" id="collection-hide">
+                                        <span class="glyphicon glyphicon-minus"></span> Hide collection
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <ul class="list-group" id="active-collections"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="analysis_tab">
+                    <div class="container">
+                        <p class="row hidden bg-success" id="success-message"></p>
+                        <p class="row hidden bg-danger" id="error-message"></p>
+                        <div class="row">
+                            <div class="col-sm-12">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="analysis">Select analysis</label>
+                                    <select class="form-control" id="analysis"></select>
+                                </div>
+                                <div class="form-inline hidden" id="new-analysis-form">
+                                    <input class="form-control" id="analysis-name" placeholder="Analysis name" type="text"></input>
+                                    <button class="btn btn-primary" id="analysis-new">
+                                        <span class="glyphicon glyphicon-plus"></span> New analysis
+                                    </button>                    
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div id="inputs"></div>
+                                <div id="outputs"></div>
+                            </div>
+                        </div>
+                        <div class="form-inline" id="analysis-form">
+                            <button class="btn btn-primary" id="run">
+                                <span class="glyphicon glyphicon-play" id="run-icon"></span>
+                                Run
+                            </button>
+                            <button class="btn btn-default" id="show-script" data-toggle="button">
+                                <span class="glyphicon glyphicon-eye-open" id="show-script-icon"></span>
+                                <span id="show-script-text">Show script</span>
+                            </button>
+                            <button class="btn btn-default hidden" id="edit" data-toggle="button">
+                                <span class="glyphicon glyphicon-edit"></span> Edit
+                            </button>
+                            <span class="edit-controls hidden">
+                                <select class="form-control" id="mode">
+                                    <option value="python">Python</option>
+                                    <option value="r">R</option>
+                                </select>
+                                <button class="btn btn-default" id="save">
+                                    <span class="glyphicon glyphicon-save"></span> Save
+                                </button>
+                            </span>
+                        </div>
+                        <div class="row edit-controls hidden">
+                            <div class="col-sm-12">
+                                <div class="form-inline" style="padding-top:20px">
+                                    <input class="form-control" id="input-edit-name" placeholder="Input variable" type="text"></input>
+                                    <button class="btn btn-primary" id="input-edit-add">
+                                        <span class="glyphicon glyphicon-plus"></span> Add
+                                    </button>
+                                    <select class="form-control" id="input-edit-select"></select>
+                                    <select class="form-control" id="input-edit-format"></select>
+                                    <input class="form-control" id="input-edit-default" placeholder="Default value" type="text"></input>
+                                    <input class="form-control hidden" id="input-edit-domain" placeholder="List,of,possible,values" type="text"></input>
+                                    <button class="btn btn-primary" id="input-edit-remove">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row edit-controls hidden">
+                            <div class="col-sm-12">
+                                <div class="form-inline" style="padding-top:20px">
+                                    <input class="form-control" id="output-edit-name" placeholder="Output variable" type="text"></input>
+                                    <button class="btn btn-primary" id="output-edit-add">
+                                        <span class="glyphicon glyphicon-plus"></span> Add
+                                    </button>
+                                    <select class="form-control" id="output-edit-select"></select>
+                                    <select class="form-control" id="output-edit-format"></select>
+                                    <input class="form-control hidden" id="input-edit-domain" placeholder="List,of,possible,values" type="text"></input>
+                                    <button class="btn btn-primary" id="output-edit-remove">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="vis_tab">
+                    C
+                </div>
+            </div>
+            <div class="row spacer"><div class="col-sm-12"></div></div>
+        </div>
+    </body>
+</html>
