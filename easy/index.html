@@ -25,6 +25,11 @@
     border-radius: 4px;
     background-color: rgb(245, 245, 245);
 }
+#upload {
+    width: 300px;
+    padding: 20px;
+    margin: 20px 0px 40px 0px;
+}
 /*
 .ace_hidden-cursors {
     opacity:0
@@ -50,6 +55,16 @@
         <div id="main-container" class="container">
             <div class="row">
                 <h1>Data</h1>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="btn btn-primary" id="upload">
+                        <i class="glyphicon glyphicon-file"></i> Browse or drop files
+                    </div>
+                    <div class="form-group hide">
+                        <input id="g-files" type="file" multiple="multiple">
+                    </div>
+                </div>
             </div>
             <div class="row">
                 <div class="col-sm-6">
@@ -125,6 +140,7 @@
                         </button>
                         <select class="form-control" id="input-edit-select"></select>
                         <select class="form-control" id="input-edit-format"></select>
+                        <input class="form-control" id="input-edit-default" placeholder="Default value" type="text"></input>
                         <input class="form-control hidden" id="input-edit-domain" placeholder="List,of,possible,values" type="text"></input>
                         <button class="btn btn-primary" id="input-edit-remove">
                             <span class="glyphicon glyphicon-trash"></span>

@@ -1,10 +1,20 @@
 /*jslint browser: true, unparam: true, nomen: true */
 /*globals ace, angular, d3, $, workflow, FileReader, console, tangelo */
 
+$.fn.image = function(options) {
+    "use strict";
+    var data = options.data;
+    if (options.data.indexOf("data:image/png;base64,") !== 0) {
+        data = "data:image/png;base64," + options.data;
+    }
+    d3.select(this.get(0)).append("img")
+        .attr("src", data);
+};
+
 $(document).ready(function () {
     "use strict";
     var datasetMap = {},
-        datasetTypes = {"table": [], "tree": [], "string": []},
+        datasetTypes = {"table": [], "tree": [], "string": [], "image": []},
         editor,
         analysis,
         analyses = [],
@@ -24,9 +34,15 @@ $(document).ready(function () {
                 name: "dendrogram",
                 options: [
                     {name: "data", type: "tree", format: "nested"},
-                    {name: "distance", type: "json", data: '{"field": "edge_data.weight"}'},
+                    {name: "distance", type: "json", "default": {format: "inline", data: {"field": "edge_data.weight"}}},
                     {name: "lineStyle", type: "string", domain: ["axisAligned", "curved"]},
                     {name: "orientation", type: "string", domain: ["horizontal", "vertical"]}
+                ]
+            },
+            {
+                name: "image",
+                options: [
+                    {name: "data", type: "image", format: "png.base64"}
                 ]
             }
         ],
@@ -34,14 +50,19 @@ $(document).ready(function () {
         visualization,
         webFormat = {
             "table": "rows",
-            "tree": "nested"
+            "tree": "nested",
+            "string": "text",
+            "number": "number",
+            "image": "png.base64"
         },
         formats = [
             "table:rows",
             "table:r.dataframe",
             "tree:nested",
             "tree:r.apetree",
-            "string:text"
+            "string:text",
+            "number:number",
+            "image:png.base64"
         ];
 
     editor = ace.edit("editor");
@@ -62,6 +83,106 @@ $(document).ready(function () {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
 
+    function updateDataSelectors() {
+        ["table", "tree", "image"].forEach(function (type) {
+            d3.selectAll("." + type + "-select")
+                .each(function () {
+                    var options = d3.select(this).selectAll("option")
+                        .data(datasetTypes[type], function (d) {
+                            return d.uri || d.name;
+                        });
+                    options.enter().append("option")
+                        .text(function (d) { return d.name + " (" + (d.collection ? d.collection.name : "Local") + ")"; })
+                        .attr("value", function (d) { return d.uri || d.name; });
+                    options.exit().remove();
+                });
+        });
+    }
+
+    function addDataset(dataset) {
+        if (!dataset.type) {
+            if (endsWith(dataset.name, ".phy")) {
+                dataset.type = "tree";
+                dataset.format = "newick";
+            } else if (endsWith(dataset.name, ".csv")) {
+                dataset.type = "table";
+                dataset.format = "csv";
+            } else if (endsWith(dataset.name, ".png")) {
+                dataset.type = "image";
+                dataset.format = "png";
+            }
+        }
+        if (dataset.type) {
+            datasetMap[dataset.uri || dataset.name] = dataset;
+            if (!datasetTypes[dataset.type]) {
+                datasetTypes[dataset.type] = [];
+            }
+            datasetTypes[dataset.type].push(dataset);
+        }
+        updateDataSelectors();
+    }
+
+    function upload(file) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            var contents = e.target.result;
+            addDataset({
+                name: file.name,
+                data: contents
+            });
+        };
+
+        reader.readAsText(file);
+    }
+
+    $("#g-files").change(function (e) {
+        var files = $('#g-files')[0].files;
+        $.each(files, function (i, file) {
+            upload(file);
+        });
+    });
+
+    $('#upload').click(function (e) {
+        $('#g-files').click();
+    });
+
+    $('#upload').on('dragenter', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        e.originalEvent.dataTransfer.dropEffect = 'copy';
+        d3.select('#upload')
+            .classed('btn-success', true)
+            .classed('btn-primary', false)
+            .html('<i class="glyphicon glyphicon-upload"></i> Drop files here');
+    });
+
+    $('#upload').on('dragleave', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        d3.select('#upload')
+            .classed('btn-success', false)
+            .classed('btn-primary', true)
+            .html('<i class="glyphicon glyphicon-file"/></i> Browse or drop files');
+    });
+
+    $('#upload').on('dragover', function (e) {
+        e.preventDefault();
+    });
+
+    $('#upload').on('drop', function (e) {
+        var files = e.originalEvent.dataTransfer.files;
+        e.stopPropagation();
+        e.preventDefault();
+        d3.select('#upload')
+            .classed('btn-success', false)
+            .classed('btn-primary', true)
+            .html('<i class="glyphicon glyphicon-file"></i> Browse or drop files');
+        $.each(files, function (i, file) {
+            upload(file);
+        });
+    });
+
     function setupEditor(parent, idPrefix, parameters) {
         d3.select(parent).selectAll("*").remove();
         parameters.forEach(function (input) {
@@ -72,7 +193,7 @@ $(document).ready(function () {
             div.append("label")
                 .attr("for", idPrefix + input.name)
                 .text(input.name);
-            if (input.type === "table" || input.type === "tree") {
+            if (input.type === "table" || input.type === "tree" || input.type === "image") {
                 div.append("select")
                     .classed("form-control", true)
                     .classed(input.type + "-select", true)
@@ -82,7 +203,7 @@ $(document).ready(function () {
                     .enter().append("option")
                     .text(function (d) { return d.name + " (" + (d.collection ? d.collection.name : "Local") + ")"; })
                     .attr("value", function (d) { return d.uri || d.name; });
-            } else if (input.type === "string" || input.type === "int" || input.type === "json") {
+            } else if (input.type === "string" || input.type === "number" || input.type === "json") {
                 if (input.domain) {
                     control = div.append("select")
                         .classed("form-control", true)
@@ -98,8 +219,12 @@ $(document).ready(function () {
                         .attr("type", "text")
                         .attr("id", idPrefix + input.name);
                 }
-                if (input.data) {
-                    $(control.node()).val(input.data);
+                if (input["default"]) {
+                    if (input.type === "json" && input["default"].format === "inline") {
+                        $(control.node()).val(JSON.stringify(input["default"].data));
+                    } else {
+                        $(control.node()).val(input["default"].data);
+                    }
                 }
             }
         });
@@ -112,6 +237,7 @@ $(document).ready(function () {
             format = $("#" + idPrefix + "format"),
             domain = $("#" + idPrefix + "domain"),
             select = $("#" + idPrefix + "select"),
+            defaultValue = $("#" + idPrefix + "default"),
             parameterMap = {};
 
         parameters.forEach(function (d) {
@@ -150,6 +276,13 @@ $(document).ready(function () {
                 format.val(param.type + ":" + param.format);
                 if (param.domain) {
                     domain.val(param.domain.join(","));
+                } else {
+                    domain.val("");
+                }
+                if (defaultValue && param["default"]) {
+                    defaultValue.val(param["default"].data);
+                } else {
+                    defaultValue.val("");
                 }
             }
         });
@@ -188,6 +321,24 @@ $(document).ready(function () {
                 select.change();
             }
         });
+
+        if (defaultValue) {
+            defaultValue.remove("focusout");
+            defaultValue.focusout(function () {
+                var param = parameterMap[select.val()];
+                if (param) {
+                    if (defaultValue.val() !== "") {
+                        if (param.type === "string") {
+                            param['default'] = {format: "text", data: defaultValue.val()};
+                        } else if (param.type === "number") {
+                            param['default'] = {format: "number", data: parseFloat(defaultValue.val())};
+                        }
+                    } else {
+                        delete param['default'];
+                    }
+                }
+            });
+        }
 
         d3.select(select.get(0)).selectAll("option").remove();
         update();
@@ -230,22 +381,6 @@ $(document).ready(function () {
         }
     });
 
-    function updateDataSelectors() {
-        ["table", "tree"].forEach(function (type) {
-            d3.selectAll("." + type + "-select")
-                .each(function () {
-                    var options = d3.select(this).selectAll("option")
-                        .data(datasetTypes[type], function (d) {
-                            return d.uri || d.name;
-                        });
-                    options.enter().append("option")
-                        .text(function (d) { return d.name + " (" + (d.collection ? d.collection.name : "Local") + ")"; })
-                        .attr("value", function (d) { return d.uri || d.name; });
-                    options.exit().remove();
-                });
-        });
-    }
-
     function updateAnalysisList() {
         var options = d3.select("#analysis").selectAll("option")
             .data(analyses, function (d) { return d.uri; });
@@ -286,22 +421,8 @@ $(document).ready(function () {
                 if (token) {
                     dataset.uri += "?token=" + token;
                 }
-                if (endsWith(d.name, ".phy")) {
-                    dataset.type = "tree";
-                    dataset.format = "newick";
-                } else if (endsWith(d.name, ".csv")) {
-                    dataset.type = "table";
-                    dataset.format = "csv";
-                }
-                if (dataset.type) {
-                    datasetMap[dataset.uri] = dataset;
-                    if (!datasetTypes[dataset.type]) {
-                        datasetTypes[dataset.type] = [];
-                    }
-                    datasetTypes[dataset.type].push(dataset);
-                }
+                addDataset(dataset);
             });
-            updateDataSelectors();
         });
     }
 
@@ -405,7 +526,7 @@ $(document).ready(function () {
         }
 
         $.each(datasetMap, function (key, value) {
-            if (value.collection.name === collection.name) {
+            if (value.collection && value.collection.name === collection.name) {
                 delete datasetMap[key];
             }
         });
@@ -413,7 +534,7 @@ $(document).ready(function () {
         $.each(datasetTypes, function (key, list) {
             toDelete = [];
             $.each(list, function (index, value) {
-                if (value.collection.name === collection.name) {
+                if (value.collection && value.collection.name === collection.name) {
                     toDelete.push(index);
                 }
             });
@@ -505,10 +626,8 @@ $(document).ready(function () {
                             index += 1;
                         }
                         output.bindings = taskBindings;
-                        datasetMap[output.name] = output;
-                        datasetTypes[output.type].push(output);
+                        addDataset(output);
                     });
-                    updateDataSelectors();
                     d3.select("#run")
                         .classed("btn-primary", true)
                         .classed("btn-default", false)
@@ -543,10 +662,12 @@ $(document).ready(function () {
 
         analysis.data.inputs.forEach(function (input) {
             var value = $("#input-" + input.name).val();
-            if (input.type === "table" || input.type === "tree") {
+            if (input.type === "table" || input.type === "tree" || input.type === "image") {
                 bindings.inputs[input.name] = datasetMap[value];
-            } else if (input.type === "string" || input.type === "int") {
+            } else if (input.type === "string") {
                 bindings.inputs[input.name] = {"type": input.type, "format": "text", "data": value};
+            } else if (input.type === "number") {
+                bindings.inputs[input.name] = {"type": input.type, "format": "number", "data": parseFloat(value)};
             }
         });
         analysis.data.outputs.forEach(function (output) {
@@ -576,7 +697,7 @@ $(document).ready(function () {
             input = inputs[0];
             inputs = inputs.slice(1);
             value = $("#vis-input-" + input.name).val();
-            if (input.type === "table" || input.type === "tree") {
+            if (input.type === "table" || input.type === "tree" || input.type === "image") {
                 dataset = datasetMap[value];
                 if (dataset.bindings) {
                     d3.select("#prov")
@@ -584,7 +705,16 @@ $(document).ready(function () {
                         // .classed("hidden", false);
                 }
                 if (dataset.hasOwnProperty("data")) {
-                    options[input.name] = dataset.data;
+                    if (dataset.format === input.format) {
+                        options[input.name] = dataset.data;
+                    } else {
+                        uri = "/girder/api/v1/item/cardoon/" + input.type + "/" + dataset.format + "/" + input.format;
+                        d3.json(uri).post(dataset.data, function (error, data) {
+                            options[input.name] = data.data;
+                            loadInputs(inputs, options, done);
+                        });
+                        return;
+                    }
                 } else {
                     parts = dataset.uri.split("/");
                     parts.pop();
@@ -597,8 +727,8 @@ $(document).ready(function () {
                 }
             } else if (input.type === "string") {
                 options[input.name] = value;
-            } else if (input.type === "int") {
-                options[input.name] = parseInt(value, 10);
+            } else if (input.type === "number") {
+                options[input.name] = parseFloat(value);
             } else if (input.type === "json") {
                 options[input.name] = JSON.parse(value);
             }
