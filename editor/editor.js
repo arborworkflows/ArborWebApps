@@ -30,7 +30,10 @@ $(document).ready(function () {
             .text(function (d) { return d; })
             .on("click", function (d) {
                 project = d;
-                d3.json("/projectmanager/tangelo/projmgr/workflow/" + project, function (error, workflows) {
+                // set the current project in the name field
+                $("#project-name").val(project);
+                // fill the workflow dropdown with the workflows in this project
+                d3.json("/projectmanager/tangelo/projmgr/project/" + project+"/Workflow", function (error, workflows) {
                     d3.select("#workflow").selectAll("li")
                         .data(workflows).enter().append("li").append("a")
                         .attr("href", "#")
@@ -40,9 +43,11 @@ $(document).ready(function () {
                 d3.event.preventDefault();
             });
     });
+
+    // create a new project in the datastore
     d3.select("#new-project").on("click", function () {
         d3.json("/projectmanager/tangelo/projmgr/project/" + $("#project-name").val()).send("put", function (error, d) {
-            console.log("Put it!");
+            console.log("create new project!");
         });
     });
 
@@ -62,15 +67,15 @@ $(document).ready(function () {
                     if (analysis.length !== 1) {
                         console.warn("[analysis on click]: Analysis not found");
                     }
-                    analysis = analysis[0].analysis;
-                    if (!tangelo.isArray(analysis.inputs.input)) {
-                        analysis.inputs.input = [analysis.inputs.input];
+                    analysis = analysis[0];
+                    if (!tangelo.isArray(analysis.inputs)) {
+                        analysis.inputs = [analysis.inputs];
                     }
-                    if (!tangelo.isArray(analysis.outputs.output)) {
-                        analysis.outputs.output = [analysis.outputs.output];
+                    if (!tangelo.isArray(analysis.outputs)) {
+                        analysis.outputs = [analysis.outputs];
                     }
-                    if (!tangelo.isArray(analysis.parameters.parameter)) {
-                        analysis.parameters.parameter = [analysis.parameters.parameter];
+                    if (!tangelo.isArray(analysis.parameters)) {
+                        analysis.parameters = [analysis.parameters];
                     }
                     console.log(analysis);
                     flow.add(analysis);
@@ -97,14 +102,15 @@ $(document).ready(function () {
     d3.select("#save").on("click", function () {
         flow.data().name = $("#name").val();
         if (!currentWorkflow) {
-            d3.json("/projectmanager/tangelo/projmgr/workflow/" + project).send("put", JSON.stringify(flow.serialize()), function (error, id) {
-                currentWorkflow = {id: id, name: flow.data().name};
-                d3.select("#workflow").append("li").append("a")
-                    .datum(currentWorkflow)
-                    .attr("href", "#")
-                    .text(flow.data().name)
-                    .on("click", loadWorkflow);
-            });
+            var workflowname = $("#name").val();
+            var serializedWorkflow = JSON.stringify(flow.serialize());
+            var operationStringToSend = "?operation=updateWorkflowFromString&workflowName="+workflowname+"&data="+serializedWorkflow
+            console.log("serialize to save: ",operationStringToSend+serializedWorkflow)
+            d3.json("/projectmanager/tangelo/projmgr/workflow/" + project+ operationStringToSend).send("put", serializedWorkflow, function (error, result) {
+                console.log("result: ", result)
+                if (error)
+                    console.log("error: ", error)
+        });
         } else {
             d3.json("/projectmanager/tangelo/projmgr/workflow/" + project + "/" + currentWorkflow.id).send("put", JSON.stringify(flow.serialize()), function (error, result) {
                 // Update the name in the dropdown menu
@@ -122,7 +128,7 @@ $(document).ready(function () {
             $("#name").val(flow.data().name);
         } else {
             console.log(currentWorkflow);
-            d3.json("/projectmanager/tangelo/projmgr/workflow/" + project + "/" + currentWorkflow.id).send("delete", "", function (error, result) {
+            d3.json("/projectmanager/tangelo/projmgr/workflow/" + project + "/" + currentWorkflow.name).send("delete", "", function (error, result) {
                 flow.clear();
                 $("#name").val(flow.data().name);
 
@@ -151,91 +157,20 @@ $(document).ready(function () {
         });
     });
 
-    /*
-    // Select workflow
-    d3.select("#workflow").on("change", function (d) {
-        if ($("#workflow").val() === "Select workflow") {
-            flow.clear();
-            $("#name").val(flow.data().name);
-        } else {
-            d3.json("workflow/" + $("#workflow").val(), function (error, w) {
-                flow.clear();
-                flow.data(w);
-                $("#name").val(flow.data().name);
-            });
-        }
-    });
-    */
+
+
 
     // Run workflow
     d3.select("#run").on("click", function () {
-        flow.data().analyses.forEach(function (a, aIndex) {
-            var analysisInfo, canRun, foundDoneInput;
-
-            if (!a.state || a.state === "waiting") {
-                canRun = true;
-                analysisInfo = flow.serialize().analyses[aIndex];
-                a.inputs.forEach(function (input, inputIndex) {
-                    if (input.optional) {
-                        return;
-                    }
-                    foundDoneInput = false;
-                    flow.data().connections.forEach(function (c) {
-                        if (c.inputAnalysis === a
-                                && c.inputIndex === inputIndex
-                                && c.outputAnalysis.state === "done") {
-                            foundDoneInput = true;
-                            analysisInfo.inputs[inputIndex].data =
-                                c.outputAnalysis.outputs[c.outputIndex].data;
-                        }
-                    });
-                    if (!foundDoneInput) {
-                        canRun = false;
-                    }
-                });
-                if (canRun) {
-                    a.state = "running";
-                    flow.update();
-
-                    /*
-                    // TODO: Do ajax request to run the analysis.
-                    // Update state to done when complete.
-                    d3.json("analysis/run").send("post", JSON.stringify(analysisInfo), function (error, results) {
-                        a.outputs.forEach(function (o, oIndex) {
-                            o.data = results[oIndex].data;
-                        });
-                        console.log(a);
-                        a.state = "done";
-                        flow.update();
-                    });
-                    */
-                }
-            }
-        });
+          var postRequest = "operation=executeWorkflow&workflowName="+ $("#name").val()+"&projname="+$("#project-name").val();
+          console.log("run request: ",postRequest)
+          d3.json("/projectmanager/tangelo/projmgr/workflow/").send("put", postRequest, function (error, results) {
+                console.log("workflow executed");
+                //flow.update();
+          });
     });
 
-    function handleReaderProgress(evt) {
-        if (evt.lengthComputable) {
-            var loaded = (evt.loaded / evt.total);
 
-            $("#progressbar").progressbar({ value: loaded * 100 });
-        }
-    }
-
-    function handleReaderLoadEnd(evt) {
-        $("#progressbar").progressbar({ value: 100 });
-        $("#droplabel").html("");
-        $("#dropstatus").hide();
-
-        var data = d3.csv.parse(evt.target.result);
-
-        flow.add({
-            name: file.name,
-            inputs: [],
-            parameters: [],
-            outputs: [{name: "output", type: "table", data: data}]
-        });
-    }
 
     // Handle file drag/drop events
     d3.select("body")
@@ -345,5 +280,6 @@ $(document).ready(function () {
     // init the widgets
     $("#progressbar").progressbar();
     $(".has-tooltip").tooltip();
+
 
 });
