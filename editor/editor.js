@@ -12,11 +12,11 @@ $(document).ready(function () {
         currentWorkflow;
 
     function loadWorkflow(d) {
-        d3.json("/projectmanager/tangelo/projmgr/project/" + project + "/Workflow/" + d, function (error, w) {
+        d3.json("/projectmanager/tangelo/projmgr/workflow/" + project + "/" + d, function (error, w) {
             $("#name").val(d);
-            //flow.clear();
-            //flow.data(w);
-            //currentWorkflow = {id: d, name: flow.data().name};
+            flow.clear();
+            flow.data(w);
+            currentWorkflow = {id: d, name: flow.data().name};
         });
         d3.event.preventDefault();
     }
@@ -73,7 +73,7 @@ $(document).ready(function () {
                     if (!tangelo.isArray(analysis.outputs)) {
                         analysis.outputs = [analysis.outputs];
                     }
-                    if (!tangelo.isArray(analysis.parameters.parameter)) {
+                    if (!tangelo.isArray(analysis.parameters)) {
                         analysis.parameters = [analysis.parameters];
                     }
                     console.log(analysis);
@@ -100,9 +100,10 @@ $(document).ready(function () {
     // Save workflow
     d3.select("#save").on("click", function () {
         var workflowname = $("#name").val();
-        var stringToSend = "?operation=updateWorkflowFromString&workflowName="+workflowname+"&data="+JSON.stringify(flow.serialize());
-        console.log("serialize to save: ",stringToSend)
-        d3.json("/projectmanager/tangelo/projmgr/workflow/" + project).send("put", stringToSend, function (error, result) {
+        var serializedWorkflow = JSON.stringify(flow.serialize());
+        var operationStringToSend = "?operation=updateWorkflowFromString&workflowName="+workflowname+"&data="+serializedWorkflow
+        console.log("serialize to save: ",operationStringToSend+serializedWorkflow)
+        d3.json("/projectmanager/tangelo/projmgr/workflow/" + project+ operationStringToSend).send("put", serializedWorkflow, function (error, result) {
                 console.log("result: ", result)
                 if (error)
                     console.log("error: ", error)

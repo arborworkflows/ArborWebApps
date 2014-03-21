@@ -29,7 +29,7 @@ workflow = function (selection, details) {
         workflow.analyses.forEach(function (a) {
             a.inputScale = d3.scale.linear().domain([0, a.inputs.length - 1]).range([25, 75]);
             a.outputScale = d3.scale.linear().domain([0, a.outputs.length - 1]).range([25, 75]);
-            analysisMap[a['@name']] = a;
+            analysisMap[a['name']] = a;
         });
         workflow.connections.forEach(function (c) {
             c.outputAnalysis = analysisMap[c.outputAnalysis];
@@ -56,11 +56,11 @@ workflow = function (selection, details) {
 
     function updateConnections() {
         function connectionKey(d) {
-            return d.inputAnalysis['@name']
+            return d.inputAnalysis['name']
                 + "$"
                 + d.inputIndex
                 + "$"
-                + d.outputAnalysis['@name']
+                + d.outputAnalysis['name']
                 + "$"
                 + d.outputIndex;
         }
@@ -181,11 +181,11 @@ workflow = function (selection, details) {
     }
 
     function updateAnalyses() {
-        var g = vis.selectAll("g.analysis").data(workflow.analyses, function (d) { return d['@name']; })
+        var g = vis.selectAll("g.analysis").data(workflow.analyses, function (d) { return d['name']; })
             .enter().append("g")
             .classed("analysis", true);
 
-        vis.selectAll("g.analysis").data(workflow.analyses, function (d) { return d['@name']; })
+        vis.selectAll("g.analysis").data(workflow.analyses, function (d) { return d['name']; })
             .exit().remove();
 
         g.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
@@ -195,7 +195,7 @@ workflow = function (selection, details) {
 
                 detailContent.selectAll("*").remove();
                 detailContent.append("div").classed("panel-heading", true)
-                    .append("h3").classed("panel-title", true).text(d['@name']);
+                    .append("h3").classed("panel-title", true).text(d['name']);
                 panelBody = detailContent.append("div").classed("panel-body", true)
                     .style("height", "100%");
                 panelBody.selectAll("div.param")
@@ -205,8 +205,8 @@ workflow = function (selection, details) {
                     .each(function (p) {
                         var sel,
                             param = d3.select(this).append("div").classed("form-group", true),
-                            paramId = "param-" + p['@name'];
-                        param.append("label").attr("for", paramId).text(p['@name']);
+                            paramId = "param-" + p['name'];
+                        param.append("label").attr("for", paramId).text(p['name']);
                         if (p.type === "enum") {
                             sel = param.append("select")
                                 .attr("id", paramId)
@@ -257,7 +257,7 @@ workflow = function (selection, details) {
             .style("fill", strokeColor)
             .style("text-anchor", "middle")
             .style("alignment-baseline", "central")
-            .text(function (d) { return d['@name']; })
+            .text(function (d) { return d['name']; })
             .style("user-select", "none")
             .style("-webkit-user-select", "none")
             .style("pointer-events", "none");
@@ -283,7 +283,7 @@ workflow = function (selection, details) {
             analysis = {
                 x: 200,
                 y: 200,
-                '@name': a['@name'],
+                'name': a['name'],
                 type: a.type,
                 state: a.state,
                 inputs: a.inputs,
@@ -291,18 +291,18 @@ workflow = function (selection, details) {
                 outputs: a.outputs
             };
         a.parameters.forEach(function (param) {
-            var p = {'@name': param['@name'], type: param.type, value: param.value, options: param.options};
+            var p = {'name': param['name'], type: param.type, value: param.value, options: param.options};
             p.current = param.value;
             analysis.parameters.push(p);
         });
         analysis.inputScale = d3.scale.linear().domain([0, analysis.inputs.length - 1]).range([25, 75]);
         analysis.outputScale = d3.scale.linear().domain([0, analysis.outputs.length - 1]).range([25, 75]);
         count = 1;
-        while (analysisMap[analysis['@name']] !== undefined) {
-            analysis['@name'] = a['@name'] + " " + count;
+        while (analysisMap[analysis['name']] !== undefined) {
+            analysis['name'] = a['name'] + " " + count;
             count += 1;
         }
-        analysisMap[analysis['@name']] = analysis;
+        analysisMap[analysis['name']] = analysis;
 
         // CRL - this is the first one, so initialize the list
         if (tangelo.isArray(workflow.analyses)) {
@@ -330,7 +330,7 @@ workflow = function (selection, details) {
             serialized.analyses.push({
                 x: analysis.x,
                 y: analysis.y,
-                '@name': analysis['@name'],
+                'name': analysis['name'],
                 type: analysis.type,
                 state: analysis.state,
                 inputs: analysis.inputs,
@@ -340,9 +340,9 @@ workflow = function (selection, details) {
         });
         workflow.connections.forEach(function (c) {
             serialized.connections.push({
-                outputAnalysis: c.outputAnalysis['@name'],
+                outputAnalysis: c.outputAnalysis['name'],
                 outputIndex: c.outputIndex,
-                inputAnalysis: c.inputAnalysis['@name'],
+                inputAnalysis: c.inputAnalysis['name'],
                 inputIndex: c.inputIndex
             });
         });
