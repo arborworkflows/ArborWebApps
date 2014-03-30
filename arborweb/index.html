@@ -22,13 +22,17 @@
                 margin-top: 60px;
             }
             #control-panel {
-                z-index:10;
-                background: none repeat scroll 0% 0% rgba(232, 232, 232, 1.0);
+                z-index: 10;
+                border-top: solid 1px #ddd;
+                background-color: rgba(255, 255, 255, 0.9);
             }
             #upload {
                 width: 300px;
                 padding: 20px;
                 margin: 20px 0px 40px 0px;
+            }
+            #active-collections {
+                margin-top: 20px;
             }
             #editor, #vis {
                 position: absolute;
@@ -37,8 +41,9 @@
                 bottom: 0;
                 left: 0;
             }
-            #error-message, #success-message {
+            #error-message, #success-message, #info-message {
                 padding: 15px;
+                margin: 10px 0px;
             }
             .spacer {
                 margin-top: 20px;
@@ -73,17 +78,13 @@
                 <div class="tab-pane active" id="data_tab">
                     <div class="container">
                         <div class="row">
-                            <div class="col-sm-12">
+                            <div class="col-sm-6">
                                 <div class="btn btn-primary" id="upload">
                                     <i class="glyphicon glyphicon-file"></i> Browse or drop files
                                 </div>
                                 <div class="form-group hide">
                                     <input id="g-files" type="file" multiple="multiple">
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-6">
                                 <div class="form-inline">
                                     <select class="form-control" id="collection"></select>
                                     <button class="btn btn-primary" id="collection-add">
@@ -103,6 +104,7 @@
                 <div class="tab-pane" id="analysis_tab">
                     <div class="container">
                         <p class="row hidden bg-success" id="success-message"></p>
+                        <p class="row hidden bg-info" id="info-message"></p>
                         <p class="row hidden bg-danger" id="error-message"></p>
                         <div class="row">
                             <div class="col-sm-12">

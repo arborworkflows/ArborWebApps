@@ -708,6 +708,7 @@ $(document).ready(function () {
                         .classed("btn-default", false)
                         .attr("disabled", null);
                     d3.select("#error-message").classed("hidden", true);
+                    d3.select("#info-message").classed("hidden", true);
                     d3.select("#success-message").classed("hidden", false).text("Success!");
                     console.log(data);
                 });
@@ -719,6 +720,7 @@ $(document).ready(function () {
                 console.log("FAILURE");
                 console.log(result);
                 d3.select("#success-message").classed("hidden", true);
+                d3.select("#info-message").classed("hidden", true);
                 d3.select("#error-message").classed("hidden", false).text("Operation Failed. " + result.message);
             } else {
                 setTimeout(checkTaskResult, 1000);
@@ -749,6 +751,9 @@ $(document).ready(function () {
             bindings.outputs[output.name] = {"type": output.type, "format": webFormat[output.type]};
         });
         taskBindings = bindings;
+        d3.select("#success-message").classed("hidden", true);
+        d3.select("#error-message").classed("hidden", true);
+        d3.select("#info-message").classed("hidden", false).text("Running analysis ...");
         d3.json(analysis.uri + "/cardoon").post(JSON.stringify(bindings), function (error, result) {
             taskId = result.id;
             setTimeout(checkTaskResult, 1000);
