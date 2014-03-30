@@ -144,6 +144,23 @@ $(document).ready(function () {
         reader.readAsText(file);
     }
 
+    function retrieveDatasetAsFormat(dataset, type, format, done) {
+        var uri, parts;
+        if (dataset.hasOwnProperty("data")) {
+            if (dataset.format === format) {
+                done(null, dataset);
+            } else {
+                uri = "/girder/api/v1/item/cardoon/" + type + "/" + dataset.format + "/" + format;
+                d3.json(uri).post(dataset.data, done);
+            }
+        } else {
+            parts = dataset.uri.split("/");
+            parts.pop();
+            uri = parts.join("/") + "/cardoon/" + type + "/" + dataset.format + "/" + format;
+            d3.json(uri, done);
+        }
+    }
+
     $("#g-files").change(function (e) {
         var files = $('#g-files')[0].files;
         $.each(files, function (i, file) {
@@ -192,7 +209,15 @@ $(document).ready(function () {
     });
 
     function setupEditor(parent, idPrefix, parameters) {
+        var controlMap = {},
+            parameterMap = {};
+
         d3.select(parent).selectAll("*").remove();
+
+        parameters.forEach(function (d) {
+            parameterMap[d.name] = d;
+        });
+
         parameters.forEach(function (input) {
             var div, control;
 
@@ -202,7 +227,8 @@ $(document).ready(function () {
                 .attr("for", idPrefix + input.name)
                 .text(input.name);
             if (input.type === "table" || input.type === "tree" || input.type === "image") {
-                div.append("select")
+                controlMap[input.name] = div.append("select");
+                controlMap[input.name]
                     .classed("form-control", true)
                     .classed(input.type + "-select", true)
                     .attr("id", idPrefix + input.name)
@@ -213,20 +239,27 @@ $(document).ready(function () {
                     .attr("value", function (d) { return d.uri || d.name; });
             } else if (input.type === "string" || input.type === "number" || input.type === "json") {
                 if (input.domain) {
-                    control = div.append("select")
-                        .classed("form-control", true)
-                        .attr("id", idPrefix + input.name)
-                        .selectAll("option")
-                        .data(input.domain)
-                        .enter().append("option")
-                        .text(function (d) { return d; })
-                        .attr("value", function (d) { return d; });
+                    if (tangelo.isArray(input.domain)) {
+                        control = div.append("select")
+                            .classed("form-control", true)
+                            .attr("id", idPrefix + input.name)
+                            .selectAll("option")
+                            .data(input.domain)
+                            .enter().append("option")
+                            .text(function (d) { return d; })
+                            .attr("value", function (d) { return d; });
+                    } else {
+                        control = div.append("select")
+                            .classed("form-control", true)
+                            .attr("id", idPrefix + input.name);
+                    }
                 } else {
                     control = div.append("input")
                         .classed("form-control", true)
                         .attr("type", "text")
                         .attr("id", idPrefix + input.name);
                 }
+                controlMap[input.name] = control;
                 if (input["default"]) {
                     if (input.type === "json" && input["default"].format === "inline") {
                         $(control.node()).val(JSON.stringify(input["default"].data));
@@ -234,6 +267,30 @@ $(document).ready(function () {
                         $(control.node()).val(input["default"].data);
                     }
                 }
+            }
+        });
+        parameters.forEach(function (input) {
+            var control;
+            if (input.type === "string" || input.type === "number" || input.type === "json") {
+                if (input.domain && tangelo.isObject(input.domain)) {
+                    control = $(controlMap[input.domain.input].node());
+                    control.change(function () {
+                        var dataset = datasetMap[control.val()];
+                        retrieveDatasetAsFormat(dataset, parameterMap[input.domain.input].type, input.domain.format, function (error, data) {
+                            var options = controlMap[input.name].selectAll("option")
+                                .data(data.data, function (d) { return d; });
+                            options.enter().append("option")
+                                .text(function (d) { return d; })
+                                .attr("value", function (d) { return d; });
+                            options.exit().remove();
+                        });
+                    });
+                }
+            }
+        });
+        parameters.forEach(function (input) {
+            if (input.type === "table" || input.type === "tree" || input.type === "image") {
+                $(controlMap[input.name].node()).change();
             }
         });
     }
@@ -274,6 +331,7 @@ $(document).ready(function () {
             parameterMap[param.name] = param;
             update();
             select.val(param.name);
+            select.change();
             name.val("");
         });
 
@@ -282,8 +340,13 @@ $(document).ready(function () {
             var param = parameterMap[select.val()];
             if (param) {
                 format.val(param.type + ":" + param.format);
+                format.change();
                 if (param.domain) {
-                    domain.val(param.domain.join(","));
+                    if (tangelo.isArray(param.domain)) {
+                        domain.val(param.domain.join(","));
+                    } else {
+                        domain.val(JSON.stringify(param.domain));
+                    }
                 } else {
                     domain.val("");
                 }
@@ -311,7 +374,11 @@ $(document).ready(function () {
             var param = parameterMap[select.val()];
             if (param) {
                 if (domain.val() !== "") {
-                    param.domain = domain.val().split(",");
+                    if (domain.val()[0] === "{") {
+                        param.domain = JSON.parse(domain.val());
+                    } else {
+                        param.domain = domain.val().split(",");
+                    }
                 } else {
                     delete param.domain;
                 }
@@ -695,7 +762,7 @@ $(document).ready(function () {
             .classed("btn-default", true)
             .attr("disabled", true);
         function loadInputs(inputs, options, done) {
-            var input, dataset, value, uri, parts;
+            var input, dataset, value;
             if (inputs.length === 0) {
                 done(options);
                 return;
@@ -709,28 +776,13 @@ $(document).ready(function () {
                     d3.select("#prov")
                         .text(JSON.stringify(dataset.bindings.inputs, null, "    "));
                 }
-                if (dataset.hasOwnProperty("data")) {
-                    if (dataset.format === input.format) {
-                        options[input.name] = dataset.data;
-                    } else {
-                        uri = "/girder/api/v1/item/cardoon/" + input.type + "/" + dataset.format + "/" + input.format;
-                        d3.json(uri).post(dataset.data, function (error, data) {
-                            options[input.name] = data.data;
-                            loadInputs(inputs, options, done);
-                        });
-                        return;
-                    }
-                } else {
-                    parts = dataset.uri.split("/");
-                    parts.pop();
-                    uri = parts.join("/") + "/cardoon/" + input.type + "/" + dataset.format + "/" + input.format;
-                    d3.json(uri, function (error, data) {
-                        options[input.name] = data.data;
-                        loadInputs(inputs, options, done);
-                    });
-                    return;
-                }
-            } else if (input.type === "string") {
+                retrieveDatasetAsFormat(dataset, input.type, input.format, function (error, data) {
+                    options[input.name] = data.data;
+                    loadInputs(inputs, options, done);
+                });
+                return;
+            }
+            if (input.type === "string") {
                 options[input.name] = value;
             } else if (input.type === "number") {
                 options[input.name] = parseFloat(value);
