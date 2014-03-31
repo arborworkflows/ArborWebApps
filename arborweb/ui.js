@@ -83,12 +83,6 @@ $(document).ready(function () {
     editor.setReadOnly(true);
     editor.renderer.$cursorLayer.element.style.opacity = 0;
 
-    d3.json("/girder/api/v1/user/authentication", function (error, result) {
-        if (!error && result.authToken) {
-            token = result.authToken.token;
-        }
-    });
-
     function endsWith(str, suffix) {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
