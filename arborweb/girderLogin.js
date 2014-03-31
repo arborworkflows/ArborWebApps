@@ -35,7 +35,7 @@ $.fn.girderLogin = function(options) {
         registerPassword = $('<input type="password" class="form-control" placeholder="Password"></input>'),
         registerPassword2Group = $('<div class="form-group">'),
         registerPassword2 = $('<input type="password" class="form-control" placeholder="Password"></input>'),
-        registerValidationFailedMessage = $('<div></div>'),
+        registerValidationFailedMessage = $('<div class="bg-danger hidden" style="margin:10px 0px; padding:10px"></div>'),
         registerButton = $('<button type="submit" class="btn btn-primary">Register</button>');
 
     $.ajax({
@@ -173,9 +173,11 @@ $.fn.girderLogin = function(options) {
     registerForm.submit(function (e) {
         e.preventDefault();
 
+        $(this).find(".form-group").removeClass("has-error");
+
         if (registerPassword.val() !== registerPassword2.val()) {
-            registerPassword.addClass('has-error');
-            registerPassword2.addClass('has-error');
+            registerPasswordGroup.addClass('has-error');
+            registerPassword2Group.addClass('has-error');
             registerPassword.focus();
             registerValidationFailedMessage.text('Passwords must match.');
             return;
@@ -217,11 +219,24 @@ $.fn.girderLogin = function(options) {
                 registerLastName.val("");
             },
             error: function (err) {
-                var resp = err.responseJSON;
+                var resp = JSON.parse(err.responseText);
                 registerValidationFailedMessage.text(resp.message);
-                if (resp.field) {
-                    this.$('#g-group-' + resp.field).addClass('has-error');
-                    this.$('#g-' + resp.field).focus();
+                registerValidationFailedMessage.removeClass("hidden");
+                if (resp.field === "password") {
+                    registerPasswordGroup.addClass('has-error');
+                    registerPassword.focus();
+                } else if (resp.field === "firstName") {
+                    registerFirstNameGroup.addClass('has-error');
+                    registerFirstName.focus();
+                } else if (resp.field === "lastName") {
+                    registerLastNameGroup.addClass('has-error');
+                    registerLastName.focus();
+                } else if (resp.field === "email") {
+                    registerEmailGroup.addClass('has-error');
+                    registerEmail.focus();
+                } else if (resp.field === "login") {
+                    registerLoginGroup.addClass('has-error');
+                    registerLogin.focus();
                 }
             }
         });
