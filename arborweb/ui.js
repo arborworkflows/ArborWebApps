@@ -65,13 +65,30 @@ $(document).ready(function () {
             "image:png.base64"
         ];
 
+    function updateCollections() {
+        d3.json("/girder/api/v1/collection", function (error, collections) {
+            collections.forEach(function (c) {
+                collectionMap[c._id] = c;
+            });
+            var collectionOptions = d3.select("#collection").selectAll("option")
+                .data(collections, function (d) { return d._id; });
+            collectionOptions.enter().append("option")
+                .text(function (d) { return d.name; })
+                .attr("value", function (d) { return d._id; });
+            collectionOptions.exit().remove();
+        });
+    }
+    updateCollections();
+
     $("#control-panel").controlPanel();
     $("#login").girderLogin({
         login: function (response) {
             token = response.authToken.token;
+            updateCollections();
         },
         logout: function (response) {
             token = undefined;
+            updateCollections();
         }
     });
 
@@ -502,17 +519,6 @@ $(document).ready(function () {
             });
         });
     }
-
-    d3.json("/girder/api/v1/collection", function (error, collections) {
-        collections.forEach(function (c) {
-            collectionMap[c._id] = c;
-        });
-        d3.select("#collection").selectAll("options")
-            .data(collections)
-            .enter().append("option")
-            .text(function (d) { return d.name; })
-            .attr("value", function (d) { return d._id; });
-    });
 
     function updateActiveCollectionsList() {
         var items, itemsEnter;
