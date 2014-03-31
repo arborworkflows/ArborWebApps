@@ -11,6 +11,7 @@
         <script src="ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
         <script src="/js/tangelo.js"></script>
         <script src="table.js"></script>
+        <script src="girderLogin.js"></script>
         <script src="ui.js"></script>
         <!-- custom styling for this app -->
         <style>
@@ -31,7 +32,7 @@
                 padding: 20px;
                 margin: 20px 0px 40px 0px;
             }
-            #active-collections {
+            #active-collections, .tab-content {
                 margin-top: 20px;
             }
             #editor, #vis {
@@ -47,7 +48,7 @@
             }
             #error-message, #success-message, #info-message {
                 padding: 15px;
-                margin: 10px 0px;
+                margin-bottom: 10px;
             }
             .spacer {
                 margin-top: 20px;
@@ -81,6 +82,10 @@
             <div class="tab-content">
                 <div class="tab-pane active" id="data_tab">
                     <div class="container">
+                        <div class="row">
+                            <div class="col-sm-12" id="login">
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="btn btn-primary" id="upload">

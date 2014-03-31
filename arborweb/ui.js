@@ -66,6 +66,14 @@ $(document).ready(function () {
         ];
 
     $("#control-panel").controlPanel();
+    $("#login").girderLogin({
+        login: function (response) {
+            token = response.authToken.token;
+        },
+        logout: function (response) {
+            token = undefined;
+        }
+    });
 
     editor = ace.edit("editor");
     editor.setTheme("ace/theme/chrome");
