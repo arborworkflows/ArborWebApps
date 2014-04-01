@@ -125,13 +125,6 @@
                 </div>
                 <div class="tab-pane" id="analysis_tab">
                     <div class="container">
-                        <p class="row hidden bg-success" id="success-message"></p>
-                        <p class="row hidden bg-info" id="info-message"></p>
-                        <p class="row hidden bg-danger" id="error-message"></p>
-                        <div class="row">
-                            <div class="col-sm-12">
-                            </div>
-                        </div>
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
@@ -148,15 +141,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-6">
-                                <div id="inputs"></div>
-                                <div id="outputs"></div>
-                            </div>
                         </div>
                         <div class="form-inline" id="analysis-form">
-                            <button class="btn btn-primary" id="run">
+                            <button class="btn btn-primary" id="setup">
                                 <span class="glyphicon glyphicon-play" id="run-icon"></span>
-                                Run
+                                Setup and run
                             </button>
                             <button class="btn btn-default" id="show-script" data-toggle="button">
                                 <span class="glyphicon glyphicon-eye-open" id="show-script-icon"></span>
@@ -242,6 +231,29 @@
                 </div>
             </div>
             <div class="row spacer"><div class="col-sm-12"></div></div>
+        </div>
+        <div class="modal fade" tabindex="-1" id="analysis-setup-dialog" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="analysis-setup-title"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="row hidden bg-success" id="success-message"></p>
+                        <p class="row hidden bg-info" id="info-message"></p>
+                        <p class="row hidden bg-danger" id="error-message"></p>
+                        <div id="inputs"></div>
+                        <button class="btn btn-primary" id="run">
+                            <span class="glyphicon glyphicon-play" id="run-icon"></span>
+                            Run
+                        </button>
+                        <button class="btn btn-default" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
 </html>

@@ -147,6 +147,9 @@ $(document).ready(function () {
             .text(function (d) { return d.name + " (Local)"; })
             .attr("value", function (d) { return d.name; });
         options.exit().remove();
+        if (localDatasets.length > 0) {
+            $("#local-dataset-select").change();
+        }
     }
 
     function addDataset(dataset) {
@@ -719,6 +722,7 @@ $(document).ready(function () {
         var analysisUri = $("#analysis").val();
         if (analysisUri) {
             analysis = analysisMap[analysisUri];
+            $("#analysis-setup-title").text(analysis.data.name);
             editor.setValue(analysis.data.script);
             editor.clearSelection();
             editor.getSession().setMode("ace/mode/" + analysis.data.mode);
@@ -850,6 +854,17 @@ $(document).ready(function () {
             taskId = result.id;
             setTimeout(checkTaskResult, 1000);
         });
+    });
+
+    $("#setup").click(function () {
+        $("#analysis-setup-dialog").modal("show");
+        $("#success-message").addClass("hidden");
+        $("#info-message").addClass("hidden");
+        $("#error-message").addClass("hidden");
+    });
+
+    $("#analysis-setup-close").click(function () {
+        $("#analysis-setup-dialog").modal("hide");
     });
 
     // Show visualization
