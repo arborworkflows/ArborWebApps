@@ -1,5 +1,5 @@
 /*jslint browser: true, unparam: true, nomen: true */
-/*globals ace, angular, d3, $, workflow, FileReader, console, tangelo */
+/*globals ace, atob, Blob, d3, $, girderUpload, FileReader, console, tangelo, Uint8Array */
 
 $.fn.image = function(options) {
     "use strict";
@@ -15,6 +15,7 @@ $(document).ready(function () {
     "use strict";
     var datasetMap = {},
         datasetTypes = {"table": [], "tree": [], "string": [], "image": []},
+        localDatasets = [],
         editor,
         analysis,
         analyses = [],
@@ -54,6 +55,19 @@ $(document).ready(function () {
             "string": "text",
             "number": "number",
             "image": "png.base64"
+        },
+        saveFormats = {
+            "table": ["csv", "rows.json"],
+            "tree": ["nested.json", "nexus", "newick"],
+            "image": ["png"]
+        },
+        extensions = {
+            "csv": "csv",
+            "rows.json": "rows-json",
+            "nested.json": "nested-json",
+            "nexus": "nex",
+            "newick": "phy",
+            "png": "png"
         },
         formats = [
             "table:rows",
@@ -111,6 +125,7 @@ $(document).ready(function () {
     }
 
     function updateDataSelectors() {
+        var options;
         ["table", "tree", "image"].forEach(function (type) {
             d3.selectAll("." + type + "-select")
                 .each(function () {
@@ -124,6 +139,14 @@ $(document).ready(function () {
                     options.exit().remove();
                 });
         });
+        options = d3.selectAll("#local-dataset-select").selectAll("option")
+            .data(localDatasets, function (d) {
+                return d.name;
+            });
+        options.enter().append("option")
+            .text(function (d) { return d.name + " (Local)"; })
+            .attr("value", function (d) { return d.name; });
+        options.exit().remove();
     }
 
     function addDataset(dataset) {
@@ -138,6 +161,9 @@ $(document).ready(function () {
                 dataset.type = "image";
                 dataset.format = "png";
             }
+        }
+        if (!dataset.uri) {
+            localDatasets.push(dataset);
         }
         if (dataset.type) {
             datasetMap[dataset.uri || dataset.name] = dataset;
@@ -164,14 +190,38 @@ $(document).ready(function () {
     }
 
     function retrieveDatasetAsFormat(dataset, type, format, done) {
-        var uri, parts;
+        var uri, parts,
+            byteCharacters,
+            byteNumbers,
+            byteArray,
+            i;
         if (dataset.hasOwnProperty("data")) {
             if (dataset.format === format) {
                 done(null, dataset);
-            } else {
-                uri = "/girder/api/v1/item/cardoon/" + type + "/" + dataset.format + "/" + format;
-                d3.json(uri).post(dataset.data, done);
+                return;
             }
+            if (dataset.type === "table" && dataset.format === "rows") {
+                dataset = {type: "table", format: "rows.json", data: JSON.stringify(dataset.data)};
+            }
+            if (dataset.type === "tree" && dataset.format === "nested") {
+                dataset = {type: "tree", format: "nested.json", data: JSON.stringify(dataset.data)};
+            }
+            if (dataset.format === format) {
+                done(null, dataset);
+                return;
+            }
+            if (dataset.type === "image" && dataset.format === "png.base64" && format === "png") {
+                byteCharacters = atob(dataset.data);
+                byteNumbers = new Array(byteCharacters.length);
+                for (i = 0; i < byteCharacters.length; i += 1) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                byteArray = new Uint8Array(byteNumbers);
+                done(null, {type: "image", format: "png", data: byteArray});
+                return;
+            }
+            uri = "/girder/api/v1/item/cardoon/" + type + "/" + dataset.format + "/" + format;
+            d3.json(uri).post(dataset.data, done);
         } else {
             parts = dataset.uri.split("/");
             parts.pop();
@@ -179,6 +229,38 @@ $(document).ready(function () {
             d3.json(uri, done);
         }
     }
+
+    $("#local-dataset-select").change(function () {
+        var dataset = datasetMap[$("#local-dataset-select").val()],
+            options;
+        $("#dataset-name").val(dataset.name);
+        options = d3.select("#dataset-format-select").selectAll("option")
+            .data(saveFormats[dataset.type], function (d) { return d; });
+        options.enter().append("option")
+            .text(function (d) { return d; })
+            .attr("value", function (d) { return d; });
+        options.exit().remove();
+    });
+
+    $("#dataset-save").click(function () {
+        var name = $("#dataset-name").val(),
+            format = $("#dataset-format-select").val(),
+            dataset = datasetMap[$("#local-dataset-select").val()];
+        retrieveDatasetAsFormat(dataset, dataset.type, format, function (error, converted) {
+            girderUpload(new Blob([converted.data]), name + "." + extensions[format], currentCollection.dataFolder);
+        });
+    });
+
+    $("#dataset-download").click(function () {
+        var name = $("#dataset-name").val(),
+            format = $("#dataset-format-select").val(),
+            dataset = datasetMap[$("#local-dataset-select").val()];
+        retrieveDatasetAsFormat(dataset, dataset.type, format, function (error, converted) {
+            var blob = new Blob([converted.data], {type: "image/png"}),
+                anchor = $('<a href="' + URL.createObjectURL(blob) + '" download="' + name + "." + extensions[format] + '" class="hidden"></a>');
+            anchor[0].click();
+        });
+    });
 
     $("#g-files").change(function (e) {
         var files = $('#g-files')[0].files;
@@ -532,6 +614,7 @@ $(document).ready(function () {
                     currentCollection = d;
                     d3.select("#active-collections").selectAll("li").selectAll(".current").classed("hidden", function (dd) { return dd !== d; });
                     d3.select("#new-analysis-form").classed("hidden", false);
+                    d3.select("#dataset-save").classed("hidden", false);
                 }
             });
         itemsEnter.append("span")
@@ -544,7 +627,7 @@ $(document).ready(function () {
             .classed("glyphicon-ok", true)
             .classed("hidden", true)
             .classed("current", true)
-            .attr("title", "New analyses saved here");
+            .attr("title", "New analyses and datasets saved here");
         items.exit().remove();
     }
 
@@ -590,6 +673,7 @@ $(document).ready(function () {
         if (currentCollection === collection) {
             currentCollection = null;
             d3.select("#new-analysis-form").classed("hidden", true);
+            d3.select("#dataset-save").classed("hidden", true);
         }
 
         $.each(analysisMap, function (key, value) {
