@@ -223,12 +223,12 @@ $(document).ready(function () {
                 done(null, {type: "image", format: "png", data: byteArray});
                 return;
             }
-            uri = "/girder/api/v1/item/cardoon/" + type + "/" + dataset.format + "/" + format;
+            uri = "/girder/api/v1/item/romanesco/" + type + "/" + dataset.format + "/" + format;
             d3.json(uri).post(dataset.data, done);
         } else {
             parts = dataset.uri.split("/");
             parts.pop();
-            uri = parts.join("/") + "/cardoon/" + type + "/" + dataset.format + "/" + format;
+            uri = parts.join("/") + "/romanesco/" + type + "/" + dataset.format + "/" + format;
             d3.json(uri, done);
         }
     }
@@ -555,7 +555,8 @@ $(document).ready(function () {
         if (analysis) {
             analysis.data.script = editor.getValue();
             d3.json(analysis.uri + "/metadata").send("put", JSON.stringify({analysis: analysis.data}), function (error, result) {
-                console.log(result);
+                // Trigger recreating the analysis UI
+                $("#analysis").change();
             });
         }
     });
@@ -783,10 +784,10 @@ $(document).ready(function () {
     });
 
     function checkTaskResult() {
-        d3.json(analysis.uri + "/cardoon/" + taskId + "/status", function (error, result) {
+        d3.json(analysis.uri + "/romanesco/" + taskId + "/status", function (error, result) {
             console.log(result.status);
             if (result.status === "SUCCESS") {
-                d3.json(analysis.uri + "/cardoon/" + taskId + "/result", function (error, data) {
+                d3.json(analysis.uri + "/romanesco/" + taskId + "/result", function (error, data) {
                     var result = data.result;
                     // Put data into list
                     $.each(result, function (outputName, output) {
@@ -850,7 +851,7 @@ $(document).ready(function () {
         d3.select("#success-message").classed("hidden", true);
         d3.select("#error-message").classed("hidden", true);
         d3.select("#info-message").classed("hidden", false).text("Running analysis ...");
-        d3.json(analysis.uri + "/cardoon").post(JSON.stringify(bindings), function (error, result) {
+        d3.json(analysis.uri + "/romanesco").post(JSON.stringify(bindings), function (error, result) {
             taskId = result.id;
             setTimeout(checkTaskResult, 1000);
         });
