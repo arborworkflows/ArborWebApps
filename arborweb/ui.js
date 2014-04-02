@@ -1,7 +1,7 @@
 /*jslint browser: true, unparam: true, nomen: true */
 /*globals ace, atob, Blob, d3, $, girderUpload, FileReader, console, tangelo, Uint8Array */
 
-$.fn.image = function(options) {
+$.fn.image = function (options) {
     "use strict";
     var data = options.data;
     if (options.data.indexOf("data:image/png;base64,") !== 0) {
@@ -50,12 +50,16 @@ $(document).ready(function () {
                 name: "treeHeatmap",
                 options: [
                     {
-                        name: "tree", type: "tree",
-                        format: "vtktree.serialized", dataIsURI: true
+                        name: "tree",
+                        type: "tree",
+                        format: "vtktree.serialized",
+                        dataIsURI: true
                     },
                     {
-                        name: "table", type: "table",
-                        format: "vtktable.serialized", dataIsURI: true
+                        name: "table",
+                        type: "table",
+                        format: "vtktable.serialized",
+                        dataIsURI: true
                     }
                 ]
             }
@@ -453,7 +457,7 @@ $(document).ready(function () {
         }
 
         add.off("click");
-        add.click(function() {
+        add.click(function () {
             var param = {name: name.val(), type: "table", format: "rows"};
             parameters.push(param);
             parameterMap[param.name] = param;
@@ -514,7 +518,7 @@ $(document).ready(function () {
         });
 
         remove.off("click");
-        remove.click(function() {
+        remove.click(function () {
             var param = parameterMap[select.val()], index;
             if (param) {
                 index = parameters.indexOf(param);
@@ -743,7 +747,7 @@ $(document).ready(function () {
         $("#analysis").change();
     });
 
-    $("#analysis").change(function() {
+    $("#analysis").change(function () {
         var analysisUri = $("#analysis").val();
         if (analysisUri) {
             analysis = analysisMap[analysisUri];
@@ -775,7 +779,7 @@ $(document).ready(function () {
         .text(function (d) { return d.name; })
         .attr("value", function (d) { return d.name; });
 
-    $("#visualization").change(function() {
+    $("#visualization").change(function () {
         visualization = visualizationMap[$("#visualization").val()];
         setupEditor("#vis-inputs", "vis-input-", visualization.options);
     });
