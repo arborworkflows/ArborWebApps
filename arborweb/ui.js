@@ -45,6 +45,19 @@ $(document).ready(function () {
                 options: [
                     {name: "data", type: "image", format: "png.base64"}
                 ]
+            },
+            {
+                name: "treeHeatmap",
+                options: [
+                    {
+                        name: "tree", type: "tree",
+                        format: "vtktree.serialized", dataIsURI: true
+                    },
+                    {
+                        name: "table", type: "table",
+                        format: "vtktable.serialized", dataIsURI: true
+                    }
+                ]
             }
         ],
         visualizationMap = {},
@@ -192,12 +205,23 @@ $(document).ready(function () {
         reader.readAsText(file);
     }
 
-    function retrieveDatasetAsFormat(dataset, type, format, done) {
+    function retrieveDatasetAsFormat(dataset, type, format, dataIsURI, done) {
         var uri, parts,
             byteCharacters,
             byteNumbers,
             byteArray,
             i;
+        if (dataIsURI) {
+            parts = dataset.uri.split("/");
+            parts.pop();
+            dataset.data = parts.join("/") + "/romanesco/" + type + "/" +
+                           dataset.format + "/" + format;
+            if (token) {
+                dataset.data += "?token=" + token;
+            }
+            done(null, dataset);
+            return;
+        }
         if (dataset.hasOwnProperty("data")) {
             if (dataset.format === format) {
                 done(null, dataset);
@@ -889,7 +913,7 @@ $(document).ready(function () {
                     d3.select("#prov")
                         .text(JSON.stringify(dataset.bindings.inputs, null, "    "));
                 }
-                retrieveDatasetAsFormat(dataset, input.type, input.format, function (error, data) {
+                retrieveDatasetAsFormat(dataset, input.type, input.format, input.dataIsURI, function (error, data) {
                     options[input.name] = data.data;
                     loadInputs(inputs, options, done);
                 });
