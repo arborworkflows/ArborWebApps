@@ -277,7 +277,7 @@ $(document).ready(function () {
         var name = $("#dataset-name").val(),
             format = $("#dataset-format-select").val(),
             dataset = datasetMap[$("#local-dataset-select").val()];
-        retrieveDatasetAsFormat(dataset, dataset.type, format, function (error, converted) {
+        retrieveDatasetAsFormat(dataset, dataset.type, format, false, function (error, converted) {
             girderUpload(new Blob([converted.data]), name + "." + extensions[format], currentCollection.dataFolder);
         });
     });
@@ -286,7 +286,7 @@ $(document).ready(function () {
         var name = $("#dataset-name").val(),
             format = $("#dataset-format-select").val(),
             dataset = datasetMap[$("#local-dataset-select").val()];
-        retrieveDatasetAsFormat(dataset, dataset.type, format, function (error, converted) {
+        retrieveDatasetAsFormat(dataset, dataset.type, format, false, function (error, converted) {
             var blob = new Blob([converted.data], {type: "image/png"}),
                 anchor = $('<a href="' + URL.createObjectURL(blob) + '" download="' + name + "." + extensions[format] + '" class="hidden"></a>');
             anchor[0].click();
@@ -408,7 +408,7 @@ $(document).ready(function () {
                     control = $(controlMap[input.domain.input].node());
                     control.change(function () {
                         var dataset = datasetMap[control.val()];
-                        retrieveDatasetAsFormat(dataset, parameterMap[input.domain.input].type, input.domain.format, function (error, data) {
+                        retrieveDatasetAsFormat(dataset, parameterMap[input.domain.input].type, input.domain.format, false, function (error, data) {
                             var options = controlMap[input.name].selectAll("option")
                                 .data(data.data, function (d) { return d; });
                             options.enter().append("option")
