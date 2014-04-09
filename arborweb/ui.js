@@ -32,6 +32,14 @@ $(document).ready(function () {
                 options: [{name: "data", type: "table", format: "rows"}]
             },
             {
+                name: "timeline",
+                options: [
+                    {name: "data", type: "table", format: "rows"},
+                    {name: "date", type: "json", "default": {format: "inline", data: {"field": "Date"}}},
+                    {name: "y", type: "json", "default": {format: "inline", data: [{"field": "y"}]}}
+                ]
+            },
+            {
                 name: "dendrogram",
                 options: [
                     {name: "data", type: "tree", format: "nested"},
@@ -89,6 +97,7 @@ $(document).ready(function () {
         formats = [
             "table:rows",
             "table:r.dataframe",
+            "table:csv",
             "tree:nested",
             "tree:r.apetree",
             "string:text",
@@ -409,6 +418,7 @@ $(document).ready(function () {
                     control.change(function () {
                         var dataset = datasetMap[control.val()];
                         retrieveDatasetAsFormat(dataset, parameterMap[input.domain.input].type, input.domain.format, false, function (error, data) {
+                            data.data.sort();
                             var options = controlMap[input.name].selectAll("option")
                                 .data(data.data, function (d) { return d; });
                             options.enter().append("option")
@@ -898,10 +908,6 @@ $(document).ready(function () {
 
     // Show visualization
     d3.select("#show").on("click", function () {
-        d3.select("#show")
-            .classed("btn-primary", false)
-            .classed("btn-default", true)
-            .attr("disabled", true);
         function loadInputs(inputs, options, done) {
             var input, dataset, value;
             if (inputs.length === 0) {
@@ -933,7 +939,7 @@ $(document).ready(function () {
             loadInputs(inputs, options, done);
         }
         loadInputs(visualization.options, {}, function (options) {
-            var inner = $("<div></div>");
+            var inner = $('<div style="width:100%;height:100%"></div>');
             $("#vis").empty();
             $("#vis").append(inner);
             inner[visualization.name](options);
@@ -944,11 +950,6 @@ $(document).ready(function () {
                 d3.select("#show-script").on("click")();
                 d3.select("#show-script").classed("active", false);
             }
-
-            d3.select("#show")
-                .classed("btn-primary", true)
-                .classed("btn-default", false)
-                .attr("disabled", null);
         });
     });
 
