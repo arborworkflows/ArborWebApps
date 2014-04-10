@@ -1,5 +1,5 @@
 /*jslint browser: true, unparam: true, nomen: true */
-/*globals ace, atob, Blob, d3, $, girderUpload, FileReader, console, tangelo, Uint8Array */
+/*globals ace, atob, Blob, d3, $, girderUpload, FileReader, console, tangelo, Uint8Array, URL */
 
 $.fn.image = function (options) {
     "use strict";
@@ -14,7 +14,7 @@ $.fn.image = function (options) {
 $(document).ready(function () {
     "use strict";
     var datasetMap = {},
-        datasetTypes = {"table": [], "tree": [], "string": [], "image": []},
+        datasetTypes = {"table": [], "tree": [], "string": [], "image": [], "r": []},
         localDatasets = [],
         editor,
         analysis,
@@ -79,20 +79,23 @@ $(document).ready(function () {
             "tree": "nested",
             "string": "text",
             "number": "number",
-            "image": "png.base64"
+            "image": "png.base64",
+            "r": "serialized"
         },
         saveFormats = {
             "table": ["csv", "rows.json"],
             "tree": ["nested.json", "nexus", "newick"],
-            "image": ["png"]
+            "image": ["png"],
+            "r": ["serialized"]
         },
         extensions = {
-            "csv": "csv",
-            "rows.json": "rows-json",
-            "nested.json": "nested-json",
-            "nexus": "nex",
-            "newick": "phy",
-            "png": "png"
+            "table:csv": "csv",
+            "table:rows.json": "rows-json",
+            "table:nested.json": "nested-json",
+            "tree:nexus": "nex",
+            "tree:newick": "phy",
+            "image:png": "png",
+            "r:serialized": "rds"
         },
         formats = [
             "table:rows",
@@ -102,7 +105,8 @@ $(document).ready(function () {
             "tree:r.apetree",
             "string:text",
             "number:number",
-            "image:png.base64"
+            "image:png.base64",
+            "r:object"
         ];
 
     function updateCollections() {
@@ -152,7 +156,7 @@ $(document).ready(function () {
 
     function updateDataSelectors() {
         var options;
-        ["table", "tree", "image"].forEach(function (type) {
+        ["table", "tree", "image", "r"].forEach(function (type) {
             d3.selectAll("." + type + "-select")
                 .each(function () {
                     var options = d3.select(this).selectAll("option")
@@ -189,6 +193,9 @@ $(document).ready(function () {
             } else if (endsWith(dataset.name, ".png")) {
                 dataset.type = "image";
                 dataset.format = "png";
+            } else if (endsWith(dataset.name, ".rds")) {
+                dataset.type = "r";
+                dataset.format = "serialized";
             }
         }
         if (!dataset.uri) {
@@ -252,7 +259,8 @@ $(document).ready(function () {
             }
             if (dataset.type === "image" && dataset.format === "png.base64" && format === "png") {
                 byteCharacters = atob(dataset.data);
-                byteNumbers = new Array(byteCharacters.length);
+                byteNumbers = [];
+                byteNumbers.length = byteCharacters.length;
                 for (i = 0; i < byteCharacters.length; i += 1) {
                     byteNumbers[i] = byteCharacters.charCodeAt(i);
                 }
@@ -287,7 +295,7 @@ $(document).ready(function () {
             format = $("#dataset-format-select").val(),
             dataset = datasetMap[$("#local-dataset-select").val()];
         retrieveDatasetAsFormat(dataset, dataset.type, format, false, function (error, converted) {
-            girderUpload(new Blob([converted.data]), name + "." + extensions[format], currentCollection.dataFolder);
+            girderUpload(new Blob([converted.data]), name + "." + extensions[dataset.type + ":" + format], currentCollection.dataFolder);
         });
     });
 
@@ -297,7 +305,7 @@ $(document).ready(function () {
             dataset = datasetMap[$("#local-dataset-select").val()];
         retrieveDatasetAsFormat(dataset, dataset.type, format, false, function (error, converted) {
             var blob = new Blob([converted.data], {type: "image/png"}),
-                anchor = $('<a href="' + URL.createObjectURL(blob) + '" download="' + name + "." + extensions[format] + '" class="hidden"></a>');
+                anchor = $('<a href="' + URL.createObjectURL(blob) + '" download="' + name + "." + extensions[dataset.type + ":" + format] + '" class="hidden"></a>');
             anchor[0].click();
         });
     });
@@ -367,7 +375,7 @@ $(document).ready(function () {
             div.append("label")
                 .attr("for", idPrefix + input.name)
                 .text(input.name);
-            if (input.type === "table" || input.type === "tree" || input.type === "image") {
+            if (input.type === "table" || input.type === "tree" || input.type === "image" || input.type === "r") {
                 controlMap[input.name] = div.append("select");
                 controlMap[input.name]
                     .classed("form-control", true)
@@ -431,7 +439,7 @@ $(document).ready(function () {
             }
         });
         parameters.forEach(function (input) {
-            if (input.type === "table" || input.type === "tree" || input.type === "image") {
+            if (input.type === "table" || input.type === "tree" || input.type === "image" || input.type === "r") {
                 $(controlMap[input.name].node()).change();
             }
         });
@@ -874,7 +882,7 @@ $(document).ready(function () {
 
         analysis.data.inputs.forEach(function (input) {
             var value = $("#input-" + input.name).val();
-            if (input.type === "table" || input.type === "tree" || input.type === "image") {
+            if (input.type === "table" || input.type === "tree" || input.type === "image" || input.type === "r") {
                 bindings.inputs[input.name] = datasetMap[value];
             } else if (input.type === "string") {
                 bindings.inputs[input.name] = {"type": input.type, "format": "text", "data": value};
@@ -917,7 +925,7 @@ $(document).ready(function () {
             input = inputs[0];
             inputs = inputs.slice(1);
             value = $("#vis-input-" + input.name).val();
-            if (input.type === "table" || input.type === "tree" || input.type === "image") {
+            if (input.type === "table" || input.type === "tree" || input.type === "image" || input.type === "r") {
                 dataset = datasetMap[value];
                 if (dataset.bindings) {
                     d3.select("#prov")
