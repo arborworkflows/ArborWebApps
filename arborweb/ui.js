@@ -94,7 +94,6 @@ $(document).ready(function () {
             "table:nested.json": "nested-json",
             "tree:nexus": "nex",
             "tree:newick": "phy",
-             "tree:newick": "newick",
             "image:png": "png",
             "r:serialized": "rds"
         },
@@ -183,9 +182,17 @@ $(document).ready(function () {
         }
     }
 
+    // adding ".newick" and .nwk type as a legal extensions for newick
+
     function addDataset(dataset) {
         if (!dataset.type) {
             if (endsWith(dataset.name, ".phy")) {
+                dataset.type = "tree";
+                dataset.format = "newick";
+            } else if (endsWith(dataset.name, ".newick")) {
+                dataset.type = "tree";
+                dataset.format = "newick";
+            } else if (endsWith(dataset.name, ".nwk")) {
                 dataset.type = "tree";
                 dataset.format = "newick";
             } else if (endsWith(dataset.name, ".csv")) {
