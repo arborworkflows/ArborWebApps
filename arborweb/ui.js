@@ -94,6 +94,7 @@ $(document).ready(function () {
             "table:nested.json": "nested-json",
             "tree:nexus": "nex",
             "tree:newick": "phy",
+             "tree:newick": "newick",
             "image:png": "png",
             "r:serialized": "rds"
         },
