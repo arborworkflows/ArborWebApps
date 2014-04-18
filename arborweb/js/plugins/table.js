@@ -20,24 +20,38 @@
         _update: function () {
             var header = "<thead>",
                 body = "<tbody>",
-                headerSet = false;
+                headerSet = false,
+                fields = this.options.data.fields,
+                rows = this.options.data.rows || this.options.data;
 
             this.div.empty();
 
-            $.each(this.options.data, function(key, value) {
-                var row = "<tr>";
-                $.each(value, function(key, value) {
-                    if (key !== "_id") {
+            if (fields) {
+                $.each(fields, function(index, value) {
+                    header += "<th>" + value + "</th>";
+                });
+                $.each(rows, function(index, value) {
+                    var row = "<tr>";
+                    $.each(fields, function(index, field) {
+                        row += "<td>" + value[field] + "</td>";
+                    });
+                    row += "</tr>";
+                    body += row;
+                });
+            } else {
+                $.each(rows, function(key, value) {
+                    var row = "<tr>";
+                    $.each(value, function(key, value) {
                         row += "<td>" + value + "</td>";
                         if (!headerSet) {
                             header += "<th>" + key + "</th>";
                         }
-                    }
+                    });
+                    headerSet = true;
+                    row += "</tr>";
+                    body += row;
                 });
-                headerSet = true;
-                row += "</tr>";
-                body += row;
-            });
+            }
             header += "</thead>";
             body += "</tbody>";
             this.div.append(header);
