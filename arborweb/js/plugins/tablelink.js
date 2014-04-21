@@ -1,6 +1,6 @@
 /*jslint browser: true, unparam: true */
 
-(function ($, tangelo, vg) {
+(function ($, d3, tangelo, vg) {
     "use strict";
 
     $.fn.tablelink = function (spec) {
@@ -38,12 +38,6 @@
             linkMap[s][t].count += 1;
         });
 
-        links.forEach(function (link) {
-            if (!nodeMap[link.source]) {
-                console.log(link);
-            }
-        });
-
         links.sort(function (a, b) { return d3.descending(a.count, b.count); });
         filteredLinks = links.slice(0, 200);
 
@@ -57,9 +51,6 @@
                 filteredNodes.push(nodeMap[link.target]);
             }
         });
-
-        console.log(filteredLinks);
-        console.log(filteredNodes);
 
         return $(that).nodeLink({
             data: {nodes: filteredNodes, links: filteredLinks},
@@ -75,4 +66,4 @@
         });
     };
 
-}(window.jQuery, window.tangelo, window.vg));
+}(window.jQuery, window.d3, window.tangelo, window.vg));
