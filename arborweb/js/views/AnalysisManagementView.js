@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true */
 
-(function (flow, $, _, ace, Backbone, d3, girder, tangelo) {
+(function (flow, $, _, ace, Backbone, Blob, d3, girder, tangelo, URL) {
     "use strict";
 
    // The view for selecting, running, and editing analyses
@@ -87,7 +87,15 @@
                         $("#analysis-name").val("");
                     }, this));
                 }, this));
+            },
+
+            'click #analysis-download': function () {
+                var blob = new Blob([JSON.stringify(this.analysis.get('meta').analysis, null, "    ")]),
+                    filename = this.analysis.get('meta').analysis.name + '.json',
+                    anchor = $('<a href="' + URL.createObjectURL(blob) + '" download="' + filename + '" class="hidden"></a>');
+                anchor[0].click();
             }
+
         },
 
         initialize: function (settings) {
@@ -266,4 +274,4 @@
         }
     });
 
-}(window.flow, window.$, window._, window.ace, window.Backbone, window.d3, window.girder, window.tangelo));
+}(window.flow, window.$, window._, window.ace, window.Backbone, window.Blob, window.d3, window.girder, window.tangelo, window.URL));
