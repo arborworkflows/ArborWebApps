@@ -12,8 +12,10 @@
                     var inner = $('<div style="width:100%;height:100%"></div>');
                     $("#vis").empty();
                     $("#vis").append(inner);
-                    inner[this.visualization.get('name')](options);
                     flow.setDisplay('vis');
+                    setTimeout(_.bind(function () {
+                        inner[this.visualization.get('name')](options);
+                    }, this), 1000);
 
                     // Untoggle the show script button if active
                     if (d3.select("#show-script").classed("active")) {
