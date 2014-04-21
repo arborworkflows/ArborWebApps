@@ -1,6 +1,6 @@
 /*jslint browser: true, nomen: true */
 
-(function (flow, $, _, ace, Backbone, Blob, d3, girder, tangelo, URL) {
+(function (flow, $, _, ace, Backbone, Blob, d3, FileReader, girder, tangelo, URL) {
     "use strict";
 
    // The view for selecting, running, and editing analyses
@@ -67,26 +67,14 @@
             },
 
             'click #analysis-new': function () {
-                var meta = {
-                    analysis: {
-                        name: $("#analysis-name").val(),
-                        inputs: [],
-                        outputs: [],
-                        mode: "python",
-                        script: ""
-                    }
+                var analysis = {
+                    name: $("#analysis-name").val(),
+                    inputs: [],
+                    outputs: [],
+                    mode: "python",
+                    script: ""
                 };
-                d3.json(girder.apiRoot + '/item/?name=' + encodeURIComponent(meta.analysis.name) + '&folderId=' + flow.saveLocation.get('analysisFolder')).post(_.bind(function (error, result) {
-                    var analysisUri = girder.apiRoot + '/item/' + result._id;
-                    d3.json(analysisUri + '/metadata').send('put', JSON.stringify(meta), _.bind(function (error, result) {
-                        var model = new Backbone.Model(result);
-                        model.id = model.get('_id');
-                        this.analyses.add(model);
-                        $("#analysis").val(model.cid);
-                        $("#analysis").change();
-                        $("#analysis-name").val("");
-                    }, this));
-                }, this));
+                this.createAnalysis(analysis);
             },
 
             'click #analysis-download': function () {
@@ -94,6 +82,17 @@
                     filename = this.analysis.get('meta').analysis.name + '.json',
                     anchor = $('<a href="' + URL.createObjectURL(blob) + '" download="' + filename + '" class="hidden"></a>');
                 anchor[0].click();
+            },
+
+            'change #analysis-files': function () {
+                var files = $('#analysis-files')[0].files;
+                _.each(files, function (file) {
+                    this.upload(file);
+                }, this);
+            },
+
+            'click #analysis-upload': function () {
+                $('#analysis-files').click();
             }
 
         },
@@ -142,6 +141,30 @@
                 this.editor.setValue('');
                 this.setupVariableEditor('input-edit-', []);
             }
+        },
+
+        upload: function (file) {
+            var reader = new FileReader();
+
+            reader.onload = _.bind(function (e) {
+                this.createAnalysis(JSON.parse(e.target.result));
+            }, this);
+
+            reader.readAsText(file);
+        },
+
+        createAnalysis: function (analysis) {
+            d3.json(girder.apiRoot + '/item/?name=' + encodeURIComponent(analysis.name) + '&folderId=' + flow.saveLocation.get('analysisFolder')).post(_.bind(function (error, result) {
+                var analysisUri = girder.apiRoot + '/item/' + result._id;
+                d3.json(analysisUri + '/metadata').send('put', JSON.stringify({analysis: analysis}), _.bind(function (error, result) {
+                    var model = new Backbone.Model(result);
+                    model.id = model.get('_id');
+                    this.analyses.add(model);
+                    $("#analysis").val(model.cid);
+                    $("#analysis").change();
+                    $("#analysis-name").val("");
+                }, this));
+            }, this));
         },
 
         saveLocationChange: function () {
@@ -274,4 +297,4 @@
         }
     });
 
-}(window.flow, window.$, window._, window.ace, window.Backbone, window.Blob, window.d3, window.girder, window.tangelo, window.URL));
+}(window.flow, window.$, window._, window.ace, window.Backbone, window.Blob, window.d3, window.FileReader, window.girder, window.tangelo, window.URL));
