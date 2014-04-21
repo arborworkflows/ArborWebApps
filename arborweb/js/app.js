@@ -174,9 +174,9 @@
 
                     if (collection.get('dataFolder')) {
                         this.datasets.offset = 0;
-                        this.datasets.off('add', null, this).on('add', function (dataset) {
+                        this.datasets.off('add', null, 'set-collection').on('add', function (dataset) {
                             dataset.set({collection: collection});
-                        }, this).fetch({
+                        }, 'set-collection').fetch({
                             folderId: collection.get('dataFolder')
                         });
                     }
