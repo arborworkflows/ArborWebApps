@@ -121,9 +121,13 @@ var tangelo = {};
         });
     } else {
         tangelo.config = function(inputfile, callback) {
+            var path = window.location.pathname;
+            if (path.slice(-1) !== "/") {
+                path = window.location.pathname.split("/").slice(0, -1).join("/");
+            }
             if (inputfile.length > 0) {
                 if (inputfile[0] !== "/" && inputfile[0] !== "~") {
-                    inputfile = window.location.pathname + "/" + inputfile;
+                    inputfile = path + "/" + inputfile;
                 }
             }
             $.ajax({
@@ -1558,7 +1562,7 @@ window.tangelo.vtkweb = {};
     if (!($ && $.widget && d3)) {
         return;
     }
-    tangelo.widget("tangelo.nodelink", {
+    tangelo.widget("tangelo.nodeLink", {
         options: {
             nodeCharge: tangelo.accessor({
                 value: -130
@@ -1590,59 +1594,101 @@ window.tangelo.vtkweb = {};
             linkOpacity: tangelo.accessor({
                 value: .2
             }),
-            nodeX: tangelo.accessor(),
-            nodeY: tangelo.accessor(),
-            width: 1e3,
-            height: 1e3,
             dynamicLabels: false,
             data: null
         },
         _create: function() {
+            var that = this;
             this.colorScale = d3.scale.category10();
             this.force = d3.layout.force();
-            this.svg = d3.select(this.element.get(0)).append("svg");
+            this.svg = d3.select(this.element.get(0)).append("svg").style("width", "100%").style("height", "100%");
+            function resize() {
+                that.width = that.element.width();
+                that.height = that.element.height();
+                that._update();
+            }
+            $(window).resize(resize);
+            this.width = this.element.width();
+            this.height = this.element.height();
         },
         _update: function() {
-            var that = this, nodeIdMap = {};
-            if (this.options.nodeX && !this.options.nodeX.undefined) {
-                this.xScale = d3.scale.linear().domain(d3.extent(this.options.data.nodes, this.options.nodeX)).range([ 50, this.options.width - 100 ]);
-            }
-            if (this.options.nodeY && !this.options.nodeY.undefined) {
-                this.yScale = d3.scale.linear().domain(d3.extent(this.options.data.nodes, this.options.nodeY)).range([ this.options.height - 100, 50 ]);
-            }
-            this.force.linkDistance(this.options.linkDistance).charge(this.options.nodeCharge).size([ this.options.width, this.options.height ]);
+            var that = this, nodeIdMap = {}, nodeEnter;
+            this.force.linkDistance(this.options.linkDistance).charge(this.options.nodeCharge).size([ this.width, this.height ]);
             this.options.data.nodes.forEach(function(d, i) {
                 nodeIdMap[that.options.nodeId(d, i)] = d;
-                d.degree = 0;
-                d.outgoing = [];
-                d.incoming = [];
+                d._degree = 0;
+                d._outgoing = [];
+                d._incoming = [];
             });
             this.options.data.links.forEach(function(d, i) {
                 d.source = nodeIdMap[that.options.linkSource(d, i)];
                 d.target = nodeIdMap[that.options.linkTarget(d, i)];
-                d.source.degree += 1;
-                d.target.degree += 1;
-                d.source.outgoing.push(d.target);
-                d.target.incoming.push(d.source);
+                d.source._degree += 1;
+                d.target._degree += 1;
+                d.source._outgoing.push(d.target);
+                d.target._incoming.push(d.source);
             });
-            this.options.data.nodes.sort(function(a, b) {
-                return d3.descending(a.degree, b.degree);
+            this.options.data.nodes.forEach(function(d, i) {
+                var count = 0;
+                if (d.x === undefined) {
+                    d.x = 0;
+                    d.y = 0;
+                    d._incoming.forEach(function(other) {
+                        if (other.x !== undefined) {
+                            d.x += other.x;
+                            d.y += other.y;
+                            count += 1;
+                        }
+                    });
+                    d._outgoing.forEach(function(other) {
+                        if (other.x !== undefined) {
+                            d.x += other.x;
+                            d.y += other.y;
+                            count += 1;
+                        }
+                    });
+                    if (count > 0) {
+                        d.x /= count;
+                        d.y /= count;
+                    } else {
+                        delete d.x;
+                        delete d.y;
+                    }
+                }
+                nodeIdMap[that.options.nodeId(d, i)] = d;
+                d._degree = 0;
+                d._outgoing = [];
+                d._incoming = [];
             });
             this.sizeScale = d3.scale.sqrt().domain(d3.extent(this.options.data.nodes, that.options.nodeSize)).range([ 5, 15 ]);
-            this.force.size([ this.options.width, this.options.height ]).nodes(this.options.data.nodes).links(this.options.data.links).start();
+            this.linkOpacityScale = d3.scale.sqrt().domain(d3.extent(this.options.data.links, that.options.linkOpacity)).range([ .1, 1 ]);
+            this.nodeOpacityScale = d3.scale.sqrt().domain(d3.extent(this.options.data.nodes, that.options.nodeOpacity)).range([ .1, 1 ]);
+            this.force.size([ this.width, this.height ]).nodes(this.options.data.nodes).links(this.options.data.links).start();
             this.link = this.svg.selectAll(".link").data(this.options.data.links);
-            this.link.enter().append("line").classed("link", true).style("opacity", this.options.linkOpacity).style("stroke", "black").style("stroke-width", 1);
-            this.node = this.svg.selectAll(".node").data(this.options.data.nodes);
-            this.node.enter().append("circle").classed("node", true).call(this.force.drag).append("title");
+            this.link.enter().append("line").classed("link", true).style("stroke", "black").style("stroke-width", 1).style("opacity", 0);
+            this.link.exit().remove();
+            this.node = this.svg.selectAll(".node").data(this.options.data.nodes, this.options.nodeId);
+            nodeEnter = this.node.enter().append("circle").classed("node", true).style("opacity", 0).call(this.force.drag);
+            nodeEnter.append("title");
+            nodeEnter.transition().duration(1e3).style("opacity", this.options.nodeOpacity);
             this.node.attr("r", function(d, i) {
                 return that.sizeScale(that.options.nodeSize(d, i));
             }).style("fill", function(d, i) {
                 return that.colorScale(that.options.nodeColor(d, i));
-            }).style("opacity", this.options.nodeOpacity);
+            }).style("opacity", function(d, i) {
+                return that.nodeOpacityScale(that.options.nodeOpacity(d, i));
+            }).sort(function(a, b) {
+                return d3.descending(a._degree, b._degree);
+            });
+            this.link.style("opacity", function(d, i) {
+                return that.linkOpacityScale(that.options.linkOpacity(d, i));
+            });
+            this.node.exit().remove();
             this.node.selectAll("title").text(this.options.nodeLabel);
             if (!that.options.dynamicLabels) {
-                this.label = this.svg.selectAll("text").data(this.options.data.nodes);
+                this.label = this.svg.selectAll("text").data(this.options.data.nodes, this.options.nodeId);
                 this.label.enter().append("text").text(this.options.nodeLabel);
+                this.label.exit().remove();
             }
             this.force.on("tick", function() {
                 that._tick.call(that);
@@ -1651,16 +1697,6 @@ window.tangelo.vtkweb = {};
         },
         _tick: function() {
             var that = this, nodeLabels;
-            if (this.options.nodeX && !that.options.nodeX.undefined) {
-                that.options.data.nodes.forEach(function(d, i) {
-                    d.x = that.xScale(that.options.nodeX(d, i));
-                });
-            }
-            if (this.options.nodeY && !that.options.nodeY.undefined) {
-                that.options.data.nodes.forEach(function(d, i) {
-                    d.y = that.yScale(that.options.nodeY(d, i));
-                });
-            }
             if (that.options.dynamicLabels) {
                 nodeLabels = that._nodeLabels();
                 that.svg.selectAll("text").remove();
@@ -1710,8 +1746,8 @@ window.tangelo.vtkweb = {};
                         count += 1;
                         labels.push(that.options.nodeLabel(dd, i));
                         dd.visited = true;
-                        dd.incoming.forEach(visit);
-                        dd.outgoing.forEach(visit);
+                        dd._incoming.forEach(visit);
+                        dd._outgoing.forEach(visit);
                     }
                 }
                 visit(d);
