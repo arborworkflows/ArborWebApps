@@ -64,6 +64,29 @@
                     this.analysisSetupView.model = this.analysis;
                     this.analysisSetupView.render();
                 }
+            },
+
+            'click #analysis-new': function () {
+                var meta = {
+                    analysis: {
+                        name: $("#analysis-name").val(),
+                        inputs: [],
+                        outputs: [],
+                        mode: "python",
+                        script: ""
+                    }
+                };
+                d3.json(girder.apiRoot + '/item/?name=' + encodeURIComponent(meta.analysis.name) + '&folderId=' + flow.saveLocation.get('analysisFolder')).post(_.bind(function (error, result) {
+                    var analysisUri = girder.apiRoot + '/item/' + result._id;
+                    d3.json(analysisUri + '/metadata').send('put', JSON.stringify(meta), _.bind(function (error, result) {
+                        var model = new Backbone.Model(result);
+                        model.id = model.get('_id');
+                        this.analyses.add(model);
+                        $("#analysis").val(model.cid);
+                        $("#analysis").change();
+                        $("#analysis-name").val("");
+                    }, this));
+                }, this));
             }
         },
 
