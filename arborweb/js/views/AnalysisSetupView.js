@@ -84,7 +84,8 @@
                 console.log(result.status);
                 if (result.status === 'SUCCESS') {
                     d3.json(girder.apiRoot + '/item/' + this.model.id + '/romanesco/' + this.taskId + '/result', _.bind(function (error, data) {
-                        var result = data.result;
+                        var result = data.result,
+                            outputMessage;
                         // Put data into list
                         $.each(result, _.bind(function (outputName, output) {
                             var index = 1;
@@ -97,14 +98,21 @@
                             output.set({bindings: this.taskBindings});
                             console.log(output);
                             this.datasets.off('add', null, 'set-collection').add(output);
+                            if (outputMessage) {
+                                outputMessage += ',';
+                            } else {
+                                outputMessage = '';
+                            }
+                            outputMessage += ' ' + output.get('name') + ' [' + output.get('type') + ']';
                         }, this));
+                        outputMessage += '.';
                         d3.select('.run')
                             .classed('btn-primary', true)
                             .classed('btn-default', false)
                             .attr('disabled', null);
                         d3.select('.error-message').classed('hidden', true);
                         d3.select('.info-message').classed('hidden', true);
-                        d3.select('.success-message').classed('hidden', false).text('Success!');
+                        d3.select('.success-message').classed('hidden', false).text('Success! Created outputs: ' + outputMessage);
                         console.log(data);
                     }, this));
                 } else if (result.status === 'FAILURE') {
