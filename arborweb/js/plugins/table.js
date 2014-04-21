@@ -31,6 +31,9 @@
                     header += "<th>" + value + "</th>";
                 });
                 $.each(rows, function(index, value) {
+                    if (index >= 200) {
+                        return;
+                    }
                     var row = "<tr>";
                     $.each(fields, function(index, field) {
                         row += "<td>" + value[field] + "</td>";
@@ -40,6 +43,9 @@
                 });
             } else {
                 $.each(rows, function(key, value) {
+                    if (key >= 200) {
+                        return;
+                    }
                     var row = "<tr>";
                     $.each(value, function(key, value) {
                         row += "<td>" + value + "</td>";
