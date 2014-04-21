@@ -32,6 +32,14 @@
                 ]
             },
             {
+                name: "tablelink",
+                inputs: [
+                    {name: "data", type: "table", format: "rows"},
+                    {name: "source", type: "string", domain: {input: "data", format: "column.names"}},
+                    {name: "target", type: "string", domain: {input: "data", format: "column.names"}}
+                ]
+            },
+            {
                 name: "image",
                 inputs: [
                     {name: "data", type: "image", format: "png.base64"}
