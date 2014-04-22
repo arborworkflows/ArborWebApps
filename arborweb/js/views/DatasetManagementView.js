@@ -35,6 +35,7 @@
                         parts = name.split('.'),
                         nameWithExtension = parts[parts.length - 1] === extension ? name : name + '.' + extension;
                     girderUpload(blob, nameWithExtension, flow.saveLocation.get('dataFolder'));
+                    dataset.set({collection: flow.saveLocation});
                 }, this));
             },
 
@@ -129,7 +130,7 @@
                 _.extend(dataset, flow.extensionToType[extension]);
                 dataset = new Backbone.Model(dataset);
 
-                this.datasets.add(dataset);
+                this.datasets.off('add', null, 'set-collection').add(dataset);
             }, this);
 
             reader.readAsText(file);
