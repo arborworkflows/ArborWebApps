@@ -19,7 +19,7 @@
 
                     // Untoggle the show script button if active
                     if (d3.select("#show-script").classed("active")) {
-                        d3.select("#show-script").on("click")();
+                        $("#show-script").click();
                         d3.select("#show-script").classed("active", false);
                     }
                 }, this));
