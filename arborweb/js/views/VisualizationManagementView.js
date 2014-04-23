@@ -69,7 +69,7 @@
 
             input = inputView.model;
 
-            if (input.get('type') === 'table' || input.get('type') === 'tree' || input.get('type') === 'image' || input.get('type') === 'r') {
+            if (inputView.inputMode === 'dataset') {
                 dataset = this.datasets.get(value);
                 if (dataset.get('bindings')) {
                     d3.select("#prov")
@@ -81,9 +81,7 @@
                     // Handle the rest once we're done taking care of this one
                     this.loadInputs(inputViews, options, done);
                 }, this));
-                return;
-            }
-            if (input.get('type') === 'string') {
+            } else if (input.get('type') === 'string') {
                 options[input.get('name')] = value;
             } else if (input.get('type') === 'number') {
                 options[input.get('name')] = parseFloat(value);

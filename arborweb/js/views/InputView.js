@@ -7,13 +7,13 @@
     // visualization based on its type
     flow.InputView = Backbone.View.extend({
         typeMetadata: {
-            table: {dataset: true},
-            tree: {dataset: true},
-            image: {dataset: true},
-            r: {dataset: true},
-            string: {dataset: false},
-            number: {dataset: false},
-            json: {dataset: false}
+            table: {inputMode: "dataset"},
+            tree: {inputMode: "dataset"},
+            image: {inputMode: "dataset"},
+            r: {inputMode: "dataset"},
+            string: {inputMode: "line"},
+            number: {inputMode: "line"},
+            json: {inputMode: "line"}
         },
 
         initialize: function (settings) {
@@ -21,13 +21,17 @@
 
             this.datasets = settings.datasets;
             this.idPrefix = settings.idPrefix;
+            this.inputMode = this.model.get('inputMode');
+            if (!this.inputMode) {
+                this.inputMode = this.typeMetadata[this.model.get('type')].inputMode;
+            }
 
             div = d3.select(this.el).append('div')
                 .classed('form-group', true);
             div.append('label')
                 .attr('for', this.idPrefix + this.model.get('name'))
                 .text(this.model.get('name'));
-            if (this.typeMetadata[this.model.get('type')].dataset) {
+            if (this.inputMode === 'dataset') {
                 this.view = new flow.ItemsView({
                     el: $('<select class="form-control"/>').appendTo(div.node()),
                     collection: this.datasets,

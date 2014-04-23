@@ -112,6 +112,7 @@
             this.editor.setHighlightGutterLine(false);
             this.editor.setShowPrintMargin(false);
             this.editor.setReadOnly(true);
+            this.editor.setFontSize(14);
             this.editor.renderer.$cursorLayer.element.style.opacity = 0;
 
             this.analyses = settings.analyses;

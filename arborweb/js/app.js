@@ -46,6 +46,12 @@
                 ]
             },
             {
+                name: "string",
+                inputs: [
+                    {name: "data", type: "string", format: "text", inputMode: "dataset"}
+                ]
+            },
+            {
                 name: "treeHeatmap",
                 inputs: [
                     {
