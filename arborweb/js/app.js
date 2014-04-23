@@ -7,8 +7,6 @@
     flow.App = Backbone.View.extend({
         el: 'body',
 
-        types: ['table', 'tree', 'string', 'image', 'r'],
-
         visualizationDescriptors: [
             {
                 name: "table",
