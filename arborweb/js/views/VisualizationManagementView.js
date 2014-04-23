@@ -4,6 +4,68 @@
     "use strict";
 
     flow.VisualizationManagementView = Backbone.View.extend({
+
+        visualizationDescriptors: [
+            {
+                name: "table",
+                inputs: [{name: "data", type: "table", format: "rows"}]
+            },
+            {
+                name: "timeline",
+                inputs: [
+                    {name: "data", type: "table", format: "rows"},
+                    {name: "date", type: "json", "default": {format: "inline", data: {"field": "Date"}}},
+                    {name: "y", type: "json", "default": {format: "inline", data: [{"field": "y"}]}}
+                ]
+            },
+            {
+                name: "dendrogram",
+                inputs: [
+                    {name: "data", type: "tree", format: "nested"},
+                    {name: "distance", type: "json", "default": {format: "inline", data: {"field": "edge_data.weight"}}},
+                    {name: "lineStyle", type: "string", domain: ["axisAligned", "curved"]},
+                    {name: "orientation", type: "string", domain: ["horizontal", "vertical"]}
+                ]
+            },
+            {
+                name: "tablelink",
+                inputs: [
+                    {name: "data", type: "table", format: "rows"},
+                    {name: "source", type: "string", domain: {input: "data", format: "column.names"}},
+                    {name: "target", type: "string", domain: {input: "data", format: "column.names"}}
+                ]
+            },
+            {
+                name: "image",
+                inputs: [
+                    {name: "data", type: "image", format: "png.base64"}
+                ]
+            },
+            {
+                name: "string",
+                inputs: [
+                    {name: "data", type: "string", format: "text", inputMode: "dataset"}
+                ]
+            },
+            {
+                name: "treeHeatmap",
+                inputs: [
+                    {
+                        name: "tree",
+                        type: "tree",
+                        format: "vtktree.serialized",
+                        dataIsURI: true
+                    },
+                    {
+                        name: "table",
+                        type: "table",
+                        format: "vtktable.serialized",
+                        dataIsURI: true
+                    }
+                ]
+            }
+        ],
+
         events: {
             'change #visualization': 'changeVisualization',
 
@@ -34,7 +96,7 @@
                 datasets: this.datasets
             });
 
-            this.visualizations = settings.visualizations;
+            this.visualizations = new Backbone.Collection(this.visualizationDescriptors);
             this.visualizaitonsView = new flow.ItemsView({el: this.$('#visualization'), itemView: flow.ItemOptionView, collection: this.visualizations});
             this.visualizaitonsView.render();
             this.changeVisualization();
