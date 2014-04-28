@@ -5,7 +5,7 @@ import json
 import tangelo
 import math
 import materializedPaths
-import urllib2
+import urllib
 
 def isInBounds(lng, lat, container, boundary_type, resp):
 	'''Function performs a manual bounds check to ensure that (lng,lat) is in
@@ -44,9 +44,9 @@ def isInBounds(lng, lat, container, boundary_type, resp):
 # but is looked up through the Arbor API on the fly.
 
 def run(servername, projectname, datasetname, boundary_type, _id=None, lng=-1.0, lat=-1.0, radius=0.0, swlng=-1.0, swlat=-1.0, nelng=-1.0, nelat=-1.0, limit=1000, _filter='true'):
-        url = 'http://'+servername+':8080'+'/arborapi/projmgr/collection/'+projectname+'/PhyloTree/'+datasetname
+        url = 'http://'+servername+':8888'+'/arborapi/projmgr/collection/'+projectname+'/PhyloTree/'+datasetname
         print url
-        response = urllib2.urlopen(url)
+        response = urllib.urlopen(url)
         html = response.read()
         dataDescription = json.loads(html)
         result = run_on_collection(dataDescription['host'],dataDescription['db'],dataDescription[ 'collection'],
@@ -58,7 +58,7 @@ def run(servername, projectname, datasetname, boundary_type, _id=None, lng=-1.0,
 def run_on_collection(servername, dbname, data_coll, boundary_type, _id=None, lng=-1.0, lat=-1.0, radius=0.0, swlng=-1.0, swlat=-1.0, nelng=-1.0, nelat=-1.0, limit=1000, _filter='true'):
 	earthRadius = 6378137 #meters
 	# Construct an empty response object.
-	response = tangelo.empty_response();
+	response = {};
 	try:
 		limit = int(limit)
 	except ValueError:
