@@ -249,13 +249,16 @@
 
             domain.off("focusout");
             domain.focusout(function () {
-                var param = parameterMap[select.val()];
+                var param = parameterMap[select.val()], i;
                 if (param) {
                     if (domain.val() !== "") {
                         if (domain.val()[0] === "{") {
                             param.domain = JSON.parse(domain.val());
                         } else {
                             param.domain = domain.val().split(",");
+                            for (i = 0; i < param.domain.length; i += 1) {
+                                param.domain[i] = param.domain[i].trim();
+                            }
                         }
                     } else {
                         delete param.domain;
