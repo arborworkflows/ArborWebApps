@@ -9,6 +9,7 @@
             'table:rows',
             'table:r.dataframe',
             'table:csv',
+            'table:tsv',
             'tree:nested',
             'tree:r.apetree',
             'string:text',
