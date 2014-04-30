@@ -137,7 +137,7 @@
                     d3.select("#prov")
                         .text(JSON.stringify(dataset.get('bindings').inputs, null, "    "));
                 }
-                flow.retrieveDatasetAsFormat(dataset, input.get('type'), input.get('format'), false, _.bind(function (error, converted) {
+                flow.retrieveDatasetAsFormat(dataset, input.get('type'), input.get('format'), input.get('dataIsURI'), _.bind(function (error, converted) {
                     options[input.get('name')] = converted.get('data');
 
                     // Handle the rest once we're done taking care of this one

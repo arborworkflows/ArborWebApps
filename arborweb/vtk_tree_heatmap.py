@@ -1,21 +1,35 @@
 import vtk
 import requests
 
+# to support alternative baseURL
+import os
+import os.path
+
 def add_arguments(parser):
     parser.add_argument("--table", help="URI to serialized vtkTable", dest="tableURI")
     parser.add_argument("--tree", help="URI to serialized vtkTree", dest="treeURI")
     parser.add_argument("--width", help="desired width of render window", dest="width")
     parser.add_argument("--height", help="desired height of render window", dest="height")
+    parser.add_argument("--baseURL", help="the protocol, hostname, and port of the girder instance", dest="baseURL")
 
 def initialize(self, VTKWebApp, args):
     # Create default pipeline (Only once for all the session)
     if not VTKWebApp.view:
 
+        baseURL = args.baseURL
+        # support for overriding the base URL
+        scriptDir = os.path.dirname(os.path.realpath(__file__))
+        configPath = scriptDir + "/baseURL.txt"
+        if os.path.isfile(configPath):
+          f = file(configPath, "r")
+          baseURL = f.read().rstrip()
+          f.close()
+
         # get our input data from romanesco
-        r = requests.get(args.tableURI)
+        r = requests.get(baseURL + args.tableURI, verify=False)
         tableJSON = r.json()
         tableStr = tableJSON["data"]
-        r = requests.get(args.treeURI)
+        r = requests.get(baseURL + args.treeURI, verify=False)
         treeJSON = r.json()
         treeStr = treeJSON["data"]
 

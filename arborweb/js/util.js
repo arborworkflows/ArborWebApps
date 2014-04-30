@@ -32,7 +32,7 @@
                 i;
             if (dataIsURI) {
                 dataset.set({data: girder.apiRoot + '/item/' + dataset.id + '/romanesco/' + type + '/' +
-                    dataset.format + '/' + format});
+                    dataset.get('format') + '/' + format});
                 if (girder.currentUser) {
                     dataset.set({data: dataset.get('data') + '?token=' + girder.currentUser.get('token')});
                 }

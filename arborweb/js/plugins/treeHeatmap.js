@@ -38,9 +38,9 @@ function stop_vtkweb() {
             args += " --height " + height;
             args += " --table " + this.options.table;
             args += " --tree " + this.options.tree;
+            args += " --baseURL " + window.location.protocol + "//" + window.location.host;
 
             tangelo.vtkweb.launch({
-                //url: "cone.py",
                 url: "vtk_tree_heatmap.py",
                 argstring: args,
                 viewport: "#viewport",
