@@ -143,7 +143,10 @@
                     // Handle the rest once we're done taking care of this one
                     this.loadInputs(inputViews, options, done);
                 }, this));
-            } else if (input.get('type') === 'string') {
+                return;
+            }
+
+            if (input.get('type') === 'string') {
                 options[input.get('name')] = value;
             } else if (input.get('type') === 'number') {
                 options[input.get('name')] = parseFloat(value);
