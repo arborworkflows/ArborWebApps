@@ -35,7 +35,7 @@
             // Trigger a change event on each dataset dropdown so dependent inputs
             // can be initially populated
             this.collection.forEach(_.bind(function (input) {
-                if (input.get('type') === 'table' || input.get('type') === 'tree' || input.get('type') === 'image' || input.get('type') === 'r') {
+                if (this.itemViews[input.cid].inputMode === "dataset") {
                     this.itemViews[input.cid].$el.change();
                 }
             }, this));
