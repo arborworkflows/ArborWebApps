@@ -43,6 +43,9 @@
         <script src="js/views/InputView.js"></script>
         <script src="js/views/ItemOptionView.js"></script>
         <script src="js/views/StringOptionView.js"></script>
+        <script src="js/views/VariableEditView.js"></script>
+        <script src="js/views/VariablesView.js"></script>
+        <script src="js/views/VariableView.js"></script>
         <script src="js/views/VisualizationManagementView.js"></script>
 
         <script src="js/app.js"></script>
@@ -226,7 +229,23 @@
                                 </button>
                             </span>
                         </div>
-                        <div class="row edit-controls hidden">
+                        <div class="row spacer edit-controls">
+                            <div class="col-sm-6">
+                                <label>Inputs</label>
+                                <button class="btn btn-sm btn-link">
+                                    <span class="glyphicon glyphicon-plus add-input-variable"></span>
+                                </button>
+                                <div class="input-variables"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label>Outputs</label>
+                                <button class="btn btn-sm btn-link">
+                                    <span class="glyphicon glyphicon-plus add-output-variable"></span>
+                                </button>
+                                <div class="output-variables"></div>
+                            </div>
+                        </div>
+<!--                         <div class="row edit-controls hidden">
                             <div class="col-sm-12">
                                 <div class="form-inline" style="padding-top:20px">
                                     <input class="form-control" id="input-edit-name" placeholder="Input variable" type="text"></input>
@@ -259,7 +278,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+ -->                    </div>
                 </div>
                 <div class="tab-pane" id="vis_tab">
                     <div class="container" id="visualization-management">
@@ -313,12 +332,55 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" tabindex="-1" id="input-variable-edit-dialog" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Configure input</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="properties"></div>
+                        <button class="btn btn-primary update">
+                            Update
+                        </button>
+                        <button class="btn btn-default" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" tabindex="-1" id="output-variable-edit-dialog" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Configure output</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="properties"></div>
+                        <button class="btn btn-primary update">
+                            Update
+                        </button>
+                        <button class="btn btn-default" data-dismiss="modal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="g-dialog-container" class="modal fade"></div>
         <div id="template-container" class="hidden">
             <div id="collection-template">
                 <span class="active-state glyphicon glyphicon-eye-open" title="Toggle collection visibility"></span>
                 <span class="save-location glyphicon glyphicon-pencil" title="Save to this collection"></span>
                 <span class="name"></span>
+            </div>
+            <div id="variable-template">
+                <span class="edit glyphicon glyphicon-pencil" title="Edit variable"></span>
+                <span class="name"></span>
+                <span class="delete glyphicon glyphicon-trash pull-right" title="Delete variable"></span>
             </div>
         </div>
     </body>

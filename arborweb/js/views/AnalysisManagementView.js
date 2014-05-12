@@ -26,10 +26,6 @@
                 d3.select("#show-script-icon").classed("glyphicon-eye-open", hide);
                 d3.select("#show-script-icon").classed("glyphicon-eye-close", !hide);
                 d3.select("#show-script-text").text(hide ? "Show script" : "Hide script");
-                if (this.analysis.get('collection').get('_accessLevel') > 0) {
-                    d3.select("#edit").classed("hidden", hide);
-                    d3.selectAll(".edit-controls").classed("hidden", !d3.select("#edit").classed("active") || hide);
-                }
             },
 
             'click #edit': function () {
@@ -49,6 +45,9 @@
             'click #save': function () {
                 if (this.analysis) {
                     this.analysis.get('meta').analysis.script = this.editor.getValue();
+                    this.analysis.get('meta').analysis.inputs = this.inputVariables.toJSON();
+                    this.analysis.get('meta').analysis.outputs = this.outputVariables.toJSON();
+                    console.log(this.analysis.get('meta'));
                     d3.json(girder.apiRoot + '/item/' + this.analysis.id + '/metadata').send('put', JSON.stringify(this.analysis.get('meta')), function () {
                         // Trigger recreating the analysis UI
                         $("#analysis").change();
@@ -65,6 +64,20 @@
                     this.analysisSetupView.model = this.analysis;
                     this.analysisSetupView.render();
                 }
+            },
+
+            'click .add-input-variable': function () {
+                var model = new Backbone.Model();
+                this.inputVariableEditView.model = model;
+                this.inputVariables.add(model);
+                this.inputVariableEditView.render();
+            },
+
+            'click .add-output-variable': function () {
+                var model = new Backbone.Model();
+                this.outputVariableEditView.model = model;
+                this.outputVariables.add(model);
+                this.outputVariableEditView.render();
             },
 
             'click #analysis-new': function () {
@@ -120,6 +133,23 @@
             this.analysesView = new flow.ItemsView({el: this.$('#analysis'), itemView: flow.ItemOptionView, collection: this.analyses});
             this.analysesView.render();
 
+            this.inputVariables = new Backbone.Collection();
+            this.outputVariables = new Backbone.Collection();
+            this.inputVariableEditView = new flow.VariableEditView({el: $('#input-variable-edit-dialog'), input: true});
+            this.inputVariablesView = new flow.VariablesView({
+                el: this.$('.input-variables'),
+                itemView: flow.VariableView,
+                itemOptions: {editView: this.inputVariableEditView, collection: this.inputVariables},
+                collection: this.inputVariables
+            });
+            this.outputVariableEditView = new flow.VariableEditView({el: $('#output-variable-edit-dialog'), input: false});
+            this.outputVariablesView = new flow.VariablesView({
+                el: this.$('.output-variables'),
+                itemView: flow.VariableView,
+                itemOptions: {editView: this.outputVariableEditView, collection: this.outputVariables},
+                collection: this.outputVariables
+            });
+
             // Once the first analysis is added, make it the active analysis
             this.analyses.on('add', _.bind(function (item) {
                 if (!this.analysis) {
@@ -131,17 +161,32 @@
         },
 
         changeAnalysis: function (analysis) {
+            var checkCanEdit = function () {
+                if (!this.analysis.get('collection') || this.analysis.get('collection').get('_accessLevel') > 0) {
+                    d3.select("#edit").classed("hidden", false);
+                    d3.selectAll(".edit-controls").classed("hidden", !d3.select("#edit").classed("active"));
+                }
+            };
+
+            if (this.analysis) {
+                this.analysis.off('change:collection', null, this);
+            }
+
             this.analysis = analysis;
             if (this.analysis) {
                 this.editor.setValue(this.analysis.get('meta').analysis.script);
                 this.editor.clearSelection();
                 this.editor.getSession().setMode("ace/mode/" + this.analysis.get('meta').analysis.mode);
-                this.setupVariableEditor('input-edit-', this.analysis.get('meta').analysis.inputs);
-                this.setupVariableEditor('output-edit-', this.analysis.get('meta').analysis.outputs);
+                this.inputVariables.set(this.analysis.get('meta').analysis.inputs);
+                this.outputVariables.set(this.analysis.get('meta').analysis.outputs);
                 this.$('#mode').val(this.analysis.get('meta').analysis.mode);
+
+                this.analysis.on('change:collection', checkCanEdit, this);
+                _.bind(checkCanEdit, this)();
             } else {
                 this.editor.setValue('');
-                this.setupVariableEditor('input-edit-', []);
+                this.inputVariables.set([]);
+                this.outputVariables.set([]);
             }
         },
 
@@ -173,133 +218,6 @@
             this.$('#new-analysis-form').toggleClass('hidden', flow.saveLocation === null);
         },
 
-        setupVariableEditor: function(idPrefix, parameters) {
-            var add = $("#" + idPrefix + "add"),
-                name = $("#" + idPrefix + "name"),
-                remove = $("#" + idPrefix + "remove"),
-                format = $("#" + idPrefix + "format"),
-                domain = $("#" + idPrefix + "domain"),
-                select = $("#" + idPrefix + "select"),
-                defaultValue = $("#" + idPrefix + "default"),
-                parameterMap = {};
-
-            parameters.forEach(function (d) {
-                parameterMap[d.name] = d;
-            });
-
-            d3.select(format.get(0)).selectAll("option")
-                .data(this.formats, function (d) { return d; })
-                .enter().append("option")
-                .text(function (d) { return d; })
-                .attr("value", function (d) { return d; });
-
-            function update() {
-                var options = d3.select(select.get(0)).selectAll("option")
-                    .data(parameters, function (d) { return d.name; });
-                options.enter().append("option")
-                    .text(function (d) { return d.name; })
-                    .attr("value", function (d) { return d.name; });
-                options.exit().remove();
-            }
-
-            add.off("click");
-            add.click(function () {
-                var param = {name: name.val(), type: "table", format: "rows"};
-                parameters.push(param);
-                parameterMap[param.name] = param;
-                update();
-                select.val(param.name);
-                select.change();
-                name.val("");
-            });
-
-            select.off("change");
-            select.change(function () {
-                var param = parameterMap[select.val()];
-                if (param) {
-                    format.val(param.type + ":" + param.format);
-                    format.change();
-                    if (param.domain) {
-                        if (tangelo.isArray(param.domain)) {
-                            domain.val(param.domain.join(","));
-                        } else {
-                            domain.val(JSON.stringify(param.domain));
-                        }
-                    } else {
-                        domain.val("");
-                    }
-                    if (defaultValue && param["default"]) {
-                        defaultValue.val(param["default"].data);
-                    } else {
-                        defaultValue.val("");
-                    }
-                }
-            });
-
-            format.off("change");
-            format.change(function () {
-                var param = parameterMap[select.val()],
-                    parts = format.val().split(":");
-                if (param) {
-                    param.type = parts[0];
-                    param.format = parts[1];
-                }
-                d3.select(domain.get(0)).classed("hidden", format.val() !== "string:text");
-            });
-
-            domain.off("focusout");
-            domain.focusout(function () {
-                var param = parameterMap[select.val()], i;
-                if (param) {
-                    if (domain.val() !== "") {
-                        if (domain.val()[0] === "{") {
-                            param.domain = JSON.parse(domain.val());
-                        } else {
-                            param.domain = domain.val().split(",");
-                            for (i = 0; i < param.domain.length; i += 1) {
-                                param.domain[i] = param.domain[i].trim();
-                            }
-                        }
-                    } else {
-                        delete param.domain;
-                    }
-                }
-            });
-
-            remove.off("click");
-            remove.click(function () {
-                var param = parameterMap[select.val()], index;
-                if (param) {
-                    index = parameters.indexOf(param);
-                    parameters.splice(index, 1);
-                    delete parameterMap[param.name];
-                    update();
-                    select.change();
-                }
-            });
-
-            if (defaultValue) {
-                defaultValue.remove("focusout");
-                defaultValue.focusout(function () {
-                    var param = parameterMap[select.val()];
-                    if (param) {
-                        if (defaultValue.val() !== "") {
-                            if (param.type === "string") {
-                                param['default'] = {format: "text", data: defaultValue.val()};
-                            } else if (param.type === "number") {
-                                param['default'] = {format: "number", data: parseFloat(defaultValue.val())};
-                            }
-                        } else {
-                            delete param['default'];
-                        }
-                    }
-                });
-            }
-
-            d3.select(select.get(0)).selectAll("option").remove();
-            update();
-            select.change();
-        }
     });
 
 }(window.flow, window.$, window._, window.ace, window.Backbone, window.Blob, window.d3, window.FileReader, window.girder, window.tangelo, window.URL));

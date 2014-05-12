@@ -16,6 +16,10 @@
             this.listenTo(this.collection, 'add', this.add);
             this.listenTo(this.collection, 'remove', this.remove);
             this.itemViews = {};
+            if (!options.itemView) {
+                console.error("Error: itemView required");
+                return;
+            }
             this.itemView = options.itemView;
             this.itemOptions = options.itemOptions;
             this.collection.forEach(_.bind(this.add, this));
