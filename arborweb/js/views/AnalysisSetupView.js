@@ -16,7 +16,7 @@
 
         events: {
             'click .run': function () {
-                var bindings = {'inputs': {}, 'outputs': {}};
+                var inputs = {}, outputs = {};
 
                 d3.select('.run')
                     .classed('btn-primary', false)
@@ -37,24 +37,27 @@
                         if (girder.currentUser) {
                             dataset.uri += '?token=' + girder.currentUser.get('token');
                         }
-                        bindings.inputs[input.get('name')] = _.extend(dataset.toJSON(), {uri: uri});
+                        inputs[input.get('name')] = _.extend(dataset.toJSON(), {uri: uri});
                     } else if (input.get('type') === 'string') {
-                        bindings.inputs[input.get('name')] = {type: input.get('type'), format: 'text', data: value};
+                        inputs[input.get('name')] = {type: input.get('type'), format: 'text', data: value};
                     } else if (input.get('type') === 'number') {
-                        bindings.inputs[input.get('name')] = {type: input.get('type'), format: 'number', data: parseFloat(value)};
+                        inputs[input.get('name')] = {type: input.get('type'), format: 'number', data: parseFloat(value)};
                     }
                 }, this));
                 this.model.get('meta').analysis.outputs.forEach(_.bind(function (output) {
-                    bindings.outputs[output.name] = {type: output.type, format: this.webFormat[output.type]};
+                    outputs[output.name] = {type: output.type, format: this.webFormat[output.type]};
                 }, this));
-                this.taskBindings = bindings;
+                this.taskBindings = {'inputs': inputs, 'outputs': outputs};
+
                 d3.select('.success-message').classed('hidden', true);
                 d3.select('.error-message').classed('hidden', true);
                 d3.select('.info-message').classed('hidden', false).text('Running analysis ...');
-                d3.json(girder.apiRoot + '/item/' + this.model.id + '/romanesco').post(JSON.stringify(bindings), _.bind(function (error, result) {
-                    this.taskId = result.id;
-                    setTimeout(_.bind(this.checkTaskResult, this), 1000);
-                }, this));
+
+                flow.performAnalysis(this.model.id, inputs, outputs,
+                    _.bind(function (error, result) {
+                        this.taskId = result.id;
+                        setTimeout(_.bind(this.checkTaskResult, this), 1000);
+                    }, this));
             }
         },
 

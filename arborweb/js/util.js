@@ -76,7 +76,14 @@
                     done(error, new Backbone.Model(converted));
                 });
             }
+        },
+
+        // Run an analysis.
+        performAnalysis: function (analysisId, inputs, outputs, done) {
+            var bindings = {'inputs': inputs, 'outputs': outputs};
+            d3.json(girder.apiRoot + '/item/' + analysisId + '/romanesco').post(JSON.stringify(bindings), done);
         }
+
     };
 
 }(window._, window.atob, window.Backbone, window.d3, window.girder, window.Uint8Array));
