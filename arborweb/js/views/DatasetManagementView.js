@@ -6,8 +6,8 @@
     // The view for managing data saving and downloading
     flow.DatasetManagementView = Backbone.View.extend({
         saveFormats: {
-            table: ['csv', 'tsv', 'rows.json'],
-            tree: ['nested.json', 'nexus', 'newick'],
+            table: ['csv', 'tsv', 'rows.json', 'vtktable.serialized'],
+            tree: ['nested.json', 'nexus', 'newick', 'vtktree.serialized'],
             image: ['png'],
             r: ['serialized']
         },
@@ -16,9 +16,11 @@
             "table:csv": "csv",
             "table:tsv": "tsv",
             "table:rows.json": "rows-json",
+            "table:vtktable.serialized": "vtk",
             "tree:nested.json": "nested-json",
             "tree:nexus": "nex",
             "tree:newick": "phy",
+            "tree:vtktree.serialized": "vtk",
             "image:png": "png",
             "r:serialized": "rds"
         },

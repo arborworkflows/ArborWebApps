@@ -31,7 +31,7 @@
                 byteNumbers,
                 byteArray,
                 i;
-            if (dataIsURI) {
+            if (dataIsURI && dataset.id) {
                 dataset.set({data: girder.apiRoot + '/item/' + dataset.id + '/romanesco/' + type + '/' +
                     dataset.get('format') + '/' + format});
                 if (girder.currentUser) {

@@ -13,7 +13,8 @@ function stop_vtkweb() {
     "use strict";
     // When the page is closed, make sure to close any processes
     // that were running.
-    window.onbeforeunload = window.onunload = stop_vtkweb;
+    $(window).on('unload', stop_vtkweb);
+    $(window).bind('beforeunload', stop_vtkweb);
 
     if (!($ && $.widget)) {
         return;
@@ -31,6 +32,7 @@ function stop_vtkweb() {
         },
 
         _update: function () {
+            stop_vtkweb();
             this.div.empty();
 
             var width = $(window).width(), height = $(window).height(),
