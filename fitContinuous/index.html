@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Arbor Web</title>
+        <title>Arbor Web - Simple</title>
         <link rel="stylesheet" href="//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
         <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.2/d3.js" charset="utf-8"></script>
         <script src="//code.jquery.com/jquery-1.10.0.js"></script>
@@ -78,8 +78,7 @@
                 border-radius: 10px;
             }
             #column-input {
-                height: 150px;
-                line-height: 150px;
+                padding: 50px;
                 border-radius: 10px;
             }
         </style>
@@ -88,7 +87,7 @@
         <div class="container" style="width:100%;height:100%;"/>
             <div id="dataset-management">
                 <div class="row">
-                    <div class="col-sm-6">
+                    <div class="col-sm-12">
                         <div class="btn btn-primary" id="upload">
                             <i class="glyphicon glyphicon-file"></i> Browse or drop files
                         </div>
@@ -105,12 +104,12 @@
                     </div>
                 </div>
                 <div class="row spacer">
-                    <div id="column-names" class="col-sm-2 btn-group-vertical">
+                    <div id="column-names" class="col-sm-3 btn-group-vertical">
                     </div>
-                    <div class="col-sm-10">
+                    <div class="col-sm-9">
                         <div class="row">
-                            <div id="fit-continuous" class="col-sm-3 col-sm-offset-1 bg-info">
-                                <p class="lead text-center">fitContinuous</p>
+                            <div id="fit-continuous" class="col-sm-8 col-sm-offset-1 bg-info">
+                                <p class="lead text-center">Fit continuous - early burst</p>
                                 <p id="tree-name"class="text-justify">
                                     tree: (none)
                                     <span class="glyphicon glyphicon-exclamation-sign"></span>
@@ -120,18 +119,26 @@
                                     <span class="glyphicon glyphicon-exclamation-sign"></span>
                                 </p>
                                 <div id="column-input" class="bg-warning spacer text-center">
-                                    Load your data
+                                    Load data to proceed
                                 </div>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-sm-2 col-sm-offset-2">
-                                <div class="btn btn-primary spacer disabled" id="analyze">
-                                    Perform Analysis
+                            <div class="col-sm-2 col-sm-offset-4">
+                                <div id="analyze" class="btn btn-success spacer hidden" style="width:100%">
+                                    Go!
                                 </div>
                             </div>
                         </div>
+                        <div class="row">
+                            <div id="notice" class="col-sm-8 col-sm-offset-1 spacer text-center">
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div>
+            <div class="row">
+                <div id="fit_table" class="col-sm-12 spacer">
                 </div>
             </div>
             <div id="vis" class="hidden"></div>
