@@ -63,6 +63,29 @@
                         dataIsURI: true
                     }
                 ]
+            },
+            {
+                name: "tanglegram",
+                inputs: [
+                    {
+                        name: "tree1",
+                        type: "tree",
+                        format: "vtktree.serialized",
+                        dataIsURI: true
+                    },
+                    {
+                        name: "tree2",
+                        type: "tree",
+                        format: "vtktree.serialized",
+                        dataIsURI: true
+                    },
+                    {
+                        name: "table",
+                        type: "table",
+                        format: "csv",
+                        dataIsURI: true
+                    }
+                ]
             }
         ],
 
