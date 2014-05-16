@@ -4,7 +4,8 @@ var currentDatasetName = "anolis";
 var pieheight = 40
 var piewidth = 40
 var pieradius = 15
-var enablePie = false
+var enablePie = true
+
 
 
 function addLoadEvent(func) {
@@ -181,6 +182,8 @@ function entireTree() {
 	onAll(root, function() {update(root);});
 }
 
+var pieslices = [[Math.random(),Math.random(),Math.random()],[Math.random(),Math.random(),Math.random()]];
+
 function update(source) {
 	// set animatio time, slow animation if alt key is pressed
 	var duration = d3.event && d3.event.altKey ? 5000 : 500;
@@ -272,27 +275,34 @@ function update(source) {
 		.style("visibility", function() {
 			return d3.select("#nodeNames").property("checked") ? "visible" : "hidden";
 		});
-       //enablePie = d3.select("#showPiechart").property("checked") ? "visible" : "hidden";
 
-       if (enablePie=="visible") {
-        nodeEnter.append("svg:svg")              //create the SVG element inside the <body>
-        .attr("width", piewidth)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+        var pievis = nodeEnter.append("svg:svg")              //create the SVG element inside the <body>
+        .data(pieslices)
+       .attr("width", piewidth)           //set the width and height of our visualization (these will be attributes of the <svg> tag
         .attr("height", pieheight)
+        .attr("class","piechart")
+
         .append("svg:g")                //make a group to hold our pie chart
         .attr("transform", "translate(" + pieradius + "," + pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
 
         var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
         .outerRadius(pieradius);
 
-        var pie = d3.layout.pie()           //this will create arc data for us given a list of values
-        .value(function (d) {console.log(d)});    //we must tell it out to access the value of each element in our data array
+        var pie = d3.layout.pie()        //this will create arc data for us given a list of values
+        .value(function (d) {return d});    //we must tell it out to access the value of each element in our data array
 
-        var arcs = vis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+        var arcs = pievis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
         .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties)
         .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
         .append("svg:g")                    //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
         .attr("class", "slice");            //allow us to style things in the slices (like text)
-}
+
+        piecolor = d3.scale.category20c();     //builtin range of colors
+
+        arcs.append("svg:path")
+                .attr("fill", function(d, i) { return piecolor(i); } ) //set the color for each slice to be chosen from the color function defined above
+                .attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing
+
 
 	// Transition nodes to their new position.
 	var nodeUpdate = node.transition()
@@ -474,6 +484,16 @@ function toggleText(element) {
 		vis.selectAll("g.node").selectAll("text").style("visibility","visible")
 	} else {
 		vis.selectAll("g.node").selectAll("text").style("visibility","hidden")
+	}
+}
+
+
+// turn text on or off all text labels based on what element (checkbox) is set to
+function togglePiechart(element) {
+	if (element.checked) {
+		vis.selectAll("piechart").style("visibility","visible")
+	} else {
+		vis.selectAll("piechart").style("visibility","hidden")
 	}
 }
 
