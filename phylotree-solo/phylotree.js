@@ -1,5 +1,15 @@
-var currentProjectName = "";
-var currentDatasetName = "";
+var currentProjectName = "anolis";
+var currentDatasetName = "anolis";
+
+var pieheight = 40
+var piewidth = 40
+var pieradius = 15
+var enablePie = true
+
+// arrays used for pie charts on the nodes.  attribArray is deprecated in favor of the flexible value and name arrays
+var attribArray = []
+var attribValueArray = []
+var attribNameArray = []
 
 
 function addLoadEvent(func) {
@@ -176,18 +186,56 @@ function entireTree() {
 	onAll(root, function() {update(root);});
 }
 
+
+// this function is used to examine the nodes currently being rendered and build an array of the attributes on the nodes
+// for rendering pie charts on the nodes.   Javascript object introspection is used to traverse the "attribs" of the node object 
+// and build up arrays used by d3's "data & select" engine to fill the pie charts instanced during the node.enter() procedure.
+
+function updateAttribArray(nodes) {
+	attribValueArray = []
+	attribNameArray = []
+	for (var i = nodes.length - 1; i >= 0; i--) {
+		var characterValues = []
+		var characterNames = []
+		if ('characters' in nodes[0]) {
+			for (attrib in nodes[i].characters) {
+				var characterInfo = {}
+				characterInfo.name = attrib
+				characterInfo.value = nodes[i].characters[attrib]
+				characterValues.push(characterInfo)
+			};
+			attribValueArray.push(characterValues)
+			//attribNameArray.push(characterNames)
+		}
+	};
+	//console.log("updated attribValueArray",attribValueArray);
+	//console.log("updated attribNameArray",attribNameArray);
+}
+
+
+// this function is called whenever the d3 tree rendering needs to be updated.  It is called with the root of the part of the 
+// tree that needs to be updated.  Nodes are added as needed, and node.enter() clasues are used to add popovers, titles, etc.
+// if there is a character subobject to the node, a pie chart can be rendered just below the node, to show the relative percentages
+// of attribute values.  the pie chart is enabled / disabled by a selector on the UI.  
+
+// BUG: a total redraw has pie charts turned on
 function update(source) {
 	// set animatio time, slow animation if alt key is pressed
 	var duration = d3.event && d3.event.altKey ? 5000 : 500;
 
+
 	// Compute the new tree layout
 	nodes = cluster.nodes(root);
+	//console.log('nodes:',nodes)
+	updateAttribArray(nodes);
 
 	// Update the nodes...
 	var node = vis.selectAll("g.node")
 		.data(nodes, function(d) {
 			return d.id || (d.id = ++i);
 		});
+
+
 
 	// Enter any new nodes at the parent's previous position.
 	var nodeEnter = node.enter().append("svg:g")
@@ -213,6 +261,9 @@ function update(source) {
 			textOff(this, true);
 		});
 
+	// add the circle for a node and put a title popover on the circle so the user can hover over the circle to see the 
+	// name, branch_length, and any characters which are assgned to the node
+
 	nodeEnter.append("svg:circle")
 		.attr("r", 1e-6)
 		.style("fill", function(d) {
@@ -220,19 +271,29 @@ function update(source) {
 		})
 		.append("title")
 		.text(function(d) {
-		  var msg = "";
-		  if (d.name) {
-                    msg += "name: " + d.name + "\n";
-                  }
-                  if (d.Species) {
-                    msg += "Species: " + d.Species + "\n";
-                  }
-                   if (d.branch_length) {
-                        msg += "branch_length: " + d.branch_length + "\n";
-                  }
-                  return msg;
-		});
+			  var msg = "";
+			  if (d.name) {
+		                    msg += "name: " + d.name + "\n";
+		                  }
+		                  if (d.Species) {
+		                    msg += "Species: " + d.Species + "\n";
+		                  }
+		                   if (d.branch_length) {
+		                        msg += "branch_length: " + d.branch_length + "\n";
+		                  }
+		                  // if there are characters on this node, add them to the popover hover.  The values
+		                  // are truncated to fewer decimal places to shorten the display
+			     if ('characters' in d) {
+				for (character in d.characters) {
+					msg += character + ": " + d[character].toString().substring(0,6) + '\n'
+				}
 
+			     }
+		                  return msg;
+	});
+
+	// add text to the new node added in the tree.  There is inconsistency in the naming and attribute declarations in
+	// the early Arbor datasets, so several different names are allowed here until standardization occurs. 
 
 	nodeEnter.append("svg:text")
 		.attr("x", function(d) {
@@ -242,10 +303,11 @@ function update(source) {
 			return d.clades || d._clades ? "end" : "start"; })
 		.text(function(d) {
 			// truncate ID's to last 4 characters
+			var msg = "";
 			if (d.name ) {
-			    return d.name;
+			    msg += d.name + "\n";
 			} else if (d.Species) {
-			    return d.Species;
+			    msg +=  d.Species + '\n';
 			} else if (d.scientific_name) {
 			    return d.scientific_name;
 			} else if (d.display_name) {
@@ -254,12 +316,14 @@ function update(source) {
 				return d.taxonomies[0].scientific_name;
 			} else if (d.branch_length) {
 				// round to 3 decimal places
-				return d.branch_length.toString().substring(0,5);
+				msg += d.branch_length.toString().substring(0,5)+ '\n';
 			} else if (d._id) {
 				return d._id.substring(d._id.length - 4);
 			} else if (typeof (d) === "string") {
 				return d.substring(d.length -4);
 			}
+			
+			return msg
 		})
 			//return d.taxonomies ? d.taxonomies[0].scientific_name : d._id.substring(d._id.length - 4); })
 		.style("fill-opacity", 1e-6)
@@ -267,6 +331,45 @@ function update(source) {
 		.style("visibility", function() {
 			return d3.select("#nodeNames").property("checked") ? "visible" : "hidden";
 		});
+
+	// add a piechart at each node that displays
+	// the value of characters at this node
+
+        	var pievis = nodeEnter.append("svg:svg")              //create the SVG element inside the <body>
+        		.data(attribValueArray)
+       		.attr("width", piewidth)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+        		.attr("height", pieheight)
+        		.attr("class","piechart")
+        		.append("svg:g")                //make a group to hold our pie chart
+        		.attr("transform", "translate(" + pieradius + "," + 1.5*pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+
+        	var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
+        		.outerRadius(pieradius);
+
+        	var pie = d3.layout.pie()        //this will create arc data for us given a list of values
+        		.value(function (d) {return d.value});    //we must tell it out to access the value of each element in our data array
+
+       	 var arcs = pievis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+        		.data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties)
+        		.enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+        		.append("svg:g")                    //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+        		.attr("class", "slice");            //allow us to style things in the slices (like text)
+
+        	piecolor = d3.scale.category10();     //builtin range of colors
+
+        	arcs.append("svg:path")
+                	.attr("fill", function(d, i) { return piecolor(i); } ) //set the color for each slice to be chosen from the color function defined above
+                	.attr("d", arc)                                  //this creates the actual SVG path using the associated data (pie) with the arc drawing
+		
+	/***	
+	pievis.append("title")
+		.data(attribValueArray)
+		.text(function(d,i) {
+		  var msg  = "characters" ;
+		  // logic here to parse character values and fill the message
+                  	return msg;
+		});
+	***/
 
 	// Transition nodes to their new position.
 	var nodeUpdate = node.transition()
@@ -298,7 +401,7 @@ function update(source) {
 		.duration(duration)
 		.attr("transform", function(d) {
 			return "translate(" + source.y + "," + source.x + ")"; })
-      	.remove();
+      		.remove();
 
 	nodeExit.select("circle")
 		.attr("r", 1e-6);
@@ -344,6 +447,8 @@ function update(source) {
 		d.y0 = d.y;
 	});
 }
+
+
 
 //SGZ 4-11-13: Fixed this so it's just one call
 // makes an async javascript call to load more tree levels
@@ -451,6 +556,18 @@ function toggleText(element) {
 	}
 }
 
+
+// turn text on or off all piecharts  based on what element (checkbox) is set.  We had to look for svg.piechart
+// because of the order of the hierarchy in the DOM
+
+function togglePiechart(element) {
+	if (element.checked) {
+		vis.selectAll("g.node").selectAll("svg.piechart").style("visibility","visible")
+	} else {
+		vis.selectAll("g.node").selectAll("svg.piechart").style("visibility","hidden")
+	}
+}
+
 // state variable for automatic clade selection mode.  When set, click on clade will highlight all
 // children below it in the tree (of all species)
 var cladeSelectEnabled = false;
@@ -490,6 +607,7 @@ function mapItem(item) {
 	}
 }
 
+/***
 function clearBadge() {
 	console.log("callback");
 	$(document).ready(function() {
@@ -510,6 +628,7 @@ function mapAllChildNodes(d, node) {
 		//$(document).ready(function() {$('#treebuttons').badger('');});
 	}
 }
+***/
 
 var phylotree = {}
 
@@ -687,6 +806,8 @@ vis.append("svg:rect")
 	.attr("class", "background");
 
 
+// the routine that actually performs the AJAX call to get a JSON representation from a partial tree.  Then the update() method
+// is called to render the initial tree "stub" since we are loading the first as only a partial -  three levels in.
 
 function drawSelectedTree(projectName,datasetName) {
         currentProjectName = projectName;
@@ -732,6 +853,11 @@ function performEvent(element, name) {
   }
 }
 
+
+// the user is presented with a project and dataset dialog to pick from.  When a new project is selected, pull the first dataset
+// and automatically load the first element.  When a different dataset is selected, automatically load the first element only.   When
+// this rendering is ported to use girder, then we can just initialize the tree differently and everything else will probably work 
+// correctly. 
 
 function initializeDataSelection(initialProject, initialData) {
 var project = d3.select("#project").node();

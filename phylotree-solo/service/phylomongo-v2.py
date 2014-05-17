@@ -56,7 +56,7 @@ def run(servername, projectName,datasetName, name=None, objectid=None, _id=None,
         print "initializing to db: ",dbname, "collection: ",data_coll
 
 	# Construct an empty response object.
-	response = tangelo.empty_response();
+	response = {};
 
 	query = dict()
 	# Decode the query strings into Python objects.
