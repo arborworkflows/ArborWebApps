@@ -5,8 +5,11 @@ var pieheight = 40
 var piewidth = 40
 var pieradius = 15
 var enablePie = true
-var attribArray = []
 
+// arrays used for pie charts on the nodes.  attribArray is deprecated in favor of the flexible value and name arrays
+var attribArray = []
+var attribValueArray = []
+var attribNameArray = []
 
 
 function addLoadEvent(func) {
@@ -177,7 +180,6 @@ function onAllAndLoad(d, callback) {
 function emptyTree() {
 	offAll(root);
 	update(root);
-	attribArray = []
 }
 
 function entireTree() {
@@ -188,25 +190,27 @@ function entireTree() {
 // this function is used to examine the nodes currently being rendered and build an array of the attributes on the nodes
 // for rendering pie charts on the nodes.  
 
-function updateAttribArray2(nodes) {
+function updateAttribArray(nodes) {
 	attribValueArray = []
 	attribNameArray = []
 	for (var i = nodes.length - 1; i >= 0; i--) {
 		//attribArray.push([nodes[i].awesomeness,nodes[i].width,nodes[i].length])
 		var characterValues = []
 		var characterNames = []
-		for (var j = nodes[i].characters[j].length - 1; j >= 0; j--) {
-			characterNames.push(nodes[i].characters[j].name)
-			characterValues.push(nodes[i].characters[j].value)
-		};
-		attribValueArray.push(characterValues)
-		attribNameArray.push(characterNames)
+		if ('characters' in nodes[0]) {
+			for (attrib in nodes[i].characters) {
+				characterNames.push(attrib)
+				characterValues.push(nodes[i].characters[attrib])
+			};
+			attribValueArray.push(characterValues)
+			attribNameArray.push(characterNames)
+		}
 	};
 	console.log("updated attribValueArray",attribValueArray);
 	console.log("updated attribNameArray",attribNameArray);
 }
 
-function updateAttribArray(nodes) {
+function updateAttribArrayDeprecated(nodes) {
 	attribArray = []
 	for (var i = nodes.length - 1; i >= 0; i--) {
 		attribArray.push([nodes[i].awesomeness,nodes[i].width,nodes[i].length])
@@ -221,6 +225,7 @@ function update(source) {
 
 	// Compute the new tree layout
 	nodes = cluster.nodes(root);
+	console.log('nodes:',nodes)
 	updateAttribArray(nodes);
 
 	// Update the nodes...
@@ -229,7 +234,7 @@ function update(source) {
 			return d.id || (d.id = ++i);
 		});
 
-	//console.log('nodes:',nodes)
+
 
 	// Enter any new nodes at the parent's previous position.
 	var nodeEnter = node.enter().append("svg:g")
@@ -316,7 +321,7 @@ function update(source) {
 	// the value of characters at this node
 
         	var pievis = nodeEnter.append("svg:svg")              //create the SVG element inside the <body>
-        		.data(attribArray)
+        		.data(attribValueArray)
        		.attr("width", piewidth)           //set the width and height of our visualization (these will be attributes of the <svg> tag
         		.attr("height", pieheight)
         		.attr("class","piechart")
