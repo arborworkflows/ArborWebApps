@@ -5,6 +5,7 @@ var pieheight = 40
 var piewidth = 40
 var pieradius = 15
 var enablePie = true
+var attribArray = []
 
 
 
@@ -176,26 +177,59 @@ function onAllAndLoad(d, callback) {
 function emptyTree() {
 	offAll(root);
 	update(root);
+	attribArray = []
 }
 
 function entireTree() {
 	onAll(root, function() {update(root);});
 }
 
-var pieslices = [[Math.random(),Math.random(),Math.random()],[Math.random(),Math.random(),Math.random()]];
+
+// this function is used to examine the nodes currently being rendered and build an array of the attributes on the nodes
+// for rendering pie charts on the nodes.  
+
+function updateAttribArray2(nodes) {
+	attribValueArray = []
+	attribNameArray = []
+	for (var i = nodes.length - 1; i >= 0; i--) {
+		//attribArray.push([nodes[i].awesomeness,nodes[i].width,nodes[i].length])
+		var characterValues = []
+		var characterNames = []
+		for (var j = nodes[i].characters[j].length - 1; j >= 0; j--) {
+			characterNames.push(nodes[i].characters[j].name)
+			characterValues.push(nodes[i].characters[j].value)
+		};
+		attribValueArray.push(characterValues)
+		attribNameArray.push(characterNames)
+	};
+	console.log("updated attribValueArray",attribValueArray);
+	console.log("updated attribNameArray",attribNameArray);
+}
+
+function updateAttribArray(nodes) {
+	attribArray = []
+	for (var i = nodes.length - 1; i >= 0; i--) {
+		attribArray.push([nodes[i].awesomeness,nodes[i].width,nodes[i].length])
+	};
+	console.log("updated attribArray",attribArray);
+}
 
 function update(source) {
 	// set animatio time, slow animation if alt key is pressed
 	var duration = d3.event && d3.event.altKey ? 5000 : 500;
 
+
 	// Compute the new tree layout
 	nodes = cluster.nodes(root);
+	updateAttribArray(nodes);
 
 	// Update the nodes...
 	var node = vis.selectAll("g.node")
 		.data(nodes, function(d) {
 			return d.id || (d.id = ++i);
 		});
+
+	//console.log('nodes:',nodes)
 
 	// Enter any new nodes at the parent's previous position.
 	var nodeEnter = node.enter().append("svg:g")
@@ -220,6 +254,8 @@ function update(source) {
 		.on("mouseout.text", function() {
 			textOff(this, true);
 		});
+
+
 
 	nodeEnter.append("svg:circle")
 		.attr("r", 1e-6)
@@ -276,32 +312,34 @@ function update(source) {
 			return d3.select("#nodeNames").property("checked") ? "visible" : "hidden";
 		});
 
-        var pievis = nodeEnter.append("svg:svg")              //create the SVG element inside the <body>
-        .data(pieslices)
-       .attr("width", piewidth)           //set the width and height of our visualization (these will be attributes of the <svg> tag
-        .attr("height", pieheight)
-        .attr("class","piechart")
+	// add a piechart at each node that displays
+	// the value of characters at this node
 
-        .append("svg:g")                //make a group to hold our pie chart
-        .attr("transform", "translate(" + pieradius + "," + pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+        	var pievis = nodeEnter.append("svg:svg")              //create the SVG element inside the <body>
+        		.data(attribArray)
+       		.attr("width", piewidth)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+        		.attr("height", pieheight)
+        		.attr("class","piechart")
+        		.append("svg:g")                //make a group to hold our pie chart
+        		.attr("transform", "translate(" + pieradius + "," + pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
 
-        var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
-        .outerRadius(pieradius);
+        	var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
+        		.outerRadius(pieradius);
 
-        var pie = d3.layout.pie()        //this will create arc data for us given a list of values
-        .value(function (d) {return d});    //we must tell it out to access the value of each element in our data array
+        	var pie = d3.layout.pie()        //this will create arc data for us given a list of values
+        		.value(function (d) {return d});    //we must tell it out to access the value of each element in our data array
 
-        var arcs = pievis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
-        .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties)
-        .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
-        .append("svg:g")                    //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
-        .attr("class", "slice");            //allow us to style things in the slices (like text)
+       	 var arcs = pievis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+        		.data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties)
+        		.enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+        		.append("svg:g")                    //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+        		.attr("class", "slice");            //allow us to style things in the slices (like text)
 
-        piecolor = d3.scale.category20c();     //builtin range of colors
+        	piecolor = d3.scale.category20c();     //builtin range of colors
 
-        arcs.append("svg:path")
-                .attr("fill", function(d, i) { return piecolor(i); } ) //set the color for each slice to be chosen from the color function defined above
-                .attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing
+        	arcs.append("svg:path")
+                	.attr("fill", function(d, i) { return piecolor(i); } ) //set the color for each slice to be chosen from the color function defined above
+                	.attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing
 
 
 	// Transition nodes to their new position.
@@ -334,7 +372,7 @@ function update(source) {
 		.duration(duration)
 		.attr("transform", function(d) {
 			return "translate(" + source.y + "," + source.x + ")"; })
-      	.remove();
+      		.remove();
 
 	nodeExit.select("circle")
 		.attr("r", 1e-6);
@@ -380,6 +418,8 @@ function update(source) {
 		d.y0 = d.y;
 	});
 }
+
+
 
 //SGZ 4-11-13: Fixed this so it's just one call
 // makes an async javascript call to load more tree levels
