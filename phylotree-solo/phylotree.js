@@ -199,11 +199,13 @@ function updateAttribArray(nodes) {
 		var characterNames = []
 		if ('characters' in nodes[0]) {
 			for (attrib in nodes[i].characters) {
-				characterNames.push(attrib)
-				characterValues.push(nodes[i].characters[attrib])
+				var characterInfo = {}
+				characterInfo.name = attrib
+				characterInfo.value = nodes[i].characters[attrib]
+				characterValues.push(characterInfo)
 			};
 			attribValueArray.push(characterValues)
-			attribNameArray.push(characterNames)
+			//attribNameArray.push(characterNames)
 		}
 	};
 	//console.log("updated attribValueArray",attribValueArray);
@@ -211,6 +213,12 @@ function updateAttribArray(nodes) {
 }
 
 
+// this function is called whenever the d3 tree rendering needs to be updated.  It is called with the root of the part of the 
+// tree that needs to be updated.  Nodes are added as needed, and node.enter() clasues are used to add popovers, titles, etc.
+// if there is a character subobject to the node, a pie chart can be rendered just below the node, to show the relative percentages
+// of attribute values.  the pie chart is enabled / disabled by a selector on the UI.  
+
+// BUG: a total redraw has pie charts turned on
 function update(source) {
 	// set animatio time, slow animation if alt key is pressed
 	var duration = d3.event && d3.event.altKey ? 5000 : 500;
@@ -218,7 +226,7 @@ function update(source) {
 
 	// Compute the new tree layout
 	nodes = cluster.nodes(root);
-	console.log('nodes:',nodes)
+	//console.log('nodes:',nodes)
 	updateAttribArray(nodes);
 
 	// Update the nodes...
@@ -253,7 +261,8 @@ function update(source) {
 			textOff(this, true);
 		});
 
-
+	// add the circle for a node and put a title popover on the circle so the user can hover over the circle to see the 
+	// name, branch_length, and any characters which are assgned to the node
 
 	nodeEnter.append("svg:circle")
 		.attr("r", 1e-6)
@@ -262,19 +271,29 @@ function update(source) {
 		})
 		.append("title")
 		.text(function(d) {
-		  var msg = "";
-		  if (d.name) {
-                    msg += "name: " + d.name + "\n";
-                  }
-                  if (d.Species) {
-                    msg += "Species: " + d.Species + "\n";
-                  }
-                   if (d.branch_length) {
-                        msg += "branch_length: " + d.branch_length + "\n";
-                  }
-                  return msg;
-		});
+			  var msg = "";
+			  if (d.name) {
+		                    msg += "name: " + d.name + "\n";
+		                  }
+		                  if (d.Species) {
+		                    msg += "Species: " + d.Species + "\n";
+		                  }
+		                   if (d.branch_length) {
+		                        msg += "branch_length: " + d.branch_length + "\n";
+		                  }
+		                  // if there are characters on this node, add them to the popover hover.  The values
+		                  // are truncated to fewer decimal places to shorten the display
+			     if ('characters' in d) {
+				for (character in d.characters) {
+					msg += character + ": " + d[character].toString().substring(0,6) + '\n'
+				}
 
+			     }
+		                  return msg;
+	});
+
+	// add text to the new node added in the tree.  There is inconsistency in the naming and attribute declarations in
+	// the early Arbor datasets, so several different names are allowed here until standardization occurs. 
 
 	nodeEnter.append("svg:text")
 		.attr("x", function(d) {
@@ -284,10 +303,11 @@ function update(source) {
 			return d.clades || d._clades ? "end" : "start"; })
 		.text(function(d) {
 			// truncate ID's to last 4 characters
+			var msg = "";
 			if (d.name ) {
-			    return d.name;
+			    msg += d.name + "\n";
 			} else if (d.Species) {
-			    return d.Species;
+			    msg +=  d.Species + '\n';
 			} else if (d.scientific_name) {
 			    return d.scientific_name;
 			} else if (d.display_name) {
@@ -296,12 +316,14 @@ function update(source) {
 				return d.taxonomies[0].scientific_name;
 			} else if (d.branch_length) {
 				// round to 3 decimal places
-				return d.branch_length.toString().substring(0,5);
+				msg += d.branch_length.toString().substring(0,5)+ '\n';
 			} else if (d._id) {
 				return d._id.substring(d._id.length - 4);
 			} else if (typeof (d) === "string") {
 				return d.substring(d.length -4);
 			}
+			
+			return msg
 		})
 			//return d.taxonomies ? d.taxonomies[0].scientific_name : d._id.substring(d._id.length - 4); })
 		.style("fill-opacity", 1e-6)
@@ -325,7 +347,7 @@ function update(source) {
         		.outerRadius(pieradius);
 
         	var pie = d3.layout.pie()        //this will create arc data for us given a list of values
-        		.value(function (d) {return d});    //we must tell it out to access the value of each element in our data array
+        		.value(function (d) {return d.value});    //we must tell it out to access the value of each element in our data array
 
        	 var arcs = pievis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
         		.data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties)
@@ -333,17 +355,21 @@ function update(source) {
         		.append("svg:g")                    //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
         		.attr("class", "slice");            //allow us to style things in the slices (like text)
 
-        	piecolor = d3.scale.category20c();     //builtin range of colors
+        	piecolor = d3.scale.category10();     //builtin range of colors
 
         	arcs.append("svg:path")
                 	.attr("fill", function(d, i) { return piecolor(i); } ) //set the color for each slice to be chosen from the color function defined above
                 	.attr("d", arc)                                  //this creates the actual SVG path using the associated data (pie) with the arc drawing
-		.append("title")
-		.text(function(d) {
-		  var msg = " characters ";
+		
+	/***	
+	pievis.append("title")
+		.data(attribValueArray)
+		.text(function(d,i) {
+		  var msg  = "characters" ;
 		  // logic here to parse character values and fill the message
                   	return msg;
 		});
+	***/
 
 	// Transition nodes to their new position.
 	var nodeUpdate = node.transition()
@@ -581,6 +607,7 @@ function mapItem(item) {
 	}
 }
 
+/***
 function clearBadge() {
 	console.log("callback");
 	$(document).ready(function() {
@@ -601,6 +628,7 @@ function mapAllChildNodes(d, node) {
 		//$(document).ready(function() {$('#treebuttons').badger('');});
 	}
 }
+***/
 
 var phylotree = {}
 
@@ -778,6 +806,8 @@ vis.append("svg:rect")
 	.attr("class", "background");
 
 
+// the routine that actually performs the AJAX call to get a JSON representation from a partial tree.  Then the update() method
+// is called to render the initial tree "stub" since we are loading the first as only a partial -  three levels in.
 
 function drawSelectedTree(projectName,datasetName) {
         currentProjectName = projectName;
@@ -823,6 +853,11 @@ function performEvent(element, name) {
   }
 }
 
+
+// the user is presented with a project and dataset dialog to pick from.  When a new project is selected, pull the first dataset
+// and automatically load the first element.  When a different dataset is selected, automatically load the first element only.   When
+// this rendering is ported to use girder, then we can just initialize the tree differently and everything else will probably work 
+// correctly. 
 
 function initializeDataSelection(initialProject, initialData) {
 var project = d3.select("#project").node();
