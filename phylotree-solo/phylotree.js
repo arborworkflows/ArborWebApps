@@ -188,13 +188,13 @@ function entireTree() {
 
 
 // this function is used to examine the nodes currently being rendered and build an array of the attributes on the nodes
-// for rendering pie charts on the nodes.  
+// for rendering pie charts on the nodes.   Javascript object introspection is used to traverse the "attribs" of the node object 
+// and build up arrays used by d3's "data & select" engine to fill the pie charts instanced during the node.enter() procedure.
 
 function updateAttribArray(nodes) {
 	attribValueArray = []
 	attribNameArray = []
 	for (var i = nodes.length - 1; i >= 0; i--) {
-		//attribArray.push([nodes[i].awesomeness,nodes[i].width,nodes[i].length])
 		var characterValues = []
 		var characterNames = []
 		if ('characters' in nodes[0]) {
@@ -206,17 +206,10 @@ function updateAttribArray(nodes) {
 			attribNameArray.push(characterNames)
 		}
 	};
-	console.log("updated attribValueArray",attribValueArray);
-	console.log("updated attribNameArray",attribNameArray);
+	//console.log("updated attribValueArray",attribValueArray);
+	//console.log("updated attribNameArray",attribNameArray);
 }
 
-function updateAttribArrayDeprecated(nodes) {
-	attribArray = []
-	for (var i = nodes.length - 1; i >= 0; i--) {
-		attribArray.push([nodes[i].awesomeness,nodes[i].width,nodes[i].length])
-	};
-	console.log("updated attribArray",attribArray);
-}
 
 function update(source) {
 	// set animatio time, slow animation if alt key is pressed
@@ -326,7 +319,7 @@ function update(source) {
         		.attr("height", pieheight)
         		.attr("class","piechart")
         		.append("svg:g")                //make a group to hold our pie chart
-        		.attr("transform", "translate(" + pieradius + "," + pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+        		.attr("transform", "translate(" + pieradius + "," + 1.5*pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
 
         	var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
         		.outerRadius(pieradius);
@@ -344,8 +337,13 @@ function update(source) {
 
         	arcs.append("svg:path")
                 	.attr("fill", function(d, i) { return piecolor(i); } ) //set the color for each slice to be chosen from the color function defined above
-                	.attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing
-
+                	.attr("d", arc)                                  //this creates the actual SVG path using the associated data (pie) with the arc drawing
+		.append("title")
+		.text(function(d) {
+		  var msg = " characters ";
+		  // logic here to parse character values and fill the message
+                  	return msg;
+		});
 
 	// Transition nodes to their new position.
 	var nodeUpdate = node.transition()
@@ -533,12 +531,14 @@ function toggleText(element) {
 }
 
 
-// turn text on or off all text labels based on what element (checkbox) is set to
+// turn text on or off all piecharts  based on what element (checkbox) is set.  We had to look for svg.piechart
+// because of the order of the hierarchy in the DOM
+
 function togglePiechart(element) {
 	if (element.checked) {
-		vis.selectAll("piechart").style("visibility","visible")
+		vis.selectAll("g.node").selectAll("svg.piechart").style("visibility","visible")
 	} else {
-		vis.selectAll("piechart").style("visibility","hidden")
+		vis.selectAll("g.node").selectAll("svg.piechart").style("visibility","hidden")
 	}
 }
 
