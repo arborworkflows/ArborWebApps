@@ -108,6 +108,7 @@
                 var blob = new Blob([JSON.stringify(this.analysis.get('meta').analysis, null, "    ")]),
                     filename = this.analysis.get('meta').analysis.name + '.json',
                     anchor = $('<a href="' + URL.createObjectURL(blob) + '" download="' + filename + '" class="hidden"></a>');
+                $("body").append(anchor);
                 anchor[0].click();
             },
 
