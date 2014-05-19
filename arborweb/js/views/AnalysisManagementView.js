@@ -1,4 +1,4 @@
-/*jslint browser: true, nomen: true */
+/*jslint browser: true, nomen: true, unparam: true */
 
 (function (flow, $, _, ace, Backbone, Blob, d3, FileReader, girder, tangelo, URL) {
     "use strict";
@@ -46,15 +46,21 @@
             },
 
             'click #save': function () {
+                var info;
                 if (this.analysis) {
-                    this.analysis.get('meta').analysis.script = this.editor.getValue();
-                    this.analysis.get('meta').analysis.inputs = this.inputVariables.toJSON();
-                    this.analysis.get('meta').analysis.outputs = this.outputVariables.toJSON();
-                    console.log(this.analysis.get('meta'));
-                    d3.json(girder.apiRoot + '/item/' + this.analysis.id + '/metadata').send('put', JSON.stringify(this.analysis.get('meta')), function () {
-                        // Trigger recreating the analysis UI
-                        $("#analysis").change();
-                    });
+                    info = this.analysis.get('meta').analysis;
+                    info.name = this.$(".analysis-edit-name").val();
+                    info.script = this.editor.getValue();
+                    info.inputs = this.inputVariables.toJSON();
+                    info.outputs = this.outputVariables.toJSON();
+                    d3.json(girder.apiRoot + '/item/' + this.analysis.id + '?name=' + encodeURIComponent(info.name)).send('put', _.bind(function (error, result) {
+                        d3.json(girder.apiRoot + '/item/' + this.analysis.id + '/metadata').send('put', JSON.stringify(this.analysis.get('meta')), _.bind(function () {
+                            // Trigger recreating the analysis UI
+                            $("#analysis").change();
+                            // Trigger updating this analysis views
+                            this.analysis.set('name', info.name);
+                        }, this));
+                    }, this));
                 }
             },
 
@@ -182,6 +188,7 @@
                 this.editor.getSession().setMode("ace/mode/" + this.analysis.get('meta').analysis.mode);
                 this.inputVariables.set(this.analysis.get('meta').analysis.inputs);
                 this.outputVariables.set(this.analysis.get('meta').analysis.outputs);
+                this.$('.analysis-edit-name').val(this.analysis.get('meta').analysis.name);
                 this.$('#mode').val(this.analysis.get('meta').analysis.mode);
 
                 this.analysis.on('change:collection', checkCanEdit, this);
@@ -219,7 +226,7 @@
 
         saveLocationChange: function () {
             this.$('#new-analysis-form').toggleClass('hidden', flow.saveLocation === null);
-        },
+        }
 
     });
 

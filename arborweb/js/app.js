@@ -1,4 +1,4 @@
-/*jslint browser: true, nomen: true */
+/*jslint browser: true, nomen: true, unparam: true */
 
 (function (flow, _, Backbone, d3, girder) {
     "use strict";
