@@ -64,6 +64,10 @@
                 }
             },
 
+            'click .delete-analysis': function () {
+                $('#confirm-delete').modal('show');
+            },
+
             'change #analysis': function () {
                 this.changeAnalysis(this.analyses.get($("#analysis").val()));
             },
@@ -167,6 +171,17 @@
             }, this));
 
             flow.events.on('flow:change-save-location', this.saveLocationChange, this);
+
+            $('.really-delete-analysis').click(_.bind(function () {
+                if (this.analysis) {
+                    d3.json(girder.apiRoot + '/item/' + this.analysis.id).send('delete', _.bind(function (error, result) {
+                        this.analyses.remove(this.analysis);
+                        // Trigger recreating the analysis UI
+                        $("#analysis").change();
+                        $('#confirm-delete').modal('hide');
+                    }, this));
+                }
+            }, this));
         },
 
         changeAnalysis: function (analysis) {

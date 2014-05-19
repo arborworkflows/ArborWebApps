@@ -229,6 +229,9 @@
                                 <button class="btn btn-default" id="save">
                                     <span class="glyphicon glyphicon-save"></span> Save
                                 </button>
+                                <button class="delete-analysis btn btn-default" title="Delete analysis">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
                             </span>
                         </div>
                         <div class="row spacer edit-controls">
@@ -339,17 +342,35 @@
                 </div>
             </div>
         </div>
-        <div id="g-dialog-container" class="modal fade"></div>
-        <div id="template-container" class="hidden">
-            <div id="collection-template">
-                <span class="active-state glyphicon glyphicon-eye-open" title="Toggle collection visibility"></span>
-                <span class="save-location glyphicon glyphicon-pencil" title="Save to this collection"></span>
-                <span class="name"></span>
+        <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Confirm delete</h4>
+                    </div>
+                    <div class="modal-body">
+                        This analysis will be permanently deleted. Continue?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger really-delete-analysis">Delete</button>
+                    </div>
+                </div>
             </div>
-            <div id="variable-template">
-                <span class="edit glyphicon glyphicon-pencil" title="Edit variable"></span>
-                <span class="name"></span>
-                <span class="delete glyphicon glyphicon-trash pull-right" title="Delete variable"></span>
+        </div>
+        <div id="g-dialog-container" class="modal fade"></div>
+            <div id="template-container" class="hidden">
+                <div id="collection-template">
+                    <span class="active-state glyphicon glyphicon-eye-open" title="Toggle collection visibility"></span>
+                    <span class="save-location glyphicon glyphicon-pencil" title="Save to this collection"></span>
+                    <span class="name"></span>
+                </div>
+                <div id="variable-template">
+                    <span class="edit glyphicon glyphicon-pencil" title="Edit variable"></span>
+                    <span class="name"></span>
+                    <span class="delete glyphicon glyphicon-trash pull-right" title="Delete variable"></span>
+                </div>
             </div>
         </div>
     </body>
