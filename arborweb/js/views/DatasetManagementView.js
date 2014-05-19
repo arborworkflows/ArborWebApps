@@ -1,6 +1,6 @@
-/*jslint browser: true, nomen: true */
+/*jslint browser: true, nomen: true, unparam: true */
 
-(function (flow, $, _, Backbone, Blob, d3, FileReader, girderUpload, URL) {
+(function (flow, $, _, Backbone, Blob, d3, FileReader, girder, girderUpload, URL) {
     "use strict";
 
     // The view for managing data saving and downloading
@@ -54,6 +54,26 @@
                         anchor = $('<a href="' + URL.createObjectURL(blob) + '" download="' + nameWithExtension + '" class="hidden"></a>');
                     anchor[0].click();
                 }, this));
+            },
+
+            'click .dataset-delete': function () {
+                var dataset = this.datasets.get(this.$('.datasets').val());
+                if (!dataset) {
+                    return;
+                }
+                if (dataset.get('collection')) {
+                    d3.json(girder.apiRoot + '/item/' + dataset.id).send('delete', _.bind(function (error) {
+                        if (error) {
+                            window.alert('You do not have permission to delete this item.');
+                            return;
+                        }
+                        this.datasets.remove(dataset);
+                        this.$('.datasets').change();
+                    }, this));
+                } else {
+                    this.datasets.remove(dataset);
+                    this.$('.datasets').change();
+                }
             },
 
             'change #g-files': function () {
@@ -163,4 +183,4 @@
         }
     });
 
-}(window.flow, window.$, window._, window.Backbone, window.Blob, window.d3, window.FileReader, window.girderUpload, window.URL));
+}(window.flow, window.$, window._, window.Backbone, window.Blob, window.d3, window.FileReader, window.girder, window.girderUpload, window.URL));
