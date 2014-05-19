@@ -52,6 +52,7 @@
                         parts = name.split('.'),
                         nameWithExtension = parts[parts.length - 1] === extension ? name : name + '.' + extension,
                         anchor = $('<a href="' + URL.createObjectURL(blob) + '" download="' + nameWithExtension + '" class="hidden"></a>');
+                    $('body').append(anchor);
                     anchor[0].click();
                 }, this));
             },
