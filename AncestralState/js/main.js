@@ -10,7 +10,8 @@
 
         app.readyToAnalyze = function () {
             if ("column" in this && "table" in this && "tree" in this) {
-                d3.select("#analyze").classed('hidden', false)
+                d3.select("#analyze").classed('disabled', false)
+                $("#upload").popover('hide');
             }
         }
 
@@ -69,6 +70,7 @@
                     .classed('bg-warning', false)
                     .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                 app.readyToAnalyze();
+                $("#column-input").popover('hide');
             },
             over: function (event, ui) {
                 d3.select("#column-input")
@@ -83,6 +85,7 @@
             });
 
         $("#analyze").click(function() {
+            $("#analyze").popover('hide');
             $("#analyze").attr("disabled", "disabled");
             $("#analyze").text("Re-run");
             $("#notice").text("Performing ancestral state reconstruction analysis...");
@@ -115,7 +118,7 @@
                         app.treePlot = data.result.treePlot.data;
 
                         // render tree plot
-                        $("#tree_plot").image({ data: app.treePlot });
+                        $("#tree-plot").image({ data: app.treePlot });
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Ancestral state reconstruction succeeded!");
                     }, this));
@@ -129,6 +132,33 @@
             }, this));
         }
 
+        });
+
+        $("#help").click(function() {
+            $("#upload").popover({
+                'title': 'Step #1',
+                'content': 'Upload your table (csv or tsv) and tree (newick) here',
+                'placement': 'top'
+            });
+            $("#upload").popover('show');
+            $("#column-input").popover({
+                'title': 'Step #2',
+                'content': 'Drag your column of interest here',
+                'placement': 'left'
+            });
+            $("#column-input").popover('show');
+            $("#analyze").popover({
+                'title': 'Step #3',
+                'content': 'Click on the "Go!" button',
+                'placement': 'bottom'
+            });
+            $("#analyze").popover('show');
+            $("#tree-plot").popover({
+                'title': 'Step #4',
+                'content': 'If all goes according to plan, your results will be appear here',
+                'placement': 'right'
+            });
+            $("#tree-plot").popover('show');
         });
 
         app.render();
