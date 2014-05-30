@@ -140,25 +140,25 @@
                 'content': 'Upload your table (csv or tsv) and tree (newick) here',
                 'placement': 'top'
             });
-            $("#upload").popover('show');
+            $("#upload").popover('toggle');
             $("#column-input").popover({
                 'title': 'Step #2',
                 'content': 'Drag your column of interest here',
                 'placement': 'left'
             });
-            $("#column-input").popover('show');
+            $("#column-input").popover('toggle');
             $("#analyze").popover({
                 'title': 'Step #3',
                 'content': 'Click on the "Go!" button',
                 'placement': 'bottom'
             });
-            $("#analyze").popover('show');
+            $("#analyze").popover('toggle');
             $("#tree-plot").popover({
                 'title': 'Step #4',
                 'content': 'If all goes according to plan, your results will be appear here',
                 'placement': 'right'
             });
-            $("#tree-plot").popover('show');
+            $("#tree-plot").popover('toggle');
         });
 
         app.render();
