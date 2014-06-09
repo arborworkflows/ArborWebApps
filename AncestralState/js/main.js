@@ -6,7 +6,7 @@
     $(document).ready(function () {
         girder.apiRoot = '/girder/api/v1';
         var app = new flow.App();
-        app.ASRId = "537ce0372028ea3eee1ca873";
+        app.ASRId = "537a642dd591e45a509043f6";
 
         app.readyToAnalyze = function () {
             if ("column" in this && "table" in this && "tree" in this) {
@@ -34,9 +34,10 @@
                 // if its a table, get the column names
                 if (flow.extensionToType[extension].type == "table") {
                     app.table = dataset.get('data');
+                    app.tableFormat = flow.extensionToType[extension].format;
                     d3.select("#table-name").html('table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                     $("#column-input").text("Parsing column names...");
-                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names", false, _.bind(function (error, dataset) {
+                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.discrete", false, _.bind(function (error, dataset) {
                         var columnNames = dataset.get('data');
                         for (var i = 0; i < columnNames.length; ++i) {
                             // create drag-and-drop elements here
@@ -91,11 +92,11 @@
             $("#notice").text("Performing ancestral state reconstruction analysis...");
 
             var inputs = {
-                table:  {type: "table",  format: "csv",    data: app.table},
-                tree:   {type: "tree",   format: "newick", data: app.tree},
-                column: {type: "string", format: "text",   data: app.column},
-                type:   {type: "string", format: "text",   data: "discrete"},
-                method: {type: "string", format: "text",   data: "marginal"}
+                table:  {type: "table",  format: app.tableFormat,    data: app.table},
+                tree:   {type: "tree",   format: "newick",           data: app.tree},
+                column: {type: "string", format: "text",             data: app.column},
+                type:   {type: "string", format: "text",             data: "discrete"},
+                method: {type: "string", format: "text",             data: "marginal"}
             };
 
             var outputs = {
