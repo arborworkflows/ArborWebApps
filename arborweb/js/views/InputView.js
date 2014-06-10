@@ -13,7 +13,8 @@
             r: {inputMode: "dataset"},
             string: {inputMode: "line"},
             number: {inputMode: "line"},
-            json: {inputMode: "line"}
+            json: {inputMode: "line"},
+            geometry: {inputMode: "dataset"}
         },
 
         initialize: function (settings) {

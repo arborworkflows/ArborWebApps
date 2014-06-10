@@ -11,7 +11,8 @@
             string: 'text',
             number: 'number',
             image: 'png.base64',
-            r: 'serialized'
+            r: 'serialized',
+            geometry: 'vtkpolydata.serialized'
         },
 
         events: {
@@ -31,7 +32,7 @@
                         dataset,
                         uri;
 
-                    if (input.get('type') === 'table' || input.get('type') === 'tree' || input.get('type') === 'image' || input.get('type') === 'r') {
+                    if (input.get('type') === 'geometry' || input.get('type') === 'table' || input.get('type') === 'tree' || input.get('type') === 'image' || input.get('type') === 'r') {
                         dataset = this.datasets.get(value);
                         uri = window.location.origin + girder.apiRoot + '/item/' + dataset.id + '/download';
                         if (girder.currentUser) {
@@ -55,13 +56,34 @@
 
                 flow.performAnalysis(this.model.id, inputs, outputs,
                     _.bind(function (error, result) {
+                        if (error) {
+                            console.log(error);
+                            d3.select('.run')
+                                .classed('btn-primary', true)
+                                .classed('btn-default', false)
+                                .attr('disabled', null);
+                            d3.select('.success-message').classed('hidden', true);
+                            d3.select('.error-message').classed('hidden', false).text('Error: See console for details.');
+                            d3.select('.info-message').classed('hidden', true);
+                            return;
+                        }
+                        if (result.error) {
+                            d3.select('.run')
+                                .classed('btn-primary', true)
+                                .classed('btn-default', false)
+                                .attr('disabled', null);
+                            d3.select('.success-message').classed('hidden', true);
+                            d3.select('.error-message').classed('hidden', false).text('Error: ' + result.error);
+                            d3.select('.info-message').classed('hidden', true);
+                            return;
+                        }
                         this.taskId = result.id;
                         setTimeout(_.bind(this.checkTaskResult, this), 1000);
                     }, this));
             }
         },
 
-        initialize: function(settings) {
+        initialize: function (settings) {
             this.datasets = settings.datasets;
             this.inputsView = new flow.InputsView({
                 collection: new Backbone.Collection(),

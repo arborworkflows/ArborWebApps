@@ -5,7 +5,7 @@
 
     $.fn.timeline = function (spec) {
         var y,
-            date = tangelo.accessor(spec.date, undefined),
+            date = tangelo.accessor({field: spec.date}),
             data = spec.data,
             dt = [],
             opt = {
@@ -18,11 +18,11 @@
         spec.y = tangelo.isArray(spec.y) ? spec.y : [spec.y];
         y = [];
         spec.y.forEach(function (row) {
-            var accessor = tangelo.accessor(row, undefined);
+            var accessor = tangelo.accessor({field: row}, undefined);
             accessor.field = row.field;
             y.push(accessor);
         });
-        data.forEach(function (row) {
+        data.rows.forEach(function (row) {
             y.forEach(function (yy) {
                 dt.push({
                     date: new Date(date(row)),

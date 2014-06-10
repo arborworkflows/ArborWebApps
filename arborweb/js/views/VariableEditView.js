@@ -9,18 +9,20 @@
             name: {name: "Name", type: "string", format: "text"},
             type: {name: "Type", type: "string", format: "text", domain: [
                 'table:rows',
+                'table:objectlist',
                 'table:r.dataframe',
                 'table:csv',
                 'table:tsv',
-                'table:vtktable.serialized',
+                'table:vtktable',
                 'tree:nested',
                 'tree:newick',
                 'tree:r.apetree',
-                'tree:vtktree.serialized',
+                'tree:vtktree',
                 'string:text',
                 'number:number',
                 'image:png.base64',
-                'r:object'
+                'r:object',
+                'geometry:vtkpolydata'
             ]},
             description: {name: "Description", type: "string", format: "text"},
             default: {name: "Default", type: "string", format: "text"},

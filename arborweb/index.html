@@ -22,6 +22,7 @@
 
         <script src="js/util.js"></script>
         <script src="js/girderUpload.js"></script>
+        <script src="js/workflow.js"></script>
 
         <script src="js/collections/DatasetCollection.js"></script>
 
@@ -74,7 +75,7 @@
             #active-collections, .tab-content {
                 margin-top: 20px;
             }
-            #editor, #vis {
+            #workflow-editor, #code-editor, #editor, #vis {
                 position: absolute;
                 top: 0;
                 right: 0;
@@ -121,7 +122,10 @@
                 </div>
             </div>
             <div id="vis" class="hidden"></div>
-            <div id="editor" class="hidden"></div>
+            <div id="editor" class="hidden">
+                <div id="code-editor" class="hidden"></div>
+                <div id="workflow-editor" class="hidden"></div>
+            </div>
         </div>
         <div id="control-panel">
             <div class="container">
@@ -202,7 +206,10 @@
                                         </div>
                                         <input class="form-control" id="analysis-name" placeholder="Name" type="text"></input>
                                         <button class="btn btn-primary" id="analysis-new">
-                                            <span class="glyphicon glyphicon-plus"></span> Create
+                                            <span class="glyphicon glyphicon-plus"></span> New analysis
+                                        </button>
+                                        <button class="btn btn-primary" id="workflow-new">
+                                            <span class="glyphicon glyphicon-plus"></span> New workflow
                                         </button>
                                     </div>
                                 </div>
@@ -225,10 +232,12 @@
                             </button>
                             <span class="edit-controls hidden">
                                 <input class="form-control analysis-edit-name" placeholder="Name" type="text"></input>
-                                <select class="form-control" id="mode">
-                                    <option value="python">Python</option>
-                                    <option value="r">R</option>
-                                </select>
+                                <span class="analysis-edit-controls">
+                                    <select class="form-control" id="mode">
+                                        <option value="r">R</option>
+                                        <option value="python">Python</option>
+                                    </select>
+                                </span>
                                 <button class="btn btn-default" id="save">
                                     <span class="glyphicon glyphicon-save"></span> Save
                                 </button>
@@ -238,14 +247,26 @@
                             </span>
                         </div>
                         <div class="row spacer edit-controls">
-                            <div class="col-sm-6">
+                            <div class="col-sm-6 workflow-edit-controls">
+                                <div class="form-group">
+                                    <label for="workstep">Select analysis</label>
+                                    <select class="form-control" id="workstep"></select>
+                                </div>
+                                <button class="btn btn-primary" id="add-workstep">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                    Add to workflow
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row spacer edit-controls">
+                            <div class="col-sm-6 analysis-edit-controls">
                                 <label>Inputs</label>
                                 <button class="btn btn-sm btn-link">
                                     <span class="glyphicon glyphicon-plus add-input-variable"></span>
                                 </button>
                                 <div class="input-variables"></div>
                             </div>
-                            <div class="col-sm-6">
+                            <div class="col-sm-6 analysis-edit-controls">
                                 <label>Outputs</label>
                                 <button class="btn btn-sm btn-link">
                                     <span class="glyphicon glyphicon-plus add-output-variable"></span>
