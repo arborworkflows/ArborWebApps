@@ -39,7 +39,8 @@
         });
 
         links.sort(function (a, b) { return d3.descending(a.count, b.count); });
-        filteredLinks = links.slice(0, 200);
+        // filteredLinks = links.slice(0, 200);
+        filteredLinks = links;
 
         filteredLinks.forEach(function (link) {
             if (!filteredNodeMap[link.source]) {

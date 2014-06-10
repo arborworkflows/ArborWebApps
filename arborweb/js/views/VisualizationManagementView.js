@@ -14,8 +14,8 @@
                 name: "timeline",
                 inputs: [
                     {name: "data", type: "table", format: "rows"},
-                    {name: "date", type: "json", "default": {format: "inline", data: {"field": "Date"}}},
-                    {name: "y", type: "json", "default": {format: "inline", data: [{"field": "y"}]}}
+                    {name: "date", type: "string", domain: {input: "data", format: "column.names"}},
+                    {name: "y", type: "string", domain: {input: "data", format: "column.names"}}
                 ]
             },
             {

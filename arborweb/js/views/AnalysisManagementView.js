@@ -1,25 +1,10 @@
 /*jslint browser: true, nomen: true, unparam: true */
 
-(function (flow, $, _, ace, Backbone, Blob, d3, FileReader, girder, tangelo, URL) {
+(function (flow, $, _, ace, Backbone, Blob, d3, FileReader, girder, tangelo, URL, workflow) {
     "use strict";
 
    // The view for selecting, running, and editing analyses
     flow.AnalysisManagementView = Backbone.View.extend({
-        formats: [
-            'table:rows',
-            'table:r.dataframe',
-            'table:csv',
-            'table:tsv',
-            'table:vtktable.serialized',
-            'tree:nested',
-            'tree:newick',
-            'tree:r.apetree',
-            'tree:vtktree.serialized',
-            'string:text',
-            'number:number',
-            'image:png.base64',
-            'r:object'
-        ],
 
         events: {
             'click #show-script': function () {
@@ -46,13 +31,21 @@
             },
 
             'click #save': function () {
-                var info;
+                var info, curWorkflow;
                 if (this.analysis) {
                     info = this.analysis.get('meta').analysis;
                     info.name = this.$(".analysis-edit-name").val();
-                    info.script = this.editor.getValue();
-                    info.inputs = this.inputVariables.toJSON();
-                    info.outputs = this.outputVariables.toJSON();
+                    if (info.mode === "workflow") {
+                        curWorkflow = this.workflowEditor.serialize();
+                        info.inputs = curWorkflow.inputs;
+                        info.outputs = curWorkflow.outputs;
+                        info.steps = curWorkflow.steps;
+                        info.connections = curWorkflow.connections;
+                    } else {
+                        info.script = this.editor.getValue();
+                        info.inputs = this.inputVariables.toJSON();
+                        info.outputs = this.outputVariables.toJSON();
+                    }
                     d3.json(girder.apiRoot + '/item/' + this.analysis.id + '?name=' + encodeURIComponent(info.name)).send('put', _.bind(function (error, result) {
                         d3.json(girder.apiRoot + '/item/' + this.analysis.id + '/metadata').send('put', JSON.stringify(this.analysis.get('meta')), _.bind(function () {
                             // Trigger recreating the analysis UI
@@ -104,6 +97,23 @@
                 this.createAnalysis(analysis);
             },
 
+            'click #workflow-new': function () {
+                var analysis = {
+                    name: $("#analysis-name").val(),
+                    inputs: [],
+                    outputs: [],
+                    mode: "workflow",
+                    steps: [],
+                    connections: []
+                };
+                this.createAnalysis(analysis);
+            },
+
+            'click #add-workstep': function () {
+                var analysis = this.analyses.get($("#workstep").val());
+                this.workflowEditor.add(analysis.get("meta").analysis);
+            },
+
             'click #analysis-download': function () {
                 var blob = new Blob([JSON.stringify(this.analysis.get('meta').analysis, null, "    ")]),
                     filename = this.analysis.get('meta').analysis.name + '.json',
@@ -134,7 +144,7 @@
                 datasets: this.datasets
             });
 
-            this.editor = ace.edit("editor");
+            this.editor = ace.edit("code-editor");
             this.editor.setTheme("ace/theme/chrome");
             this.editor.setHighlightActiveLine(false);
             this.editor.setHighlightGutterLine(false);
@@ -142,10 +152,14 @@
             this.editor.setReadOnly(true);
             this.editor.setFontSize(14);
             this.editor.renderer.$cursorLayer.element.style.opacity = 0;
+            this.workflowEditor = workflow(d3.select("#workflow-editor"));
 
             this.analyses = settings.analyses;
             this.analysesView = new flow.ItemsView({el: this.$('#analysis'), itemView: flow.ItemOptionView, collection: this.analyses});
             this.analysesView.render();
+
+            this.workstepsView = new flow.ItemsView({el: this.$('#workstep'), itemView: flow.ItemOptionView, collection: this.analyses});
+            this.workstepsView.render();
 
             this.inputVariables = new Backbone.Collection();
             this.outputVariables = new Backbone.Collection();
@@ -199,13 +213,25 @@
 
             this.analysis = analysis;
             if (this.analysis) {
-                this.editor.setValue(this.analysis.get('meta').analysis.script);
-                this.editor.clearSelection();
-                this.editor.getSession().setMode("ace/mode/" + this.analysis.get('meta').analysis.mode);
-                this.inputVariables.set(this.analysis.get('meta').analysis.inputs);
-                this.outputVariables.set(this.analysis.get('meta').analysis.outputs);
+                if (this.analysis.get('meta').analysis.mode === "workflow") {
+                    d3.select("#code-editor").classed("hidden", true);
+                    d3.select("#workflow-editor").classed("hidden", false);
+                    d3.selectAll(".analysis-edit-controls").classed("hidden", true);
+                    d3.selectAll(".workflow-edit-controls").classed("hidden", false);
+                    this.workflowEditor.data(this.analysis.get('meta').analysis);
+                } else {
+                    d3.select("#code-editor").classed("hidden", false);
+                    d3.select("#workflow-editor").classed("hidden", true);
+                    d3.selectAll(".analysis-edit-controls").classed("hidden", false);
+                    d3.selectAll(".workflow-edit-controls").classed("hidden", true);
+                    this.editor.setValue(this.analysis.get('meta').analysis.script);
+                    this.editor.clearSelection();
+                    this.$('#mode').val(this.analysis.get('meta').analysis.mode);
+                    this.$('#mode').change();
+                    this.inputVariables.set(this.analysis.get('meta').analysis.inputs);
+                    this.outputVariables.set(this.analysis.get('meta').analysis.outputs);
+                }
                 this.$('.analysis-edit-name').val(this.analysis.get('meta').analysis.name);
-                this.$('#mode').val(this.analysis.get('meta').analysis.mode);
 
                 this.analysis.on('change:collection', checkCanEdit, this);
                 _.bind(checkCanEdit, this)();
@@ -246,4 +272,4 @@
 
     });
 
-}(window.flow, window.$, window._, window.ace, window.Backbone, window.Blob, window.d3, window.FileReader, window.girder, window.tangelo, window.URL));
+}(window.flow, window.$, window._, window.ace, window.Backbone, window.Blob, window.d3, window.FileReader, window.girder, window.tangelo, window.URL, window.workflow));

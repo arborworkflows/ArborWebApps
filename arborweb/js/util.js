@@ -13,7 +13,9 @@
             csv: {type: 'table', format: 'csv'},
             tsv: {type: 'table', format: 'tsv'},
             png: {type: 'image', format: 'png'},
-            rds: {type: 'r', format: 'serialized'}
+            rds: {type: 'r', format: 'serialized'},
+            'objectlist-json': {type: 'table', format: 'objectlist.json'},
+            'rows-json': {type: 'table', format: 'rows.json'}
         },
 
         setDisplay: function (mode) {
