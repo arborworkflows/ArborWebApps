@@ -195,6 +195,16 @@
                 'placement': 'bottom'
             });
             $("#analyze").popover('toggle');
+
+            if ($(this).text() == "Click to open help")
+              {
+              $(this).text("Click to close help");
+              }
+            else
+              {
+              $(this).text("Click to open help");
+              }
+
         });
 
         $("#folder-icon").click(function() {
