@@ -11,7 +11,6 @@
         app.readyToAnalyze = function () {
             if ("column" in this && "table" in this && "tree" in this) {
                 d3.select("#analyze").classed('disabled', false)
-                $("#upload").popover('hide');
             }
         }
 
@@ -82,9 +81,6 @@
                       rowData.rows = rowData.rows.slice(0, 3);
                       d3.select("#input-table-vis-container").classed('hidden', false);
                       $("#input-table-vis").table({ data: rowData });
-                      setTimeout(function() {
-                        toggleInputTablePreview();
-                      }, 7000);
                     }, this));
 
                 }
@@ -115,7 +111,6 @@
                     .classed('bg-warning', false)
                     .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                 app.readyToAnalyze();
-                $("#column-input").popover('hide');
             },
             over: function (event, ui) {
                 d3.select("#column-input")
@@ -130,7 +125,6 @@
             });
 
         $("#analyze").click(function() {
-            $("#analyze").popover('hide');
             $("#analyze").attr("disabled", "disabled");
             $("#analyze").text("Re-run");
             $("#notice").text("Performing ancestral state reconstruction analysis...");
@@ -201,12 +195,6 @@
                 'placement': 'bottom'
             });
             $("#analyze").popover('toggle');
-            $("#tree-plot").popover({
-                'title': 'Step #4',
-                'content': 'If all goes according to plan, your results will be appear here',
-                'placement': 'right'
-            });
-            $("#tree-plot").popover('toggle');
         });
 
         $("#folder-icon").click(function() {
