@@ -22,6 +22,7 @@
 
         <script src="../js/util.js"></script>
         <script src="../js/girderUpload.js"></script>
+        <script src="../js/workflow.js"></script>
 
         <script src="../js/collections/DatasetCollection.js"></script>
 
@@ -168,12 +169,22 @@
                     </div>
                 </div>
             </div>
+            <div class="row hidden" id="input-table-vis-container">
+                <div class="col-sm-12 text-center">
+                    <div class="row">
+                        <span id="folder-icon" class="glyphicon glyphicon-folder-close"> Hide input table preview</span>
+                    </div>
+                    <div class="row">
+                        <div id="input-table-vis"></div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
-                <div id="tree-plot" class="col-sm-12 spacer text-center">
+                <div id="tree-plot" class="col-sm-12 text-center">
                 </div>
             </div>
             <div id="vis" class="hidden"></div>
-            <div id="editor" class="hidden"></div>
+            <div id="code-editor" class="hidden"></div>
         </div>
         <div id="template-container" class="hidden">
         </div>

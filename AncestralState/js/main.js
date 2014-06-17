@@ -15,6 +15,21 @@
             }
         }
 
+        function toggleInputTablePreview() {
+            if ($("#folder-icon").hasClass("glyphicon-folder-open")) {
+                $("#folder-icon").removeClass("glyphicon-folder-open");
+                $("#folder-icon").addClass("glyphicon-folder-close");
+                $("#folder-icon").text(" Hide input table preview");
+            }
+            else {
+                $("#folder-icon").removeClass("glyphicon-folder-close");
+                $("#folder-icon").addClass("glyphicon-folder-open");
+                $("#folder-icon").text(" Show input table preview");
+            }
+
+            $("#input-table-vis").toggle('slow');
+        }
+
         // override upload function for simple mode
         app.datasetsView.upload = function (file) {
             var reader = new FileReader();
@@ -37,6 +52,7 @@
                     app.tableFormat = flow.extensionToType[extension].format;
                     d3.select("#table-name").html('table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                     $("#column-input").text("Parsing column names...");
+                    $("#column-names").empty();
                     flow.retrieveDatasetAsFormat(dataset, "table", "column.names.discrete", false, _.bind(function (error, dataset) {
                         var columnNames = dataset.get('data');
                         for (var i = 0; i < columnNames.length; ++i) {
@@ -48,7 +64,21 @@
                         });
                         d3.select("#column-input").html('Drag column of interest here <span class="glyphicon glyphicon-exclamation-sign"></span>');
                     }, this));
+
+                    flow.retrieveDatasetAsFormat(dataset, "table", "rows", false, _.bind(function (error, dataset) {
+                      // show the input table to help the user understand if their data
+                      // was parsed correctly or not
+                      var rowData = dataset.get('data');
+                      rowData.rows = rowData.rows.slice(0, 3);
+                      d3.select("#input-table-vis-container").classed('hidden', false);
+                      $("#input-table-vis").table({ data: rowData });
+                      setTimeout(function() {
+                        toggleInputTablePreview();
+                      }, 7000);
+                    }, this));
+
                 }
+
                 else if (flow.extensionToType[extension].type == "tree") {
                     app.tree = dataset.get('data');
                     d3.select("#tree-name").html('tree: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
@@ -122,6 +152,9 @@
                         $("#tree-plot").image({ data: app.treePlot });
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Ancestral state reconstruction succeeded!");
+                        $('html, body').animate({
+                            scrollTop: $("#tree-plot").offset().top
+                        }, 1000);
                     }, this));
 
                 } else if (result.status === 'FAILURE') {
@@ -160,6 +193,10 @@
                 'placement': 'right'
             });
             $("#tree-plot").popover('toggle');
+        });
+
+        $("#folder-icon").click(function() {
+            toggleInputTablePreview();
         });
 
         app.render();
