@@ -57,12 +57,22 @@
                         var columnNames = dataset.get('data');
                         for (var i = 0; i < columnNames.length; ++i) {
                             // create drag-and-drop elements here
-                            $("#column-names").append('<div class="btn btn-info draggable">' + columnNames[i] + '</div>');
+                            $("#column-names").append('<div class="btn btn-info draggable discrete">' + columnNames[i] + '</div>');
                         }
                         $(".draggable").draggable({
                              zIndex: 1, helper: "clone"
                         });
                         d3.select("#column-input").html('Drag column of interest here <span class="glyphicon glyphicon-exclamation-sign"></span>');
+                    }, this));
+                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.continuous", false, _.bind(function (error, dataset) {
+                        var columnNames = dataset.get('data');
+                        for (var i = 0; i < columnNames.length; ++i) {
+                            // create drag-and-drop elements here
+                            $("#column-names").append('<div class="btn btn-info draggable continuous">' + columnNames[i] + '</div>');
+                        }
+                        $(".draggable").draggable({
+                             zIndex: 1, helper: "clone"
+                        });
                     }, this));
 
                     flow.retrieveDatasetAsFormat(dataset, "table", "rows", false, _.bind(function (error, dataset) {
@@ -94,6 +104,10 @@
         $("#column-input").droppable({
             drop: function( event, ui ) {
                 var COI = ui.draggable.text();
+                app.type = "discrete";
+                if (ui.draggable.hasClass("continuous")) {
+                    app.type = "continuous";
+                }
                 app.column = COI;
                 d3.select("#column-input")
                     .classed('btn-primary', true)
@@ -125,7 +139,7 @@
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
                 column: {type: "string", format: "text",             data: app.column},
-                type:   {type: "string", format: "text",             data: "discrete"},
+                type:   {type: "string", format: "text",             data: app.type},
                 method: {type: "string", format: "text",             data: "marginal"}
             };
 
