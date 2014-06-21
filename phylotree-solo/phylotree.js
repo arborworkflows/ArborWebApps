@@ -1,5 +1,7 @@
 var currentProjectName = "anolis";
 var currentDatasetName = "anolis";
+var mongo = {}
+mongo.server = 'localhost';
 
 var pieheight = 40
 var piewidth = 40
@@ -333,9 +335,13 @@ function update(source) {
 		});
 
 	// add a piechart at each node that displays
-	// the value of characters at this node
+	// the value of characters at this node.  The filter method passes only the non-leaf nodes
+	// so the piecharts don't render on the taxa. 
 
-        	var pievis = nodeEnter.append("svg:svg")              //create the SVG element inside the <body>
+        	var pievis = nodeEnter
+		.filter(function(d) {return (d._clades != null || d.clades != null); })
+        		.append("svg:svg")   
+        	           //create the SVG element inside the <body>
         		.data(attribValueArray)
        		.attr("width", piewidth)           //set the width and height of our visualization (these will be attributes of the <svg> tag
         		.attr("height", pieheight)
@@ -370,6 +376,7 @@ function update(source) {
                   	return msg;
 		});
 	***/
+
 
 	// Transition nodes to their new position.
 	var nodeUpdate = node.transition()
@@ -446,6 +453,17 @@ function update(source) {
 		d.x0 = d.x;
 		d.y0 = d.y;
 	});
+
+	// CRL - disabled because it isn't working.... 
+
+	// // if this is a leaf node, suppress the pie chart
+	// nodes.forEach(function(d) {
+	// 	if (d.clades === undefined) {
+	// 		console.log('leaf node:',d)
+	// 		disablePiechartForTaxon(d)
+	// 	}
+	// });
+	
 }
 
 
@@ -566,6 +584,14 @@ function togglePiechart(element) {
 	} else {
 		vis.selectAll("g.node").selectAll("svg.piechart").style("visibility","hidden")
 	}
+}
+
+// turn off piecharts for leaf nodes
+
+function disablePiechartForTaxon(node) {
+	node = node instanceof Array ? node[0] : node;
+	d3.select(node).select("svg.piechart").style("visibility", function() {
+			return "hidden"});
 }
 
 // state variable for automatic clade selection mode.  When set, click on clade will highlight all
