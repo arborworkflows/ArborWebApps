@@ -19,6 +19,14 @@
                 ]
             },
             {
+                name: "scatterplot",
+                inputs: [
+                    {name: "data", type: "table", format: "rows"},
+                    {name: "x", type: "string", domain: {input: "data", format: "column.names"}},
+                    {name: "y", type: "string", domain: {input: "data", format: "column.names"}}
+                ]
+            },
+            {
                 name: "dendrogram",
                 inputs: [
                     {name: "data", type: "tree", format: "nested"},
