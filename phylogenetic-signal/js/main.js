@@ -57,11 +57,11 @@
                     d3.select("#table-name").html('Table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                     $("#column-input").text("Parsing column names...");
                     $("#column-names").empty();
-                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.continuous", false, _.bind(function (error, dataset) {
+                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names", false, _.bind(function (error, dataset) {
                         var columnNames = dataset.get('data');
                         for (var i = 0; i < columnNames.length; ++i) {
                             // create drag-and-drop elements here
-                            $("#column-names").append('<div class="btn btn-info draggable continuous">' + columnNames[i] + '</div>');
+                            $("#column-names").append('<div class="btn btn-info draggable">' + columnNames[i] + '</div>');
                         }
                         $(".draggable").draggable({
                              zIndex: 1, helper: "clone"
@@ -95,10 +95,6 @@
         $("#column-input").droppable({
             drop: function( event, ui ) {
                 var COI = ui.draggable.text();
-                app.type = "discrete";
-                if (ui.draggable.hasClass("continuous")) {
-                    app.type = "continuous";
-                }
                 app.column = COI;
                 d3.select("#column-input")
                     .classed('btn-primary', true)
