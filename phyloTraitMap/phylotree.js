@@ -12,8 +12,6 @@
 var phylomap = {}
 
 // define the location of the Arbor API used to lookup projects and datasets
-phylomap.arborapiurl = '/arborapi/projmgr'
-phylomap.mongoserver = 'localhost'
 phylomap.currentProjectName = ''
 phylomap.currentDatasetName = ''
 
@@ -36,7 +34,7 @@ function performEvent(element, name) {
 
 function drawSelectedTree(projectName,datasetName) {
 	// Can probably make this a better API
-	d3.json('service/phylomongo/' + projectName + '/' + datasetName, function(json) {
+	d3.json('service/phylotree/' + projectName + '/' + datasetName, function(json) {
 		root = json;
 		console.log("tree returned:",root)
 		root.x0 = height / 2;
@@ -47,6 +45,8 @@ function drawSelectedTree(projectName,datasetName) {
 	});
 }
 
+// initialize the Arbor collection and item viewers according to the dataset information
+// that comes back from the Arbor instance
 
 function initializeDataSelection(initialProject, initialData) {
 	var project = d3.select("#project").node(),
@@ -282,13 +282,9 @@ function returnNodeName(d) {
 if (d['node_data']) {
 	if (d['node_data']['node name']) {
 		return d['node_data']['node name'];
-	} else if (d.name ) {
-		return d.name;
-	} else if (d.taxonomies && d.taxonomies[0].scientific_name) {
-		return d.taxonomies[0].scientific_name;
 	} else {
 	        // couldn't find a name, return empty so a test will return false
-                return null;
+            return '';
 	}
     }
 }
@@ -351,19 +347,11 @@ function update(source) {
 			return d.children || d._children ? "end" : "start"; })
 		.text(function(d) {
 			// truncate ID's to last 4 characters; return name if there is a name assigned
-                if (d.scientific_name) {
-                                return d.scientific_name;
-                        } else if (d.name ) {
-                                return d.name;
-                        } else if (d.taxonomies && d.taxonomies[0].scientific_name) {
-                                return d.taxonomies[0].scientific_name;
-			} else if (d.branch_length) {
+            if (d.node_data['node name']) {
+                return d.node_data['node name'];  
+			} else if (d.node_data['node weight']) {
 				// round to 3 decimal places
-				return d.branch_length.toString().substring(0,5);
-			} else if (d._id) {
-				return d._id.substring(d._id.length - 4);
-			} else if (typeof (d) === "string") {
-				return d.substring(d.length -4);
+				return d.node_data['node weight'].toString().substring(0,5);
 			}
 		})
 			//return d.taxonomies ? d.taxonomies[0].scientific_name : d._id.substring(d._id.length - 4); })
@@ -465,7 +453,7 @@ function updateJSON(options) {
 		d3.select(node.childNodes[0]).style("fill", "red");
 	}
 
-	d3.json('service/phylomongo/'+phylomap.currentProjectName+ '/'+ phylomap.currentDatasetName, function(err, json) {
+	d3.json('service/phylotree/'+phylomap.currentProjectName+ '/'+ phylomap.currentDatasetName, function(err, json) {
 		toggleAll (json, function() {
 			oldJSON.children = json._children;
 			oldJSON._children = null;
@@ -610,13 +598,9 @@ function mapAllChildNodes(d, node) {
 	// ensure our helper functions have been included via javascript includes
 	if (typeof createMarker != 'undefined' && typeof google.maps.LatLng != 'undefined') {
 		// this process can take a long time, so put up a processing sign
-		$('#treebuttons').badger('Processing');
-		searchLocationsNearClade('service/phylomap-v2/' + phylomap.mongoserver + '/' + phylomap.currentProjectName + '/' +
+		searchLocationsNearClade('service/phylomap/' + phylomap.currentProjectName + '/' +
 		        phylomap.currentDatasetName +
 			'/id/' + d._id, d._id, clearBadge);
-				// this happens immediately regardless of gating
-		//$('#treebuttons').badger('');
-		//$(document).ready(function() {$('#treebuttons').badger('');});
 	}
 }
 

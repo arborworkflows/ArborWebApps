@@ -97,13 +97,13 @@
         Dataset
         <select id="data" class="input" style="margin-top:10px;" >
         </select>
+      <!--  <button type="button" onclick="initDatasetFromArbor();">Open Dataset</button>  -->
 </div>
 
 
 <div class=row>
     <div class=md-col-6 id="treebuttons" style="float:left; margin-left:30px; margin-bottom:10px; overflow: hidden;">
          <button type="button" onclick="emptyTree();">Empty Tree</button>
-        <button type="button" onclick="entireTree();">Entire Cached Tree</button>
         <button type="button" onclick="onAllAndLoad(root);">Full Tree</button>
         <input type="checkbox" id="nodeNames" onchange="toggleText(this);" checked> Show Names
         <input type="checkbox" id="cladeSelect" onchange="toggleCladeSelect(this);" unchecked> Enable Clade Selection
