@@ -100,24 +100,26 @@
 </div>
 
 
-
-    <div id="treebuttons" style="float:left; margin-left:10px; margin-bottom:10px; width: 58%; overflow: hidden;">
+<div class=row>
+    <div class=md-col-6 id="treebuttons" style="float:left; margin-left:30px; margin-bottom:10px; overflow: hidden;">
          <button type="button" onclick="emptyTree();">Empty Tree</button>
         <button type="button" onclick="entireTree();">Entire Cached Tree</button>
         <button type="button" onclick="onAllAndLoad(root);">Full Tree</button>
         <input type="checkbox" id="nodeNames" onchange="toggleText(this);" checked> Show Names
         <input type="checkbox" id="cladeSelect" onchange="toggleCladeSelect(this);" unchecked> Enable Clade Selection
-        <button type="button" onclick="clearAllHighlights();">Clear Highlights</button>
         <button type="button" onclick="increaseWidth(40);">Increase Depth</button>
         <button type="button" onclick="increaseWidth(-40);">Decrease Depth</button>
+        <button type="button" onclick="clearAllHighlights();">Clear Highlights</button>
+        <button type="button" onclick="clearLocations();">Clear Map Markers</button>
+    </div>
+</div>
+
+    <div class=row>
+        <div class=col-md-6 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; border-style:solid; overflow:hidden; border-width:medium"></div>
+            <div class=col-md-5 id="map_canvas" style="  margin-left: 20px; margin-right:20px; height:800px; float-right; border-style:solid; border-width:medium"></div>
     </div>
 
 
-        <div id="tree" style="margin-top:10px; margin-left: 10px; float:left; border-style:solid; overflow:hidden; border-width:medium"></div>
-        <div id="map_canvas" style=" margin-right:10px; float:right; width:40%; height:800px; border-style:solid; border-width:medium"></div>
-             <div style="margin-right:100px;  width: 30%; overflow: hidden;">
-                        <button type="button" onclick="clearLocations();">Clear Map Markers</button>
-                </div>
 <script type="text/javascript" src="phylotree.js"></script>
 
     </body>

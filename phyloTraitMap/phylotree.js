@@ -22,6 +22,7 @@ $(document).ready(function(){
     initializeDataSelection("anolis")
 });
 
+
 function performEvent(element, name) {
   if (document.createEvent !== undefined) {
     var evt = document.createEvent("HTMLEvents");
@@ -35,39 +36,40 @@ function performEvent(element, name) {
 
 function drawSelectedTree(projectName,datasetName) {
 	// Can probably make this a better API
-	d3.json('service/phylomongo-v2/' + phylomap.mongoserver + '/' + projectName + '/' + datasetName + '?maxdepth=3', function(json) {
+	d3.json('service/phylomongo/' + projectName + '/' + datasetName, function(json) {
 		root = json;
+		console.log("tree returned:",root)
 		root.x0 = height / 2;
 		root.y0 = 0;
 		// initialize the display to show children nodes
-		root.clades.forEach(toggleAll);
+		root.children.forEach(toggleAll);
 		update(root);
 	});
 }
 
 
 function initializeDataSelection(initialProject, initialData) {
-var project = d3.select("#project").node(),
-    data = d3.select("#data").node(),
-    i;
+	var project = d3.select("#project").node(),
+	    data = d3.select("#data").node(),
+	    i;
 
-d3.select("#project").selectAll("option").remove();
-d3.json("service/listcollections", function (error, projects) {
-    //console.log(projects,"\n");
-    d3.select("#project").selectAll("option")
-        .data(projects.result)
-        .enter().append("option")
-        .text(function (d) { return d; });
+	d3.select("#project").selectAll("option").remove();
+	d3.json("service/listcollections", function (error, projects) {
+	    //console.log(projects,"\n");
+	    d3.select("#project").selectAll("option")
+	        .data(projects.result)
+	        .enter().append("option")
+	        .text(function (d) { return d; });
 
-    d3.select("#project").on("change", function () {
-        var project = d3.select("#project").node(),
-            collectionName = project.options[project.selectedIndex].text;
-        d3.json("service/listItemsInCollection/"+collectionName, function (error, datasets) {
-            d3.select("#data").selectAll("option").remove();
-            d3.select("#data").selectAll("option")
-                .data(datasets.result)
-                .enter().append("option")
-                .text(function (d) { return d; });
+	    d3.select("#project").on("change", function () {
+	        var project = d3.select("#project").node(),
+	            collectionName = project.options[project.selectedIndex].text;
+	        d3.json("service/listItemsInCollection/"+collectionName, function (error, datasets) {
+	            d3.select("#data").selectAll("option").remove();
+	            d3.select("#data").selectAll("option")
+	                .data(datasets.result)
+	                .enter().append("option")
+	                .text(function (d) { return d; });
             d3.select("#data").on("change", function () {
                 var projectName = project.options[project.selectedIndex].text,
                     dataName = data.options[data.selectedIndex].text;
@@ -89,10 +91,19 @@ d3.json("service/listcollections", function (error, projects) {
         }
     }
     performEvent(project, "change");
-});
+	});
 }
 
 
+function initDatasetFromArbor() {
+	var project = d3.select("#project").node()
+    var projectName = project.options[project.selectedIndex].text
+    var data = d3.select("#data").node();
+    dataName = data.options[data.selectedIndex].text;
+    phylomap.currentProjectName = projectName;
+    phylomap.currentDatasetName = dataName;
+    drawSelectedTree(projectName,dataName);
+}
 
 function addLoadEvent(func) {
 	var oldonload = window.onload;
@@ -119,12 +130,11 @@ function nodeFromId (id) {
 // Toggle clades.
 function toggle(d, node, callback) {
 	calledAlready = false;
-	if (d.clades) {
-		d._clades = d.clades;
-		d.clades = null;
+	if (d.children) {
+		d._children = d.children;
 		d.children = null;
-	} else if (d._clades) {
-		if (typeof(d._clades[0]) === "string") {
+	} else if (d._children) {
+		if (typeof(d._children[0]) === "string") {
 			calledAlready = true;
 			updateJSON({
 				oldJSON:d,
@@ -132,8 +142,8 @@ function toggle(d, node, callback) {
 				callback:callback
 			});
 		} else {
-			d.clades = d._clades;
-			d._clades = null;
+			d.children = d._children;
+			d._children = null;
 		}
 	// end-node
 	} else {
@@ -153,8 +163,8 @@ function toggle(d, node, callback) {
 function toggleAll(d, callback) {
 	// counter for async control
     togCount++;
-	if (d.clades) {
-		d.clades.forEach(function(el) {toggleAll(el);});
+	if (d.children) {
+		d.children.forEach(function(el) {toggleAll(el);});
 		toggle(d);
 	}
 	togCount--;
@@ -182,13 +192,13 @@ function zoomGraph()
 
 function off(d, callback) {
 	// not an end node
-	if (d.clades) {
-		d._clades = d.clades;
-		d.clades = null;
+	if (d.children) {
+		d._children = d.children;
 		d.children = null;
+
 	}
 	// end-node
-	else if (!d._clades) {
+	else if (!d._children) {
 		d.selected = false;
 	}
 	if (callback && typeof(callback) === "function") {
@@ -200,8 +210,8 @@ function offAll(d, callback) {
 	// counter for async control
 	togCount++;
 	off(d);
-	if (d._clades) {
-		d._clades.forEach(function(el) {offAll(el);});
+	if (d._children) {
+		d._children.forEach(function(el) {offAll(el);});
 	}
 	togCount--;
 	// if done and we have a callback function, execute it
@@ -212,14 +222,14 @@ function offAll(d, callback) {
 
 // turns on a specific node
 function on(d, callback) {
-	// do nothing if d.clades exists (not an end node)
-	if (!d.clades && d._clades) {
+	// do nothing if d.children exists (not an end node)
+	if (!d.children && d._children) {
 		// ensure child is actually loaded in memory
-		if (typeof(d._clades[0]) === "object") {
-			d.clades = d._clades;
-			d._clades = null;
+		if (typeof(d._children[0]) === "object") {
+			d.children = d._children;
+			d._children = null;
 		}
-	} else if (!d.clades) {
+	} else if (!d.children) {
 		d.selected = true;
 	}
 	if (callback && typeof(callback) === "function") {
@@ -231,10 +241,10 @@ function on(d, callback) {
 function onAll(d, callback) {
 	// counter for async control
 	togCount++;
-	if (typeof(d.clades) === "object") {
+	if (typeof(d.children) === "object") {
 		on(d);
-		if (d.clades) {
-			d.clades.forEach(function(el) {onAll(el);});
+		if (d.children) {
+			d.children.forEach(function(el) {onAll(el);});
 		}
 	}
 
@@ -269,9 +279,9 @@ function entireTree() {
 
 // allow a standard way to try for node naming a few different ways
 function returnNodeName(d) {
-if (d.scientific_name) {
-	if (d.scientific_name) {
-		return d.scientific_name;
+if (d['node_data']) {
+	if (d['node_data']['node name']) {
+		return d['node_data']['node name'];
 	} else if (d.name ) {
 		return d.name;
 	} else if (d.taxonomies && d.taxonomies[0].scientific_name) {
@@ -324,7 +334,7 @@ function update(source) {
 	nodeEnter.append("svg:circle")
 		.attr("r", 1e-6)
 		.style("fill", function(d) {
-			return d._clades ? "lightsteelblue" : "#fff";
+			return d._children ? "lightsteelblue" : "#fff";
 		});
 	//	.on("mouseover.pathColor", function(d) {
 	//		highlightPath(d);
@@ -335,10 +345,10 @@ function update(source) {
 
 	nodeEnter.append("svg:text")
 		.attr("x", function(d) {
-			return d.clades || d._clades ? - 10 : 10; })
+			return d.children || d._children ? - 10 : 10; })
 		.attr("dy", ".35em")
 		.attr("text-anchor", function(d) {
-			return d.clades || d._clades ? "end" : "start"; })
+			return d.children || d._children ? "end" : "start"; })
 		.text(function(d) {
 			// truncate ID's to last 4 characters; return name if there is a name assigned
                 if (d.scientific_name) {
@@ -372,10 +382,10 @@ function update(source) {
 	nodeUpdate.select("circle")
 		.attr("r", 4.5)
 		.style("fill", function(d) {
-			if (d._clades) {
+			if (d._children) {
 				// non end-node color before it is clicked
 				return "lightsteelblue";
-			} else if (d.clades || d.selected) {
+			} else if (d.children || d.selected) {
 				// any node's color after being clicked
 				return "#fff";
 			} else {
@@ -455,11 +465,10 @@ function updateJSON(options) {
 		d3.select(node.childNodes[0]).style("fill", "red");
 	}
 
-	d3.json('service/phylomongo-v2/' + phylomap.mongoserver + '/' + phylomap.currentProjectName+ '/' + phylomap.currentDatasetName
-			 + '?maxdepth=' + maxDepth + '&_id=' + oldJSON._id, function(err, json) {
+	d3.json('service/phylomongo/'+phylomap.currentProjectName+ '/'+ phylomap.currentDatasetName, function(err, json) {
 		toggleAll (json, function() {
-			oldJSON.clades = json._clades;
-			oldJSON._clades = null;
+			oldJSON.children = json._children;
+			oldJSON._children = null;
 			if (callback && typeof(callback) === "function") {
 				callback();
 			}
@@ -578,7 +587,7 @@ function mapItem(item) {
 						parseFloat(d[1]),
 						parseFloat(d[0]));
 					var text = "location: " + latlng + "<br>id: " + item._id;
-					var name = item.taxonomies[0].scientific_name;
+					var name = item['node_data']['node name'];
 					createMarker(latlng, name, text, item._id, icon);
 				});
 			}
@@ -704,7 +713,7 @@ var lMargin = 50, rMargin = 30, tMargin = 50, bMargin = 50,
 var cluster = d3.layout.cluster()
 	.size([height, width - 160])
 	.children(function(d) {
-		return (!d.clades || d.clades.length === 0) ? null : d.clades;
+		return (!d.children || d.children.length === 0) ? null : d.children;
 	});
 
 var vis = d3.select("#tree").append("svg:svg")
