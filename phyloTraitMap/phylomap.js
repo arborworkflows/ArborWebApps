@@ -138,13 +138,9 @@ function findNodeInTreeByNodeId(currentTreeNode, nodeID) {
 }
 
 
-function mapSingleNode(treeNode, rootNode) {
-
-	var icon = getIcon();
+function mapSingleNode(treeNode, rootNode,icon,selectionID) {
 	var bounds = new google.maps.LatLngBounds();
-
 	var name = treeNode.node_data['node name'];
-	var id = treeNode.node_data['nodeid'];
 	//console.log('map single node of id=',id, treeNode)
 
 	// if this node has locations, then add them to the map
@@ -154,15 +150,10 @@ function mapSingleNode(treeNode, rootNode) {
 			var latlng = new google.maps.LatLng(
 				parseFloat(thisloc[1]),
 				parseFloat(thisloc[0]));
-				var text = "location: " + latlng + "<br>id: " + id;
-			createMarker(latlng, name, text, id, icon);
+				var text = "location: " + latlng + "<br>id: " + selectionID;
+			createMarker(latlng, name, text, selectionID, icon);
 			bounds.extend(latlng);
 		};
-	}
-	// highlight the path on the tree between the rootId and this node if a valid id was passed
-	if (treeNode != null) {
-	        var colorToUse = getIconColor(id)
-	        highlightLimitedPath(treeNode,rootNode,colorToUse)
 	}
 }
 
@@ -174,8 +165,15 @@ function mapSingleNode(treeNode, rootNode) {
 // in phylotree re-names the attributes.  This search might fail sometimes, so testing
 // for valid children references under either name
 
-function mapAllNodesInClade(treeNode, cladeRootNode) {
+function mapAllNodesInClade(treeNode, cladeRootNode,icon,selectionID) {
 	//console.log('mapping everything below node:',treeNode.node_data['nodeid'])
+		// highlight the path on the tree between the rootId and this node if a valid id was passed
+	if (treeNode != null) {
+			var id = cladeRootNode.node_data['nodeid'];
+	        var colorToUse = getIconColor(id)
+	        highlightLimitedPath(treeNode,cladeRootNode,colorToUse)
+	}
+
 	if (('_children' in treeNode) && (treeNode._children.length>0)) {
 		for (var i = treeNode._children.length - 1; i >= 0; i--) {
 			mapAllNodesInClade(treeNode._children[i], cladeRootNode)
@@ -188,7 +186,7 @@ function mapAllNodesInClade(treeNode, cladeRootNode) {
 	} else {
 		// we have reached the bottom of the hierarchy, write out the locations to the map
 		// 
-		mapSingleNode(treeNode, cladeRootNode)
+		mapSingleNode(treeNode, cladeRootNode,icon,selectionID)
 	}
 }
 
@@ -202,8 +200,11 @@ function searchLocationsNearClade(selectedNode, callback) {
 	//console.log("highlight clade below node id",selectedNodeID);
 	// find the node with the id that matches the one the user clicked on
 	rootOfClade = findNodeInTreeByNodeId(phylomap.currentTree, selectedNodeID)
-	// traverse tree recursively, adding all locations in all taxa below this
-	mapAllNodesInClade(rootOfClade, rootOfClade)
+	// traverse tree recursively, adding all locations in all taxa below this.  We create the
+	// icon here so each selection maps to just one type of icon
+	var icon = getIcon();
+	mapAllNodesInClade(rootOfClade, rootOfClade, icon,iconIndex)
+	// run the callback if one was passed.  Use for setting and clearing processing badge
 	if (callback != null) callback();
 }
 
@@ -233,7 +234,7 @@ function adjustColorIndex(index) {
 function getIconColor(id) {
     var colorToUse;
     colorToUse = treeHighlightColorList[adjustColorIndex(markerColorIndex[id])];
-    //console.log("getIconColor: id=",id," markerColorIndex=",markerColorIndex[id]," treeColor=",colorToUse)
+    console.log("getIconColor: id=",id," markerColorIndex=",markerColorIndex[id]," treeColor=",colorToUse)
     return colorToUse
 }
 

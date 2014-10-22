@@ -317,7 +317,7 @@ function update(source) {
 	// Update the nodes...
 	var node = vis.selectAll("g.node")
 		.data(nodes, function(d) {
-			return d.id || (d.id = ++i);
+			return d.selectionid || (d.selectionid = ++i);
 		});
 
 	// Enter any new nodes at the parent's previous position.
@@ -424,7 +424,7 @@ function update(source) {
 	var link = vis.selectAll("path.link")
 	//	.data(tree.links(nodes), function(d) {
 		.data(cluster.links(nodes), function(d) {
-			return d.target.id;
+			return d.target.node_data['nodeid'];
 		});
 
 	// Enter any new links at the parent's previous position.
