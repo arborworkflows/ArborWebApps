@@ -61,6 +61,56 @@ function markerExists(id) {
 		return false;
 }
 
+
+// ---- build node lists to aid traversal, finding locations or matching nodes
+
+function addTaxaToTaxaList(treenode) {
+  if ('children' in treenode) {
+  	// case for intermediate nodes, continue traversal
+  	for (var i=0;i<treenode.children.length;i++) {
+  		addTaxaToTaxaList(treenode.children[i])
+  	}
+  } else {
+  	// case for a taxon
+  	phylomap.taxalist.push(treenode)
+  }
+}
+
+// this is a pre-processing function that is called once each time a tree is loaded.  It runs throgh
+// the tree and builds a list of all nodes, so searching doesn't have to involve recursive searching 
+// each time.  The routine assumes phylomap.currentTree is valid.
+
+function addAllNodesToAllNodeList(treenode) {
+  phylomap.allnodelist.push(treenode)
+  if ('children' in treenode) {
+  	// case for intermediate nodes, continue traversal
+  	for (var i=0;i<treenode.children.length;i++) {
+  		addAllNodesToAllNodeList(treenode.children[i])
+  	}
+  }
+}
+
+// this is a pre-processing function that is called once each time a tree is loaded.  It runs throgh
+// the tree and builds a list of the taxa, so searching doesn't have to involve recursive searching 
+// each time.  The routine assumes phylomap.currentTree is valid.
+
+function processTreeForMapLocations() {
+	// clear out the previous list if there is one
+	while (phylomap.taxalist.length > 0) {
+		phylomap.taxalist.pop()
+	}
+	while (phylomap.allnodelist.length > 0) {
+		phylomap.allnodelist.pop()
+	}
+	// start a recursive traversals to build lists of just taxa and of all the nodes for use later
+	addTaxaToTaxaList(phylomap.currentTree)
+	addAllNodesToAllNodeList(phylomap.currentTree)
+	//console.log(phylomap.taxalist)
+}
+
+
+//------ end of build node lists
+
 function searchLocationsNear(searchUrl) {
 	d3.json(searchUrl, function(json) {
 		var icon = getIcon();
@@ -78,30 +128,74 @@ function searchLocationsNear(searchUrl) {
 	});
 }
 
-// CRL: created special version of this search to avoid accidental confusion.  This search used only
-// during highlight of entire clade
-function searchLocationsNearClade(searchUrl, rootId, callback) {
-	d3.json(searchUrl, function(json) {
-		var icon = getIcon();
-		var bounds = new google.maps.LatLngBounds();
-		json.result.data.forEach(function(d){
-			var name = d.name;
-			var id = d.ID.$oid;
+
+function findNodeInTreeByNodeId(currentTreeNode, nodeID) {
+	for (var i = phylomap.allnodelist.length - 1; i >= 0; i--) {
+		if (phylomap.allnodelist[i].node_data['nodeid'] == nodeID) {
+			return phylomap.allnodelist[i]
+		}
+	}
+}
+
+
+function mapSingleNode(treeNode, rootNode) {
+
+	var icon = getIcon();
+	var bounds = new google.maps.LatLngBounds();
+
+	var name = treeNode.node_data['node name'];
+	var id = treeNode.node_data['nodeid'];
+	//console.log('map single node of id=',id, treeNode)
+
+	// if this node has locations, then add them to the map
+	if ('loc' in treeNode.node_data) {
+		for (var i = 0; i< treeNode.node_data['loc'].length; i++) {
+			var thisloc = treeNode.node_data['loc'][i]
 			var latlng = new google.maps.LatLng(
-				parseFloat(d.lat),
-				parseFloat(d.lng));
-			var text = "location: " + latlng + "<br>id: " + id;
+				parseFloat(thisloc[1]),
+				parseFloat(thisloc[0]));
+				var text = "location: " + latlng + "<br>id: " + id;
 			createMarker(latlng, name, text, id, icon);
 			bounds.extend(latlng);
-			// highlight the path on the tree between the rootId and this node if a valid id was passed
-			if (rootId != null) {
-			        var colorToUse = getIconColor(id)
-			        highlightLimitedPath(d,rootId,colorToUse)
-			}
-		});
-		if (callback != null) callback();
-	});
+		};
+	}
+	// highlight the path on the tree between the rootId and this node if a valid id was passed
+	if (treeNode != null) {
+	        var colorToUse = getIconColor(id)
+	        //highlightLimitedPath(treeNode,rootNode,colorToUse)
+	}
+}
 
+
+// recursive traversal of the current tree to uncover all nodes below the passed node and
+// map them.  The clade root is passed so highlighting can be performed. 
+
+function mapAllNodesInClade(treeNode, cladeRootNode) {
+	console.log('mapping everything below node:',treeNode.node_data['nodeid'])
+	if ('children' in treeNode) {
+		for (var i = treeNode.children.length - 1; i >= 0; i--) {
+			mapAllNodesInClade(treeNode.children[i], cladeRootNode)
+		}
+	} else {
+		// we have reached the bottom of the hierarchy, write out the locations to the map
+		// 
+		mapSingleNode(treeNode, cladeRootNode)
+	}
+}
+
+// This search is used only during highlight of entire clade.  
+// Processing moved from a service to inline javascript when integrated with Arbor/TangeloHub. 
+// the data element returned in the clicked node is a <g> element, so we need to look inside its
+// '__data__' attribute to find the actual tree node record.  This 
+
+function searchLocationsNearClade(selectedNode, callback) {
+	var selectedNodeID = selectedNode.node_data['nodeid']
+	console.log("highlight clade below node id",selectedNodeID);
+	// find the node with the id that matches the one the user clicked on
+	rootOfClade = findNodeInTreeByNodeId(phylomap.currentTree, selectedNodeID)
+	// traverse tree recursively, adding all locations in all taxa below this
+	mapAllNodesInClade(rootOfClade, rootOfClade)
+	if (callback != null) callback();
 }
 
 function getIcon() {

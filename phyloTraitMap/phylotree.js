@@ -11,13 +11,20 @@
 
 var phylomap = {}
 
-// define the location of the Arbor API used to lookup projects and datasets
+// global constants 
 phylomap.currentProjectName = ''
 phylomap.currentDatasetName = ''
+phylomap.currentTree = null
 
-// when the document is loaded, try to load a default dataset
+// this is a list of the taxa in the current tree so searching is faster
+phylomap.taxalist = []
+phylomap.allnodelist = []
+
+// when the document is loaded, try to load a default dataset.  This fails quietly if the
+// dataset is not available
+
 $(document).ready(function(){
-    initializeDataSelection("anolis")
+    initializeDataSelection("Deafult","anolis")
 });
 
 
@@ -35,10 +42,17 @@ function performEvent(element, name) {
 function drawSelectedTree(projectName,datasetName) {
 	// Can probably make this a better API
 	d3.json('service/phylotree/' + projectName + '/' + datasetName, function(json) {
+		// added with new Arbor datastore as more processing is in javascript
+		phylomap.currentTree = json;
 		root = json;
 		console.log("tree returned:",root)
 		root.x0 = height / 2;
 		root.y0 = 0;
+
+		// this builds a list of the taxa nodes with their locations for 
+        // faster searching and also a list of all nodes for finding nodes by id
+        processTreeForMapLocations()
+
 		// initialize the display to show children nodes
 		root.children.forEach(toggleAll);
 		update(root);
@@ -75,7 +89,10 @@ function initializeDataSelection(initialProject, initialData) {
                     dataName = data.options[data.selectedIndex].text;
                     phylomap.currentProjectName = projectName;
                     phylomap.currentDatasetName = dataName;
+                    // this pulls the tree from Arbor, draws the tree, and saves
+                    // the tree in the global phylomap.currentTree
                     drawSelectedTree(projectName,dataName);
+
                 });
             for (i = 0; i < data.options.length; i += 1) {
                 if (data.options[i].text === initialData) {
@@ -306,6 +323,10 @@ function update(source) {
 	// Enter any new nodes at the parent's previous position.
 	var nodeEnter = node.enter().append("svg:g")
 		.attr("class", "node")
+		// copy the unique ID into the DOM, so selections on nodes can return the nodeID.  This is important
+		// to highlight all the children in a clade.  When the user selects a node, the 'nodeid'
+		// is returned as an attribute of the <g> element selected amd passed to the callback
+		.attr("nodeid", function(d) { return d.node_data['nodeid']})		
 		.attr("transform", function(d) {
 			return "translate(" + source.y0 + "," + source.x0 + ")"; })
 		.on("click", function(datum, index, el) {
@@ -343,6 +364,7 @@ function update(source) {
 		.attr("x", function(d) {
 			return d.children || d._children ? - 10 : 10; })
 		.attr("dy", ".35em")
+
 		.attr("text-anchor", function(d) {
 			return d.children || d._children ? "end" : "start"; })
 		.text(function(d) {
@@ -471,9 +493,9 @@ function updateJSON(options) {
 function highlightLimitedPath(node, rootId, color, size) {
 	color = ((color != null) ? color : "red");
 	size = ((size != null) ? size : "3px");
-	var id = node.ID.$oid;
+	var id = node.node_data['nodeid']
         //console.log("highlight node: ",node);
-        //console.log("highlightLimitedPath from id: ",node.ID.$oid, " with color: ",colorToUse);
+        console.log("highlightLimitedPath from id: ",id, " with color: ",colorToUse);
 	var parent = vis.selectAll("path").filter(function (d,i) { return d.target._id === id ? this : null; });
 	// turn on the text for this node
 	var domNode = nodeFromId(node.ID.$oid);
@@ -584,8 +606,14 @@ function mapItem(item) {
 	}
 }
 
+function setProcessingBadge() {
+	$(document).ready(function() {
+		$('#treebuttons').badger('Processing');
+	});
+}
+
 function clearBadge() {
-	console.log("callback");
+	//console.log("callback");
 	$(document).ready(function() {
 		$('#treebuttons').badger('');
 	});
@@ -598,27 +626,17 @@ function mapAllChildNodes(d, node) {
 	// ensure our helper functions have been included via javascript includes
 	if (typeof createMarker != 'undefined' && typeof google.maps.LatLng != 'undefined') {
 		// this process can take a long time, so put up a processing sign
-		searchLocationsNearClade('service/phylomap/' + phylomap.currentProjectName + '/' +
-		        phylomap.currentDatasetName +
-			'/id/' + d._id, d._id, clearBadge);
+		setProcessingBadge()
+
+		// we receive an element from the DOM corresponding to a node in the tree, so we need
+		// to traverse inside the <g> element and find the attached true tree node by using the 
+		// '__data__' attribute of the element
+		var treeNodeElement = node.__data__;
+		searchLocationsNearClade(treeNodeElement, clearBadge);
 	}
 }
 
 var phylotree = {}
-
-phylotree.getMongoDBInfo = function() {
-    "use strict";
-
-    // Read in the config options regarding which MongoDB
-    // server/database/collection to use.
-    return {
-        server: localStorage.getItem('phylotree:mongodb-server') || 'localhost',
-        db: localStorage.getItem('phylotree:mongodb-db') || 'xdata',
-        coll: localStorage.getItem('phylotree:mongodb-coll') || 'heliconia_new',
-        verticalScale: localStorage.getItem('phylotree:verticalScale') || '4.0'
-    };
-};
-
 
 function increaseHeight(delta) {
 	var oldHeight = height;
