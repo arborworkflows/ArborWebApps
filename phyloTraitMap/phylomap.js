@@ -162,20 +162,29 @@ function mapSingleNode(treeNode, rootNode) {
 	// highlight the path on the tree between the rootId and this node if a valid id was passed
 	if (treeNode != null) {
 	        var colorToUse = getIconColor(id)
-	        //highlightLimitedPath(treeNode,rootNode,colorToUse)
+	        highlightLimitedPath(treeNode,rootNode,colorToUse)
 	}
 }
 
 
 // recursive traversal of the current tree to uncover all nodes below the passed node and
-// map them.  The clade root is passed so highlighting can be performed. 
+// map them.  The clade root is passed so highlighting can be performed.
+
+// *** had to use _children instead of children because of how the accessor algorithm 
+// in phylotree re-names the attributes.  This search might fail sometimes, so testing
+// for valid children references under either name
 
 function mapAllNodesInClade(treeNode, cladeRootNode) {
-	console.log('mapping everything below node:',treeNode.node_data['nodeid'])
-	if ('children' in treeNode) {
-		for (var i = treeNode.children.length - 1; i >= 0; i--) {
-			mapAllNodesInClade(treeNode.children[i], cladeRootNode)
+	//console.log('mapping everything below node:',treeNode.node_data['nodeid'])
+	if (('_children' in treeNode) && (treeNode._children.length>0)) {
+		for (var i = treeNode._children.length - 1; i >= 0; i--) {
+			mapAllNodesInClade(treeNode._children[i], cladeRootNode)
 		}
+	} else if (('children' in treeNode) && (treeNode.children.length>0)) {
+			console.log('mapAllNodesInClade: traversing -children- attribute to follow clade')
+			for (var i = treeNode.children.length - 1; i >= 0; i--) {
+				mapAllNodesInClade(treeNode.children[i], cladeRootNode)
+			}
 	} else {
 		// we have reached the bottom of the hierarchy, write out the locations to the map
 		// 
@@ -190,7 +199,7 @@ function mapAllNodesInClade(treeNode, cladeRootNode) {
 
 function searchLocationsNearClade(selectedNode, callback) {
 	var selectedNodeID = selectedNode.node_data['nodeid']
-	console.log("highlight clade below node id",selectedNodeID);
+	//console.log("highlight clade below node id",selectedNodeID);
 	// find the node with the id that matches the one the user clicked on
 	rootOfClade = findNodeInTreeByNodeId(phylomap.currentTree, selectedNodeID)
 	// traverse tree recursively, adding all locations in all taxa below this

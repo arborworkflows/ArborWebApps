@@ -141,7 +141,7 @@ function elbow(d, i) {
 }
 
 function nodeFromId (id) {
-	return vis.selectAll("g.node").filter(function (d,i) { return d._id == id ? this : null; });
+	return vis.selectAll("g.node").filter(function (d,i) { return d.node_data['nodeid'] == id ? this : null; });
 }
 
 // Toggle clades.
@@ -495,10 +495,10 @@ function highlightLimitedPath(node, rootId, color, size) {
 	size = ((size != null) ? size : "3px");
 	var id = node.node_data['nodeid']
         //console.log("highlight node: ",node);
-        console.log("highlightLimitedPath from id: ",id, " with color: ",colorToUse);
-	var parent = vis.selectAll("path").filter(function (d,i) { return d.target._id === id ? this : null; });
+        console.log("highlightLimitedPath from id: ",id, " with color: ",color);
+	var parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === id ? this : null; });
 	// turn on the text for this node
-	var domNode = nodeFromId(node.ID.$oid);
+	var domNode = nodeFromId(id);
 	// have to pick the first element from the dictionary, since DOM structure is returned
 	textOn(domNode[0]);
 	// highlight all parent paths as well
@@ -506,7 +506,7 @@ function highlightLimitedPath(node, rootId, color, size) {
 		// highlight the path
 		parent.style("stroke", color).style("stroke-width", size);
 		// get the next parent
-		parent = vis.selectAll("path").filter(function (d,i) { return d.target._id === parent.datum().source._id ? this : null; });
+		parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === parent.datum().source._id ? this : null; });
 	}
 
 }
