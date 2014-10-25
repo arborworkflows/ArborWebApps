@@ -515,16 +515,16 @@ function highlightLimitedPath(node, rootId, color, size) {
 function highlightPath(node, color, size) {
 	color = ((color != null) ? color : "red");
 	size = ((size != null) ? size : "3px");
-	var id = node._id;
+	var id = node.node_data['nodeie'];
 	// get the current path
-	var parent = vis.selectAll("path").filter(function (d,i) { return d.target._id === id ? this : null; });
+	var parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeie'] === id ? this : null; });
 
 	// highlight all parent paths as well
 	while (parent[0].length > 0) {
 		// highlight the path
 		parent.style("stroke", color).style("stroke-width", size);
 		// get the next parent
-		parent = vis.selectAll("path").filter(function (d,i) { return d.target._id === parent.datum().source._id ? this : null; });
+		parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeie'] === parent.datum().source._id ? this : null; });
 	}
 }
 

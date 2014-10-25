@@ -128,6 +128,53 @@ function searchLocationsNear(searchUrl) {
 	});
 }
 
+// The next few routines below are involved in handling circles drawn on the map by the user. 
+//  These routines check for observation points that lie within the radius of the drawn circle. 
+
+// determine if a point (lat,lng) is inside the circle with center clat,clng, and given radius
+function pointInCircle(lat,lng,clat,clng,radius) {
+	var KPiDouble = 3.141592654
+	var KDegreesToRadiansDouble = 0.01745329  // KPiDouble / 180.0
+	var earthRadius = 6378137 // in meters
+	clng = clng * KDegreesToRadiansDouble
+	clat = clat * KDegreesToRadiansDouble
+	var cradius = radius / earthRadius
+	var lng = lng * KDegreesToRadiansDouble
+	var lat = lat * KDegreesToRadiansDouble
+	var angle = Math.acos(Math.sin(clat) * Math.sin(lat) + Math.cos(clat) * Math.cos(lat) * Math.cos(lng - clng))
+	var decision = (angle < cradius)
+	//if (decision) {
+	//	console.log(lat,lng,clat,clng,angle,cradius,(angle < cradius))
+    //}
+	return decision
+}
+
+// This call adds markers to the map for all occurrence points within the boundaries of a circle. 
+function searchLocationsNearCircle(lat,lon,radius) {
+	var icon = getIcon();
+	var bounds = new google.maps.LatLngBounds();
+	// look through all taxa in precompiled list
+	for (var i=0;i<phylomap.taxalist.length;i++) {
+		var name = phylomap.taxalist[i].node_data['node name'];
+		var id = phylomap.taxalist[i].node_data['nodeid'];
+		if ('loc' in phylomap.taxalist[i].node_data) {
+			for (var j = phylomap.taxalist[i].node_data['loc'].length - 1; j >= 0; j--) {
+				var point =  phylomap.taxalist[i].node_data['loc'][j]
+				// if this point is inside the target circle, then add a marker
+				if (pointInCircle(point[1],point[0],lat,lon,radius)) {
+					var latlng = new google.maps.LatLng(
+						parseFloat(point[1]),
+						parseFloat(point[0]));
+					var text = "location: " + latlng + "species: " + name + " <br>id: " + id;
+					createMarker(latlng, name, text, id, icon);
+					bounds.extend(latlng);
+					var colorToUse = getIconColor()
+	        		highlightPath(phylomap.taxalist[i],phylomap.currentTree,colorToUse)
+				}
+			}
+		}
+	}
+}
 
 function findNodeInTreeByNodeId(currentTreeNode, nodeID) {
 	for (var i = phylomap.allnodelist.length - 1; i >= 0; i--) {
@@ -159,7 +206,8 @@ function mapSingleNode(treeNode, rootNode,icon,selectionID) {
 
 
 // recursive traversal of the current tree to uncover all nodes below the passed node and
-// map them.  The clade root is passed so highlighting can be performed.
+// map them.  The clade root is passed so highlighting can be performed by lighting nodes between 
+// the clade root and the current node
 
 // *** had to use _children instead of children because of how the accessor algorithm 
 // in phylotree re-names the attributes.  This search might fail sometimes, so testing
@@ -176,12 +224,12 @@ function mapAllNodesInClade(treeNode, cladeRootNode,icon,selectionID) {
 
 	if (('_children' in treeNode) && (treeNode._children.length>0)) {
 		for (var i = treeNode._children.length - 1; i >= 0; i--) {
-			mapAllNodesInClade(treeNode._children[i], cladeRootNode)
+			mapAllNodesInClade(treeNode._children[i], cladeRootNode,icon,selectionID)
 		}
 	} else if (('children' in treeNode) && (treeNode.children.length>0)) {
 			console.log('mapAllNodesInClade: traversing -children- attribute to follow clade')
 			for (var i = treeNode.children.length - 1; i >= 0; i--) {
-				mapAllNodesInClade(treeNode.children[i], cladeRootNode)
+				mapAllNodesInClade(treeNode.children[i], cladeRootNode,icon,selectionID)
 			}
 	} else {
 		// we have reached the bottom of the hierarchy, write out the locations to the map
@@ -203,7 +251,7 @@ function searchLocationsNearClade(selectedNode, callback) {
 	// traverse tree recursively, adding all locations in all taxa below this.  We create the
 	// icon here so each selection maps to just one type of icon
 	var icon = getIcon();
-	mapAllNodesInClade(rootOfClade, rootOfClade, icon,iconIndex)
+	mapAllNodesInClade(rootOfClade, rootOfClade, icon, selectedNodeID)
 	// run the callback if one was passed.  Use for setting and clearing processing badge
 	if (callback != null) callback();
 }
@@ -384,7 +432,7 @@ addLoadEvent(function () {
 		//center: new google.maps.LatLng(18.994609, -71.345215),
 		//zoom: 6,
 		center: new google.maps.LatLng(1.65, -70.0),
-		zoom: 4,
+		zoom: 5,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
 	map = new google.maps.Map(d3.select("#map_canvas").node(),
@@ -414,22 +462,18 @@ addLoadEvent(function () {
 		// using up positions in the URL since the names of the arguments didn't work anymore.
 
 		if (event.type == google.maps.drawing.OverlayType.CIRCLE) {
-	 		searchUrl = 'service/phylomap-v2/' + phylomap.mongoserver + '/' + phylomap.currentProjectName +
-	 		        '/' + phylomap.currentDatasetName +
-	 			'/circle/id' +
-	 			 '/'+ event.overlay.getCenter().lng() +
-	 			 '/'+ event.overlay.getCenter().lat() +
-	 			 '/'+ event.overlay.getRadius();
+				searchLocationsNearCircle(
+					event.overlay.getCenter().lat(),
+					event.overlay.getCenter().lng(),
+					event.overlay.getRadius())
+
 	 	} else if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
-	 		searchUrl = 'service/phylomap-v2/' + phylomap.mongoserver + '/' + phylomap.currentProjectName +
-	 		        '/' + phylomap.currentDatasetName +
-	 			'/rect/id/long/lat/radius/' +
-				'/' + event.overlay.bounds.getSouthWest().lng() +
-				'/' + event.overlay.bounds.getSouthWest().lat() +
-				'/' + event.overlay.bounds.getNorthEast().lng() +
-				'/' + event.overlay.bounds.getNorthEast().lat();
+				searchLocationsNearRect(
+					event.overlay.bounds.getSouthWest().lng(),
+					event.overlay.bounds.getSouthWest().lat(),
+					event.overlay.bounds.getNorthEast().lng(),
+					event.overlay.bounds.getNorthEast().lat())
 		}
-		searchLocationsNear(searchUrl);
 		overlays.push(event.overlay);
 	});
 
