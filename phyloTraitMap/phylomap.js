@@ -165,11 +165,11 @@ function searchLocationsNearCircle(lat,lon,radius) {
 					var latlng = new google.maps.LatLng(
 						parseFloat(point[1]),
 						parseFloat(point[0]));
-					var text = "location: " + latlng + "species: " + name + " <br>id: " + id;
+					var text = "species: " + name + " <br>id: " + id;
 					createMarker(latlng, name, text, id, icon);
 					bounds.extend(latlng);
 					var colorToUse = getIconColor()
-	        		highlightPath(phylomap.taxalist[i],phylomap.currentTree,colorToUse)
+	        		//highlightPath(phylomap.taxalist[i],phylomap.currentTree,colorToUse)
 				}
 			}
 		}
@@ -296,6 +296,9 @@ function createMarker(latlng, name, text, id, icon) {
 		position: latlng,
 		icon: icon
 	});
+	/*
+	 * these are currently disabled until the highlight functions are fixed
+
 	google.maps.event.addListener(marker, 'mouseover', function() {
 		var node = nodeFromId(id);
 		//highlightParents(node, "red", "3px");
@@ -310,6 +313,7 @@ function createMarker(latlng, name, text, id, icon) {
 			textOff(node[0], true);
 		}
 	});
+*/
 	google.maps.event.addListener(marker, 'click', function() {
 		clickedOn = clickedOn == true ? false : true;
 		var node = nodeFromId(id);
@@ -317,15 +321,16 @@ function createMarker(latlng, name, text, id, icon) {
 			infoWindow.setContent(html);
 			infoWindow.open(map, marker);
 			// CRL: change so highlights match icon colors
-			highlightParents(node, getIconColor(id), "3px");
+			//highlightParents(node, getIconColor(id), "3px");
 			//highlightParents(node, "red", "3px");
 			textOn(node[0]);
 		} else {
 			infoWindow.close();
-			highlightParents(node, "#ccc", "1.5px");
+			//highlightParents(node, "#ccc", "1.5px");
 			textOff(node[0], true);
 		}
 	});
+
 	// store in index the id/markerIndex key/value pair, easier to delete later.
 	if (typeof markerIndex[id] === "object") {
 		markerIndex[id].push(markers.length);
