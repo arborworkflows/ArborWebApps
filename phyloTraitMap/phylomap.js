@@ -169,7 +169,7 @@ function searchLocationsNearCircle(lat,lon,radius) {
 					createMarker(latlng, name, text, id, icon);
 					bounds.extend(latlng);
 					var colorToUse = getIconColor()
-	        		//highlightPath(phylomap.taxalist[i],phylomap.currentTree,colorToUse)
+	        		highlightPath(phylomap.taxalist[i],phylomap.currentTree,colorToUse)
 				}
 			}
 		}
@@ -197,7 +197,7 @@ function mapSingleNode(treeNode, rootNode,icon,selectionID) {
 			var latlng = new google.maps.LatLng(
 				parseFloat(thisloc[1]),
 				parseFloat(thisloc[0]));
-				var text = "location: " + latlng + "<br>id: " + selectionID;
+				var text = "species: " + name + "<br>id: " + selectionID;
 			createMarker(latlng, name, text, selectionID, icon);
 			bounds.extend(latlng);
 		};
@@ -227,7 +227,7 @@ function mapAllNodesInClade(treeNode, cladeRootNode,icon,selectionID) {
 			mapAllNodesInClade(treeNode._children[i], cladeRootNode,icon,selectionID)
 		}
 	} else if (('children' in treeNode) && (treeNode.children.length>0)) {
-			console.log('mapAllNodesInClade: traversing -children- attribute to follow clade')
+			//console.log('mapAllNodesInClade: traversing -children- attribute to follow clade')
 			for (var i = treeNode.children.length - 1; i >= 0; i--) {
 				mapAllNodesInClade(treeNode.children[i], cladeRootNode,icon,selectionID)
 			}
@@ -250,16 +250,17 @@ function searchLocationsNearClade(selectedNode, callback) {
 	rootOfClade = findNodeInTreeByNodeId(phylomap.currentTree, selectedNodeID)
 	// traverse tree recursively, adding all locations in all taxa below this.  We create the
 	// icon here so each selection maps to just one type of icon
-	var icon = getIcon();
+	var icon = getIcon(selectedNodeID);
 	mapAllNodesInClade(rootOfClade, rootOfClade, icon, selectedNodeID)
 	// run the callback if one was passed.  Use for setting and clearing processing badge
 	if (callback != null) callback();
 }
 
-function getIcon() {
+function getIcon(nodeid) {
 	if (typeof iconIndex === "undefined" || iconIndex == null || iconIndex == iconList.length) {
 		iconIndex = 0;
-	}
+	} 
+
 	return iconList[iconIndex++];
 }
 
@@ -281,8 +282,13 @@ function adjustColorIndex(index) {
 
 function getIconColor(id) {
     var colorToUse;
+
+    // if this has been called before any markers are created for this node, set the indexes appropriately
+    if (typeof markerColorIndex[id] == "undefined") {
+    	markerColorIndex[id] = iconIndex;
+    }
     colorToUse = treeHighlightColorList[adjustColorIndex(markerColorIndex[id])];
-    console.log("getIconColor: id=",id," markerColorIndex=",markerColorIndex[id]," treeColor=",colorToUse)
+    //console.log("getIconColor: id=",id," markerColorIndex=",markerColorIndex[id]," treeColor=",colorToUse)
     return colorToUse
 }
 
@@ -290,18 +296,17 @@ function createMarker(latlng, name, text, id, icon) {
 	var html = "<b>" + name + "</b><br>" + text;
 	// save the color of this icon in a color index array
 	markerColorIndex[id] = iconIndex;
+	//console.log('saving marketColorIndex[',id,'] = ',iconIndex)
 	icon = ((icon != null) ? icon : getIcon());
 	var marker = new google.maps.Marker({
 		map: map,
 		position: latlng,
 		icon: icon
 	});
-	/*
-	 * these are currently disabled until the highlight functions are fixed
+
 
 	google.maps.event.addListener(marker, 'mouseover', function() {
 		var node = nodeFromId(id);
-		//highlightParents(node, "red", "3px");
 		// CRL: color highlight path according to icon color
 		highlightParents(node, getIconColor(id), "3px");
 		textOn(node[0]);
@@ -313,7 +318,9 @@ function createMarker(latlng, name, text, id, icon) {
 			textOff(node[0], true);
 		}
 	});
-*/
+
+
+	// enable persistent highlight after click ? 
 	google.maps.event.addListener(marker, 'click', function() {
 		clickedOn = clickedOn == true ? false : true;
 		var node = nodeFromId(id);
@@ -321,12 +328,12 @@ function createMarker(latlng, name, text, id, icon) {
 			infoWindow.setContent(html);
 			infoWindow.open(map, marker);
 			// CRL: change so highlights match icon colors
-			//highlightParents(node, getIconColor(id), "3px");
+			highlightParents(node, getIconColor(id), "3px");
 			//highlightParents(node, "red", "3px");
 			textOn(node[0]);
 		} else {
 			infoWindow.close();
-			//highlightParents(node, "#ccc", "1.5px");
+			highlightParents(node, "#ccc", "1.5px");
 			textOff(node[0], true);
 		}
 	});

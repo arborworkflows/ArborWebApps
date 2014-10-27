@@ -45,7 +45,7 @@ function drawSelectedTree(projectName,datasetName) {
 		// added with new Arbor datastore as more processing is in javascript
 		phylomap.currentTree = json;
 		root = json;
-		console.log("tree returned:",root)
+		//console.log("tree returned:",root)
 		root.x0 = height / 2;
 		root.y0 = 0;
 
@@ -353,12 +353,12 @@ function update(source) {
 		.style("fill", function(d) {
 			return d._children ? "lightsteelblue" : "#fff";
 		});
-	//	.on("mouseover.pathColor", function(d) {
-	//		highlightPath(d);
-	//	})
-	//	.on("mouseout.pathColor", function(d) {
-	//		highlightPath(d, pathColor, pathWidth);
-	//	});
+//		.on("mouseover.pathColor", function(d) {
+//			highlightPath(d);
+//		})
+//		.on("mouseout.pathColor", function(d) {
+//			highlightPath(d, pathColor, pathWidth);
+//		});
 
 	nodeEnter.append("svg:text")
 		.attr("x", function(d) {
@@ -495,7 +495,7 @@ function highlightLimitedPath(node, rootId, color, size) {
 	size = ((size != null) ? size : "3px");
 	var id = node.node_data['nodeid']
         //console.log("highlight node: ",node);
-        console.log("highlightLimitedPath from id: ",id, " with color: ",color);
+        //console.log("highlightLimitedPath from id: ",id, " with color: ",color);
 	var parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === id ? this : null; });
 	// turn on the text for this node
 	var domNode = nodeFromId(id);
@@ -506,25 +506,29 @@ function highlightLimitedPath(node, rootId, color, size) {
 		// highlight the path
 		parent.style("stroke", color).style("stroke-width", size);
 		// get the next parent
-		parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === parent.datum().source._id ? this : null; });
+		parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === parent.datum().source.node_data['nodeid'] ? this : null; });
 	}
 
 }
 
+// The traversal back up the DOM hierarchy is somewhat magical. Reviewing the paths in the browser doesn't show the node linkage 
+// traversed by the parent.datum().source.xxxx link, but it works to traverse back to the root of the tree.  Can't really see how it
+// is built either, likely the d3 path stores node information somewhere... 
 
 function highlightPath(node, color, size) {
 	color = ((color != null) ? color : "red");
 	size = ((size != null) ? size : "3px");
-	var id = node.node_data['nodeie'];
+	var id = node.node_data['nodeid'];
 	// get the current path
-	var parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeie'] === id ? this : null; });
+	var parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === id ? this : null; });
+	//console.log('parent ',parent)
 
 	// highlight all parent paths as well
 	while (parent[0].length > 0) {
 		// highlight the path
 		parent.style("stroke", color).style("stroke-width", size);
 		// get the next parent
-		parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeie'] === parent.datum().source._id ? this : null; });
+		parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === parent.datum().source.node_data['nodeid'] ? this : null; });
 	}
 }
 
