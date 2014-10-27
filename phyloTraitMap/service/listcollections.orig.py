@@ -5,18 +5,15 @@ import requests
 import tangelo
 
 
-def run(usertoken):
+def run():
     # Create an empty response object.
     response = {}
     collectionNames = []
 
-    # build custom girder header for authenticated access
-    girderheader = {'Girder-Token': usertoken}
-    print 'girderheader:',girderheader
+   # look through the collections in girder.  Return a list of collections that are in this local # Arbor instance
 
-    # look through the collections in girder.  Return a list of collections that are in this local # Arbor instance
     girderlocation = 'http://localhost:8080'
-    resp = requests.get(girderlocation+'/api/v1/collection',headers=girderheader)
+    resp = requests.get(girderlocation+'/api/v1/collection')
 
     for entry in resp.json():
         collname = entry['name']

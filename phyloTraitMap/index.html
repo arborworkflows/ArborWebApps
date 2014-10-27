@@ -77,6 +77,28 @@
     </div>
 </div>
 
+<div id=login-panel class="modal fade">
+  <div class=modal-dialog>
+        <div class=modal-content>
+            <div class=modal-header>
+                <h3>Login  to Arbor</h3>
+            </div>
+
+            <div class=modal-body>
+                    <p>Please enter your Arbor login credentials to access your private collections on Arbor:</p>
+
+                    <input type='text' id='usernameInput'> username </input>
+                    <input type='password' id='passwordInput' style='margin-left: 20px'> password</input>
+
+            </div>
+                <div class=modal-footer>
+                <a class="btn btn-success" onclick="authenticateWithArbor()" data-dismiss=modal>Login</button>
+                <a class="btn btn-default" data-dismiss=modal>Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="navbar navbar-default navbar-fixed-top">
     <div class=navbar-header>
@@ -86,6 +108,7 @@
     <ul class="nav navbar-nav">
         <li class=active> <a>Arbor Trait Museum Explorer</a>
         <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
+        <li><a style=cursor:pointer data-toggle=modal data-target=#login-panel><span class="glyphicon glyphicon-info-sign"></span> Login</a>
     </ul>
 </div>
 

@@ -16,6 +16,9 @@ phylomap.currentProjectName = ''
 phylomap.currentDatasetName = ''
 phylomap.currentTree = null
 
+// added for authentication
+phylomap.usertoken = ''
+
 // this is a list of the taxa in the current tree so searching is faster
 phylomap.taxalist = []
 phylomap.allnodelist = []
@@ -26,6 +29,22 @@ phylomap.allnodelist = []
 $(document).ready(function(){
     initializeDataSelection("Deafult","anolis")
 });
+
+
+
+function authenticateWithArbor() {
+	var currentUser = document.getElementById('usernameInput').value;
+	var currentPassword = document.getElementById('passwordInput').value;
+	console.log('received login info:',currentUser,currentPassword)
+	d3.json('service/authenticate/'+currentUser+'/' + currentPassword, function(err, json) {
+		girdertoken = json['result']
+		console.log('received auth token:', girdertoken)
+		phylomap.usertoken = girdertoken
+		// force database requery now that we are authenticated
+		initializeDataSelection()
+	});
+}
+
 
 
 function performEvent(element, name) {
@@ -68,7 +87,8 @@ function initializeDataSelection(initialProject, initialData) {
 	    i;
 
 	d3.select("#project").selectAll("option").remove();
-	d3.json("service/listcollections", function (error, projects) {
+	// add user token argument to allow authentication with remote collections
+	d3.json("service/listcollections/"+ phylomap.usertoken, function (error, projects) {
 	    //console.log(projects,"\n");
 	    d3.select("#project").selectAll("option")
 	        .data(projects.result)
@@ -707,6 +727,11 @@ function updateVisualization() {
 		.attr("d", elbow);
 }
 
+
+
+
+
+
 // GLOBAL VARIABLES
 var lMargin = 50, rMargin = 30, tMargin = 50, bMargin = 50,
 	width = 1000 - lMargin - rMargin,
@@ -738,6 +763,5 @@ vis.append("svg:rect")
 	.attr("class", "background");
 
 // ---------
-
 
 
