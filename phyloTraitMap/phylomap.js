@@ -165,8 +165,23 @@ function searchLocationsNearCircle(lat,lon,radius) {
 					var latlng = new google.maps.LatLng(
 						parseFloat(point[1]),
 						parseFloat(point[0]));
-					var text = "species: " + name + " <br>id: " + id;
+					// the id field is used internally to phylomap for highlighting, it doesn't
+					// need to be displayed to the user generally
+					//var text = "species: " + name + " <br>id: " + id;
+					var text = "species: " + name ;	
+					// add other attributes to display tag if they are present in the taxon nodes
+					var attribs = []
+					if ('attributes' in phylomap.taxalist[i].node_data) {
+						if (phylomap.taxalist[i].node_data['attributes'].length >= j) {
+							attribs = phylomap.taxalist[i].node_data['attributes'][j]
+							// add descriptions to the text markers
+							for (var attrib in attribs) {
+								text = text + ' [' + attrib+']:'+attribs[attrib]
+							};
+						}
+					}
 					createMarker(latlng, name, text, id, icon);
+					addLocationToSelectedList(phylomap.taxalist[i],attribs,point[1],point[0])
 					bounds.extend(latlng);
 					var colorToUse = getIconColor()
 	        		highlightPath(phylomap.taxalist[i],phylomap.currentTree,colorToUse)
@@ -174,7 +189,23 @@ function searchLocationsNearCircle(lat,lon,radius) {
 			}
 		}
 	}
+	updateTableDisplay(phylomap.selectedOccurrences)
 }
+
+
+function addLocationToSelectedList(node,attribs,lat,lon) {
+    console.log('adding node to selection list.  Length now:',phylomap.selectedOccurrences.length)
+    var record = {}
+    record['species'] = node.node_data['node name']
+    record['lat'] = lat
+    record['lon'] = lon
+    // if there are extra attributes on this node, copy them over to the trait matrix selection entry
+    for (attrib in attribs) {
+    	record[attrib] = attribs[attrib]
+    }
+    phylomap.selectedOccurrences.push(record)
+}
+
 
 function findNodeInTreeByNodeId(currentTreeNode, nodeID) {
 	for (var i = phylomap.allnodelist.length - 1; i >= 0; i--) {
@@ -197,7 +228,18 @@ function mapSingleNode(treeNode, rootNode,icon,selectionID) {
 			var latlng = new google.maps.LatLng(
 				parseFloat(thisloc[1]),
 				parseFloat(thisloc[0]));
-				var text = "species: " + name + "<br>id: " + selectionID;
+			var text = "species: " + name + "<br>id: " + selectionID;
+			// add other attributes to display tag if they are present in the taxon node
+			var attribs = []
+			if ('attributes' in treeNode.node_data) {
+				if (treeNode.node_data['attributes'].length >= i) {
+					attribs = treeNode.node_data['attributes'][i]
+					// add descriptions to the text markers
+					for (var attrib in attribs) {
+						text = text + ' [' + attrib+']:'+attribs[attrib]
+					};
+				}
+			}
 			createMarker(latlng, name, text, selectionID, icon);
 			bounds.extend(latlng);
 		};

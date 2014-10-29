@@ -23,6 +23,9 @@ phylomap.usertoken = ''
 phylomap.taxalist = []
 phylomap.allnodelist = []
 
+// this table is updated dynamically during operations to list what has been enabled on the map
+phylomap.selectedOccurrences = []
+
 // when the document is loaded, try to load a default dataset.  This fails quietly if the
 // dataset is not available
 
