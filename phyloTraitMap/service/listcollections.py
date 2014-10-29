@@ -18,6 +18,10 @@ def run(usertoken):
     girderlocation = 'http://localhost:8080'
     resp = requests.get(girderlocation+'/api/v1/collection',headers=girderheader)
 
+    # nothing particularly interesting here
+    #print resp.headers
+    #print requests.utils.dict_from_cookiejar(resp.cookies)
+
     for entry in resp.json():
         collname = entry['name']
         print "found collection:", collname

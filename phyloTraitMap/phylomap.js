@@ -32,6 +32,10 @@ function clearLocations() {
 	}
 	// set index to last item so it will reset on next element
 	iconIndex = 0;
+
+	// clear occurrence compilation list
+	phylomap.selectedOccurrences = []
+	updateTableDisplay(phylomap.selectedOccurrences)
 }
 
 // Can create serious problems as it doesn't delete markerIndex references!
@@ -196,13 +200,13 @@ function searchLocationsNearCircle(lat,lon,radius) {
 function addLocationToSelectedList(node,attribs,lat,lon) {
     console.log('adding node to selection list.  Length now:',phylomap.selectedOccurrences.length)
     var record = {}
-    record['species'] = node.node_data['node name']
-    record['lat'] = lat
-    record['lon'] = lon
     // if there are extra attributes on this node, copy them over to the trait matrix selection entry
     for (attrib in attribs) {
     	record[attrib] = attribs[attrib]
     }
+    record['lat'] = lat
+    record['lon'] = lon
+    record['species'] = node.node_data['node name']
     phylomap.selectedOccurrences.push(record)
 }
 
@@ -242,6 +246,7 @@ function mapSingleNode(treeNode, rootNode,icon,selectionID) {
 			}
 			createMarker(latlng, name, text, selectionID, icon);
 			bounds.extend(latlng);
+			addLocationToSelectedList(treeNode,attribs,thisloc[1],thisloc[0])		
 		};
 	}
 }
@@ -294,6 +299,7 @@ function searchLocationsNearClade(selectedNode, callback) {
 	// icon here so each selection maps to just one type of icon
 	var icon = getIcon(selectedNodeID);
 	mapAllNodesInClade(rootOfClade, rootOfClade, icon, selectedNodeID)
+	updateTableDisplay(phylomap.selectedOccurrences)
 	// run the callback if one was passed.  Use for setting and clearing processing badge
 	if (callback != null) callback();
 }

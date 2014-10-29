@@ -142,6 +142,8 @@ function initDatasetFromArbor() {
     dataName = data.options[data.selectedIndex].text;
     phylomap.currentProjectName = projectName;
     phylomap.currentDatasetName = dataName;
+    phylomap.selectedOccurrences = [];
+    updateTableDisplay(phylomap.selectedOccurrences);
     drawSelectedTree(projectName,dataName);
 }
 

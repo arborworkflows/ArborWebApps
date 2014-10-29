@@ -38,8 +38,8 @@ function updateTableDisplay(studyList) {
   grid_options = {
     enableCellNavigation: true,
     enableColumnReorder: false,
-    forceFitColumns: true,
-    fullWidthRows: false
+    forceFitColumns: false,
+    fullWidthRows: true
   };
 
   // re-instantiate the grid each time, it didn't seem to update correctly using the invalidate()
