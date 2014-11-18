@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 =============================================
-    Welcome to the Arbor Workflows!
+    Welcome to the Arbor Workflows Documentation!
 =============================================
 
 Please visit the `Arbor Workflows homepage`_ or the `GitHub repository`_ for more
