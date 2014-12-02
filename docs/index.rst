@@ -24,7 +24,6 @@ Using Arbor Workflows
 .. toctree::
     :maxdepth: 2
 
-    videos
     installation
     setup
     easy-mode
@@ -36,6 +35,7 @@ Tutorials
 .. toctree::
     :maxdepth: 2
 
+    videos
     building-an-easy-mode-app
 
 Information for Developers
