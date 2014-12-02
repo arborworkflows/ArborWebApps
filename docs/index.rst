@@ -28,6 +28,7 @@ Using Arbor Workflows
     setup
     easy-mode
     advanced-mode
+    opentree
 
 Tutorials
 =========
