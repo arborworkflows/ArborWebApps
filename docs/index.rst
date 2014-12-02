@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-=============================================
-    Welcome to the Arbor Workflows Documentation!
-=============================================
+=======================
+    Arbor Workflows
+=======================
 
 Please visit the `Arbor Workflows homepage`_ or the `GitHub repository`_ for more
 information.
@@ -24,6 +24,7 @@ Using Arbor Workflows
 .. toctree::
     :maxdepth: 2
 
+    videos
     installation
     setup
     easy-mode
