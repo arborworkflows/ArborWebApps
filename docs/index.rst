@@ -29,6 +29,7 @@ Using Arbor Workflows
     easy-mode
     advanced-mode
     opentree
+    table-operations
 
 Tutorials
 =========
