@@ -39,14 +39,6 @@ Administrator's Guide
 
     installation
 
-Developer's Guide
-=================
-
-.. toctree::
-    :maxdepth: 2
-
-    testing
-
 Indices and tables
 ==================
 
