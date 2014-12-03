@@ -13,20 +13,12 @@ information.
 .. _Arbor Workflows homepage: http://www.arborworkflows.com
 .. _GitHub repository: https://github.com/ArborWorkflows/ArborWebApps
 
-.. _quickstart:
-
-Quick Start
-===========
-
-Using Arbor Workflows
-=====================
+User's Guide
+============
 
 .. toctree::
     :maxdepth: 2
 
-    installation
-    setup
-    easy-mode
     advanced-mode
     opentree
     table-operations
@@ -38,10 +30,17 @@ Tutorials
     :maxdepth: 2
 
     videos
-    building-an-easy-mode-app
 
-Information for Developers
-==========================
+Administrator's Guide
+=====================
+
+.. toctree::
+    :maxdepth: 2
+
+    installation
+
+Developer's Guide
+=================
 
 .. toctree::
     :maxdepth: 2
