@@ -7,14 +7,21 @@
         girder.apiRoot = '/girder/api/v1';
         var app = new flow.App();
 
-        // arbor.kitware.com
-        //app.ASRId = "537a642dd591e45a509043f6";
-
-        // Jeff's system
-        app.ASRId = "53cfdc9b358ebfb5e9bae080";
+        // Lookup the ID of the analysis that we wish to perform.
+        app.analysisName = "aceArbor";
+        girder.restRequest({
+            path: 'resource/search',
+            data: {
+                q: app.analysisName,
+                types: JSON.stringify(["item"])
+            }
+        }).done(function (results) {
+            app.ASRId = results["item"][0]._id;
+            app.readyToAnalyze();
+        });
 
         app.readyToAnalyze = function () {
-            if ("column" in this && "table" in this && "tree" in this) {
+            if ("column" in this && "table" in this && "tree" in this && "ASRId" in this) {
                 d3.select("#analyze").classed('disabled', false);
             }
         };
@@ -203,16 +210,6 @@
                 trigger: 'manual'
             });
             $("#analyze").popover('toggle');
-
-            // if ($(this).text() == "Click to open help")
-            //   {
-            //   $(this).text("Click to close help");
-            //   }
-            // else
-            //   {
-            //   $(this).text("Click to open help");
-            //   }
-
         });
 
         $("#table-preview").click(function() {
