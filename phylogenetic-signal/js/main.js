@@ -7,14 +7,22 @@
         girder.apiRoot = '/girder/api/v1';
         var app = new flow.App();
 
-        // arbor.kitware.com
-        //app.analysisId = "5336cd85d591e43b17a7c270";
-
-        // Jeff's system
-        app.analysisId = "53cfefe7358ebfb5e9bae0e4";
+        // Lookup the ID of the analysis that we wish to perform.
+        app.analysisName = "Phylogenetic signal";
+        girder.restRequest({
+            path: 'resource/search',
+            data: {
+                q: app.analysisName,
+                types: JSON.stringify(["item"])
+            }
+        }).done(function (results) {
+            app.analysisId = results["item"][0]._id;
+            app.readyToAnalyze();
+        });
 
         app.readyToAnalyze = function () {
-            if ("column" in this && "table" in this && "tree" in this) {
+            if ("column" in this && "table" in this && "tree" in this &&
+                "analysisId" in this) {
                 d3.select("#analyze").classed('disabled', false);
             }
         };
