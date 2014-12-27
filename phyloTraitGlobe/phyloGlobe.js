@@ -201,7 +201,7 @@ function searchLocationsNearCircle(lat,lon,radius) {
 
 
 function addLocationToSelectedList(node,attribs,lat,lon) {
-    console.log('adding node to selection list.  Length now:',phylomap.selectedOccurrences.length)
+    //console.log('adding node to selection list.  Length now:',phylomap.selectedOccurrences.length)
     var record = {}
     // if there are extra attributes on this node, copy them over to the trait matrix selection entry
     for (attrib in attribs) {
@@ -348,20 +348,26 @@ function getIconColor(id) {
         // add an empty billboard collection.  Points will be added later
         phylomap.cesium.billboards = new Cesium.BillboardCollection();
         phylomap.cesium.scene.primitives.add(phylomap.cesium.billboards);
-
+        phylomap.cesium.labels = phylomap.cesium.scene.primitives.add(new Cesium.LabelCollection());
+        var label = phylomap.cesium.labels.add()
+        var ellipsoid = phylomap.cesium.scene.globe.ellipsoid;
 
  // If the mouse is over the billboard, change its scale and color
     handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
     handler.setInputAction(
         function (movement) {
                 var pickedObject = scene.pick(movement.endPosition);
+                 var cartesian = scene.camera.pickEllipsoid(movement.endPosition, ellipsoid);
                 if (Cesium.defined(pickedObject))  {
-                	console.log('object picked')
-                    //billboard.scale = 2.0;
-                    //billboard.color = Cesium.Color.YELLOW;
+                	var pickedId = pickedObject.id
+                	//console.log('picked species: ',phylomap.selectedOccurrences[pickedId]['species'])
+                	label.show = true;
+                	var cartographic = ellipsoid.cartesianToCartographic(cartesian);
+                	label.scale = 0.75;
+            		label.text = phylomap.selectedOccurrences[pickedId]['species'] +' (' + Cesium.Math.toDegrees(cartographic.longitude).toFixed(2) + ', ' + Cesium.Math.toDegrees(cartographic.latitude).toFixed(2) + ')';
+            		label.position = cartesian;
                 } else {
-                    //billboard.scale = 1.0;
-                    //billboard.color = Cesium.Color.WHITE;
+                    label.text = ''
                 }
         },
         Cesium.ScreenSpaceEventType.MOUSE_MOVE
@@ -372,7 +378,7 @@ function getIconColor(id) {
 }
 
 // this function adds one new pointBillboard to an existing billboard collection in Cesium
-function addPointToCesiumBillboard(scene, ellipsoid,lng,lat,colorIndex) {
+function addPointToCesiumBillboard(scene, ellipsoid,lng,lat,colorIndex,index) {
    	var canvas = document.createElement('canvas');
         canvas.width = 16;
         canvas.height = 16;
@@ -393,6 +399,7 @@ function addPointToCesiumBillboard(scene, ellipsoid,lng,lat,colorIndex) {
             color : {'red': colortuple[0],'green': colortuple[1],
             				'blue': colortuple[2], 'alpha': colortuple[3]},
             scale : 0.5,
+            id : index,
             image : canvas,
             imageIndex : 0
         });
@@ -408,12 +415,14 @@ function createMarker(latlng, name, text, id, icon) {
 	icon = ((icon != null) ? icon : getIcon());
 
 	// add point to the cesium globe view
+	var ellipsoid = phylomap.cesium.scene.globe.ellipsoid;
 	addPointToCesiumBillboard(
 			phylomap.cesium.scene,
-			phylomap.cesium.ellipsoid,
+			ellipsoid,
 			latlng.lng(),
 			latlng.lat(),
-			iconIndex
+			iconIndex,
+			phylomap.selectedOccurrences.length
 		);
 
 	// still create a GMap marker for compatibility
@@ -440,13 +449,6 @@ function createMarker_orig(latlng, name, text, id, icon) {
 	//console.log('saving marketColorIndex[',id,'] = ',iconIndex)
 	icon = ((icon != null) ? icon : getIcon());
 
-	// add point to the cesium globe view
-	addPointToCesiumBillboard(
-			phylomap.cesium.scene,
-			phylomap.cesium.ellipsoid,
-			latlng.lng(),
-			latlng.lat()
-		);
 
 	// still create a GMap marker for compatibility
 	var marker = new google.maps.Marker({
