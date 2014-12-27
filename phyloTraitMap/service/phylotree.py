@@ -26,7 +26,7 @@ def run(collectionName, itemName):
 	# Construct an empty response object.
 	response = {}
 
-	girderlocation = 'http://localhost:8080'
+	girderlocation = 'http://localhost:9000'
 
 	# lookup the Arbor collection
 	resp = requests.get(girderlocation+'/api/v1/collection')

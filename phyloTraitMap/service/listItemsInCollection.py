@@ -12,7 +12,7 @@ def run(collectionName=None):
 
    # look through the collections in girder.  Return a list of collections that are in this local # Arbor instance
 
-    girderlocation = 'http://localhost:8080'
+    girderlocation = 'http://localhost:9000'
     resp = requests.get(girderlocation+'/api/v1/collection')
 
     for coll in resp.json():

@@ -15,7 +15,7 @@ def run(usertoken):
     print 'girderheader:',girderheader
 
     # look through the collections in girder.  Return a list of collections that are in this local # Arbor instance
-    girderlocation = 'http://localhost:8080'
+    girderlocation = 'http://localhost:9000'
     resp = requests.get(girderlocation+'/api/v1/collection',headers=girderheader)
 
     # nothing particularly interesting here

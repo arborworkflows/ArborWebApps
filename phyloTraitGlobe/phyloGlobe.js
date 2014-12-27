@@ -19,7 +19,7 @@ function log(msg) {
 }
 
 function clearLocations() {
-	infoWindow.close();
+	//infoWindow.close();
 	for (i in markers) {
 		markers[i].setMap(null);
 		// CRL
@@ -32,6 +32,9 @@ function clearLocations() {
 	}
 	// set index to last item so it will reset on next element
 	iconIndex = 0;
+
+	// cesium
+	phylomap.cesium.billboards.removeAll();
 
 	// clear occurrence compilation list
 	phylomap.selectedOccurrences = []
@@ -342,30 +345,34 @@ function getIconColor(id) {
 
 
  function addCesiumPointBillboard(scene, ellipsoid) {
-        // A white circle is drawn into a 2D canvas.  The canvas is used as
-        // a texture for billboards, each of which applies a different color
-        // and scale to change the point's appearance. The 2D canvas can draw much more than circles. 
-        //  See: https://developer.mozilla.org/en/Canvas_tutorial
-        var canvas = document.createElement('canvas');
-        canvas.width = 16;
-        canvas.height = 16;
-        var context2D = canvas.getContext('2d');
-        context2D.beginPath();
-        context2D.arc(8, 8, 8, 0, Cesium.Math.TWO_PI, true);
-        context2D.closePath();
-        context2D.fillStyle = 'rgb(255, 255, 255)';
-        context2D.fill();
-
+        // add an empty billboard collection.  Points will be added later
         phylomap.cesium.billboards = new Cesium.BillboardCollection();
-        var textureAtlas = scene.createTextureAtlas({
-            image : canvas
-        });
-        phylomap.cesium.billboards.textureAtlas = textureAtlas;
         phylomap.cesium.scene.primitives.add(phylomap.cesium.billboards);
+
+
+ // If the mouse is over the billboard, change its scale and color
+    handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+    handler.setInputAction(
+        function (movement) {
+                var pickedObject = scene.pick(movement.endPosition);
+                if (Cesium.defined(pickedObject))  {
+                	console.log('object picked')
+                    //billboard.scale = 2.0;
+                    //billboard.color = Cesium.Color.YELLOW;
+                } else {
+                    //billboard.scale = 1.0;
+                    //billboard.color = Cesium.Color.WHITE;
+                }
+        },
+        Cesium.ScreenSpaceEventType.MOUSE_MOVE
+    );
+
+
+
 }
 
-
- function addPointToCesiumBillboard(scene, ellipsoid,lng,lat) {
+// this function adds one new pointBillboard to an existing billboard collection in Cesium
+function addPointToCesiumBillboard(scene, ellipsoid,lng,lat,colorIndex) {
    	var canvas = document.createElement('canvas');
         canvas.width = 16;
         canvas.height = 16;
@@ -376,16 +383,20 @@ function getIconColor(id) {
         context2D.fillStyle = 'rgb(255, 255, 255)';
         context2D.fill();
 
-        phylomap.cesium.billboards = new Cesium.BillboardCollection();
+ 		//phylomap.cesium.billboards = new Cesium.BillboardCollection();
+ 		// lookup the color that matches the tree.  See the global list in the beginning of this file
+ 		var colortuple = treeHighLightColorListAsRGB[colorIndex]
+ 		console.log(colortuple)
 
         phylomap.cesium.billboards.add({
             position : ellipsoid.cartographicToCartesian(Cesium.Cartographic.fromDegrees(lng,lat)),
-            color : Cesium.Color.RED,
+            color : {'red': colortuple[0],'green': colortuple[1],
+            				'blue': colortuple[2], 'alpha': colortuple[3]},
             scale : 0.5,
             image : canvas,
             imageIndex : 0
         });
-        phylomap.cesium.scene.primitives.add(phylomap.cesium.billboards);
+        //phylomap.cesium.scene.primitives.add(phylomap.cesium.billboards);
 }
 
 
@@ -401,7 +412,8 @@ function createMarker(latlng, name, text, id, icon) {
 			phylomap.cesium.scene,
 			phylomap.cesium.ellipsoid,
 			latlng.lng(),
-			latlng.lat()
+			latlng.lat(),
+			iconIndex
 		);
 
 	// still create a GMap marker for compatibility
@@ -494,6 +506,23 @@ var iconList = [
 
 // adding matching hightlight colors to match the icons, so the tree hightlight color matches the icon color
 var treeHighlightColorList = [ "red","blue","green","orange","pink","lightblue","purple","yellow","red","blue","green","pink","lightblue","purple","yellow"]
+
+/*
+ colors referenced from: http://cloford.com/resources/colours/500col.htm
+lightblue 	191	239	255
+ purple		128	0	128	
+ yellow     255 255 0
+ cobaltgreen 61	145	64
+ darkgreen 0 75 0 
+*/
+
+var treeHighLightColorListAsRGB = [
+		[1,1,1,1.0],[1,0,0,1.0], [0,0,1,1.0], [0.0,1,0.0,1.0], [1,0.64,0,1.0],
+		[1,0.71,0.75,1.0],[0.746,0.933,1,1.0],[0.5,0,0.5,1],[1,1,0,1],
+		[1,0,0,1.0], [0,0,1,1.0], [0,1,0,1.0], [1,0.64,0,1.0],
+		[1,0.71,0.75,1.0],[0.746,0.933,1,1.0],[0.5,0,0.5,1],[1,1,0,1]]
+
+
 /*
 phylomap.getMongoDBInfo = function () {
     "use strict";
@@ -546,8 +575,8 @@ phylomap.setConfigDefaults = function () {
 //function load() {
 
 addLoadEvent(function () {
-	    phylomap.cesium.viewer = new Cesium.Viewer('cesiumContainer');
+	    phylomap.cesium.viewer = new Cesium.Viewer('cesiumContainer',{baseLayerPicker : true});
 	    phylomap.cesium.scene = phylomap.cesium.viewer.scene;
     	phylomap.cesium.ellipsoid = phylomap.cesium.scene.globe.ellipsoid;
-    	//addCesiumPointBillboard(phylomap.cesium.scene,phylomap.cesium.ellipsoid)
+    	addCesiumPointBillboard(phylomap.cesium.scene,phylomap.cesium.ellipsoid)
 });
