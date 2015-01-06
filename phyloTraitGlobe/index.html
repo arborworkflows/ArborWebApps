@@ -36,6 +36,12 @@
 <script src="js/slick.formatters.js"></script>
 <script src="js/slick.editors.js"></script>
 
+<!-- used for girder, so we can authenticate -->
+<script src="../girder/static/built/libs.min.js"></script>
+<script src="../girder/static/built/app.min.js"></script>
+<link rel="stylesheet" href="../girder/static/lib/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../girder/static/built/app.min.css">
+
 <!-- interface to slickgrid -->
 <script src="gridControl.js"></script>
 
@@ -122,27 +128,6 @@
     </div>
 </div>
 
-<div id=login-panel class="modal fade">
-  <div class=modal-dialog>
-        <div class=modal-content>
-            <div class=modal-header>
-                <h3>Login  to Arbor</h3>
-            </div>
-
-            <div class=modal-body>
-                    <p>Please enter your Arbor login credentials to access your private collections on Arbor:</p>
-
-                    <input type='text' id='usernameInput'> username </input>
-                    <input type='password' id='passwordInput' style='margin-left: 20px'> password</input>
-
-            </div>
-                <div class=modal-footer>
-                <a class="btn btn-success" onclick="authenticateWithArbor()" data-dismiss=modal>Login</button>
-                <a class="btn btn-default" data-dismiss=modal>Cancel</a>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 <div class="navbar navbar-default navbar-fixed-top">
@@ -153,12 +138,17 @@
     <ul class="nav navbar-nav">
         <li class=active> <a>Arbor Trait Museum Explorer</a>
         <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
-        <li><a style=cursor:pointer data-toggle=modal data-target=#login-panel><span class="glyphicon glyphicon-info-sign"></span> Login</a>
     </ul>
 </div>
 
 <div  style="margin-top:75px; margin-left:1px;">
 <div class='col-md-12' style='margin-bottom:30px'>
+
+        <button class="btn btn-link" id="login" href="#">Login</button>
+        <button class="btn btn-link" id="register" href="#">Register</button>
+        <label class="hidden" id="name" href="#"></label>
+        <button class="btn btn-link hidden" id="logout" href="#">Logout</button>
+        <div class="modal fade" id="dialog-container"></div>
         Arbor Collection: 
         <select  id="project" class="input" style="margin-top:10px;">
         </select>

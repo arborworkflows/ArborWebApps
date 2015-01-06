@@ -392,7 +392,7 @@ function addPointToCesiumBillboard(scene, ellipsoid,lng,lat,colorIndex,index) {
  		//phylomap.cesium.billboards = new Cesium.BillboardCollection();
  		// lookup the color that matches the tree.  See the global list in the beginning of this file
  		var colortuple = treeHighLightColorListAsRGB[colorIndex]
- 		console.log(colortuple)
+ 		//console.log(colortuple)
 
         phylomap.cesium.billboards.add({
             position : ellipsoid.cartographicToCartesian(Cesium.Cartographic.fromDegrees(lng,lat)),

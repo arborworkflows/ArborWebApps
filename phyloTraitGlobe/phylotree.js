@@ -16,6 +16,7 @@ phylomap.currentProjectName = ''
 phylomap.currentDatasetName = ''
 phylomap.currentTree = null
 phylomap.viewer = null
+phylomap.currentDatasetArchiveId = null
 
 // added for authentication
 phylomap.usertoken = ''
@@ -34,15 +35,76 @@ phylomap.cesium.scene = null
 phylomap.cesium.ellipsoid = null
 phylomap.cesium.billboards = null
 
+phylomap.girder_API_root = '../girder/api/v1'
+
+
 // when the document is loaded, try to load a default dataset.  This fails quietly if the
 // dataset is not available
 
 $(document).ready(function(){
-    initializeDataSelection("Deafult","anolis")
+
+	girder.apiRoot = '../girder/api/v1';
+    girder.handleRouting = false;
+
+	$('#login').click(function () {
+	    var loginView = new girder.views.LoginView({
+	        el: $('#dialog-container')
+	    });
+	    loginView.render();
+	});
+
+	$('#register').click(function () {
+	    var registerView = new girder.views.RegisterView({
+	        el: $('#dialog-container')
+	    });
+	    registerView.render();
+	});
+
+	$('#logout').click(function () {
+	    girder.restRequest({
+	        path: 'user/authentication',
+	        type: 'DELETE'
+	    }).done(function () {
+	        girder.currentUser = null;
+	        girder.events.trigger('g:login');
+	    });
+	});
+
+	girder.events.on('g:login', function () {
+	    if (girder.currentUser) {
+	        $("#login").addClass("hidden");
+	        $("#register").addClass("hidden");
+	        $("#name").removeClass("hidden");
+	        $("#logout").removeClass("hidden");
+	        $("#name").text("Logged in as " + girder.currentUser.get('firstName') + " " +
+	                        girder.currentUser.get('lastName'));
+
+	        // Do anything else you would like to do on login.
+	        initializeDataSelection()
+
+	    } else {
+	        $("#login").removeClass("hidden");
+	        $("#register").removeClass("hidden");
+	        $("#name").addClass("hidden");
+	        $("#logout").addClass("hidden");
+
+	        // Do anything else you would like to do on logout.
+	    }
+	});
+
+	// Check who is logged in initially.
+	girder.restRequest({
+	    path: 'user/authentication',
+	    error: null
+	}).done(function () {
+	    girder.events.trigger('g:login');
+	});
+
+    //initializeDataSelection("Deafult","anolis")
 });
 
 
-
+/*
 function authenticateWithArbor() {
 	var currentUser = document.getElementById('usernameInput').value;
 	var currentPassword = document.getElementById('passwordInput').value;
@@ -55,7 +117,7 @@ function authenticateWithArbor() {
 		initializeDataSelection()
 	});
 }
-
+*/
 
 
 function performEvent(element, name) {
@@ -89,59 +151,139 @@ function drawSelectedTree(projectName,datasetName) {
 	});
 }
 
+
+
+function drawSelectedTree(projectName,datasetName) {
+	// use the girder API to extract the tree.  We used to use a tangelo service, which 
+	// isn't included in TangeloHuvb anymore, so use the Girder API to find the collection, the
+	// "Data" directory, and then the item from inside the Data folder by name
+
+
+    // retrieve collection ID from the name
+    var collectionId = null
+    d3.json(phylomap.girder_API_root+"/collection?text="+projectName, function (error, collectionList) {
+		collectionId =  collectionList[0]["_id"]
+		//console.log('collectionID=',collectionId);
+
+     	// build the query url for girder to list the contents of the selected Data folder in the collection
+    	// ex. http://localhost:9000/api/v1/folder?parentType=collection&parentId=5420814456c02c06f389739d&text=Data
+    	var data_folder_url = phylomap.girder_API_root+'/folder?parentType=collection&parentId='+collectionId+'&text=Data'
+    	var dataFolderId = null
+    	d3.json(data_folder_url, function (error, datasetFolderList) {
+    		dataFolderId = datasetFolderList[0]["_id"]
+			//console.log('dataFolderID=',dataFolderId)	
+
+			// now we can look up the items in the collection's Data Folder
+    		var itemlist_url = phylomap.girder_API_root+'/item?folderId='+dataFolderId
+    		d3.json(itemlist_url, function (error, itemList) {
+				var itemId = null
+				//console.log('item list: ',itemList)
+				for (var i = itemList.length - 1; i >= 0; i--) {
+					if (itemList[i]["name"]== datasetName) {
+						itemId = itemList[i]["_id"]
+					}
+				};
+				if (itemId != null) {
+					//console.log('found item number ',itemId)
+					phylomap.currentDatasetArchiveId = itemId
+
+					// item/54a01a4456c02c0551c04d40/romanesco/tree/nested/nested
+		    		var tree_return_url = 'item/'+itemId+'/romanesco/tree/nested/nested'
+		    		girder.restRequest({path: tree_return_url})
+		    			.done(_.bind(function (result) {
+							//console.log('girder response:',result)
+							// added with new Arbor datastore as more processing is in javascript
+							phylomap.currentTree = JSON.parse(result.data);
+							root = phylomap.currentTree;
+							console.log("tree returned:",root)
+							root.x0 = height / 2;
+							root.y0 = 0;
+
+							// this builds a list of the taxa nodes with their locations for 
+					        // faster searching and also a list of all nodes for finding nodes by id
+					        processTreeForMapLocations()
+
+							// initialize the display to show children nodes
+							root.children.forEach(toggleAll);
+							update(root);
+		    			}))
+				}
+			});
+		});
+	});
+
+	// http://localhost:9080/girder/api/v1/item/543b374956c02c04bd338496/romanesco/tree/newick/nested
+}
+
+
+
 // initialize the Arbor collection and item viewers according to the dataset information
 // that comes back from the Arbor instance
 
-function initializeDataSelection(initialProject, initialData) {
+function initializeDataSelection() {
 	var project = d3.select("#project").node(),
-	    data = d3.select("#data").node(),
+	    dataselector = d3.select("#data").node(),
 	    i;
 
 	d3.select("#project").selectAll("option").remove();
 	// add user token argument to allow authentication with remote collections
-	d3.json("service/listcollections/"+ phylomap.usertoken, function (error, projects) {
+	d3.json(phylomap.girder_API_root+"/collection", function (error, projects) {
 	    //console.log(projects,"\n");
 	    d3.select("#project").selectAll("option")
-	        .data(projects.result)
+	        .data(projects)
 	        .enter().append("option")
-	        .text(function (d) { return d; });
+	        .text(function (d) { return d.name; });
 
+	    // read the collection selector and find the collection name
 	    d3.select("#project").on("change", function () {
-	        var project = d3.select("#project").node(),
-	            collectionName = project.options[project.selectedIndex].text;
-	        d3.json("service/listItemsInCollection/"+collectionName, function (error, datasets) {
-	            d3.select("#data").selectAll("option").remove();
-	            d3.select("#data").selectAll("option")
-	                .data(datasets.result)
-	                .enter().append("option")
-	                .text(function (d) { return d; });
-            d3.select("#data").on("change", function () {
-                var projectName = project.options[project.selectedIndex].text,
-                    dataName = data.options[data.selectedIndex].text;
-                    phylomap.currentProjectName = projectName;
-                    phylomap.currentDatasetName = dataName;
-                    // this pulls the tree from Arbor, draws the tree, and saves
-                    // the tree in the global phylomap.currentTree
-                    drawSelectedTree(projectName,dataName);
+	        var project = d3.select("#project").node()
+	        var collectionName = project.options[project.selectedIndex].text;
+	        //console.log('collectionName=',collectionName);
 
-                });
-            for (i = 0; i < data.options.length; i += 1) {
-                if (data.options[i].text === initialData) {
-                    data.selectedIndex = i;
-                }
-            }
-            performEvent(data, "change");
-        });
-    });
-    for (i = 0; i < project.options.length; i += 1) {
-        if (project.options[i].text === initialProject) {
-            project.selectedIndex = i;
-        }
-    }
-    performEvent(project, "change");
+	        // retrieve collection ID from the name
+	        var collectionId = null
+	        d3.json(phylomap.girder_API_root+"/collection?text="+collectionName, function (error, collectionList) {
+    			collectionId =  collectionList[0]["_id"]
+    			//console.log('collectionID=',collectionId);
+
+	        	// build the query url for girder to list the contents of the selected Data folder in the collection
+	        	// ex. http://localhost:9000/api/v1/folder?parentType=collection&parentId=5420814456c02c06f389739d&text=Data
+	        	var data_folder_url = phylomap.girder_API_root+'/folder?parentType=collection&parentId='+collectionId+'&text=Data'
+	        	var dataFolderId = null
+	        	d3.json(data_folder_url, function (error, datasetFolderList) {
+	        		dataFolderId = datasetFolderList[0]["_id"]
+    				//console.log('dataFolderID=',dataFolderId)	
+
+    				// now we can look up the items in the collection's Data Folder
+	        		var itemlist_url = phylomap.girder_API_root+'/item?folderId='+dataFolderId
+	        		d3.json(itemlist_url, function (error, itemList) {
+  						d3.select("#data").selectAll("option").remove();
+	            		d3.select("#data").selectAll("option")
+	            			.filter(function(d) { return (d["name"].indexOf("nested-json") > -1) })
+	                		.data(itemList)
+	                		.enter().append("option")
+	                		.text(function (d) { return d.name; });
+
+            			d3.select("#data").on("change", function () {
+                			var projectName = project.options[project.selectedIndex].text,
+                    		dataName = dataselector.options[dataselector.selectedIndex].text;
+                    		phylomap.currentProjectName = projectName;
+                    		phylomap.currentDatasetName = dataName;
+                    		// this pulls the tree from Arbor, draws the tree, and saves
+                    		// the tree in the global phylomap.currentTree.  Only attempt this if it is a 
+                    		// nested json type of tree
+                    		if (dataName.indexOf("nested-json") > -1) {
+                    			drawSelectedTree(projectName,dataName);
+                    		}
+
+                    	});    
+            			performEvent(data, "change");
+        			});
+				});
+			});
+		});
 	});
 }
-
 
 function initDatasetFromArbor() {
 	var project = d3.select("#project").node()
@@ -492,11 +634,8 @@ function update(source) {
 	});
 }
 
+// 1/6/2015 - replaced with girder-based access to Arbor instead of python service to retrieve the tree node contents
 
-
-
-//SGZ 4-11-13: Fixed this so it's just one call
-// makes an async javascript call to load more tree levels
 function updateJSON(options) {
 	var oldJSON = options.oldJSON;
 	var node = options.node || null;
@@ -507,8 +646,11 @@ function updateJSON(options) {
 		// on loading the data change the circle color to red
 		d3.select(node.childNodes[0]).style("fill", "red");
 	}
-
-	d3.json('service/phylotree/'+phylomap.currentProjectName+ '/'+ phylomap.currentDatasetName, function(err, json) {
+	var tree_return_url = 'item/'+phylomap.currentDatasetArchiveId+'/romanesco/tree/nested/nested'
+	girder.restRequest({path: tree_return_url})
+		.done(_.bind(function (result) {
+		console.log('json:',result)
+		var json = JSON.parse(result.data)
 		toggleAll (json, function() {
 			oldJSON.children = json._children;
 			oldJSON._children = null;
@@ -516,7 +658,7 @@ function updateJSON(options) {
 				callback();
 			}
 		});
-	});
+	}));
 }
 
 // CRL: added to allow path to be highlighted only up to a certain ancestor.  At first we were calling "highlightPaths", but
