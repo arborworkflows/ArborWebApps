@@ -1,6 +1,11 @@
-This is a placeholder for the CesiumJS interactive globe.  
-Please download a copy of the cesiumjs.zip distribution and unzip 
-it in this directory.  The distribution can be found here:
+These instructions are for how to install the CesiumJS interactive globe.  
+Please do the following:
+
+step 1: download a copy of the cesiumjs.zip distribution 
+step 2: crete a directory here called "cesium"
+step 3: move the archive into the new directory and unzip it
+
+The Cesium distribution can be found here:
 
 http://cesiumjs.org/  
 
