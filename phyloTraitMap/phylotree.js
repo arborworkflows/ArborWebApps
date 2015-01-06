@@ -71,6 +71,8 @@ $(document).ready(function(){
 	                        girder.currentUser.get('lastName'));
 
 	        // Do anything else you would like to do on login.
+	        // populate the collection selectors using the login status we have nows
+	        initializeDataSelection()
 	    } else {
 	        $("#login").removeClass("hidden");
 	        $("#register").removeClass("hidden");
@@ -78,6 +80,8 @@ $(document).ready(function(){
 	        $("#logout").addClass("hidden");
 
 	        // Do anything else you would like to do on logout.
+	        // populate the collection selectors using the anonymous (user=none) status we have nows
+	        initializeDataSelection()
 	    }
 	});
 
@@ -164,12 +168,14 @@ function drawSelectedTree(projectName,datasetName) {
 
 					// item/54a01a4456c02c0551c04d40/romanesco/tree/nested/nested
 		    		var tree_return_url = 'item/'+itemId+'/romanesco/tree/nested/nested'
+					girder.restRequest({path: tree_return_url})
+		    			.done(_.bind(function (result) {
 
-							console.log('girder response:',result)
+							//console.log('girder response:',result)
 							// added with new Arbor datastore as more processing is in javascript
 							phylomap.currentTree = JSON.parse(result.data);
 							root = phylomap.currentTree;
-							console.log("tree returned:",root)
+							//console.log("tree returned:",root)
 							root.x0 = height / 2;
 							root.y0 = 0;
 
@@ -200,8 +206,11 @@ function initializeDataSelection(initialProject, initialData) {
 	    i;
 
 	d3.select("#project").selectAll("option").remove();
+	d3.select("#data").selectAll("option").remove();
 	// add user token argument to allow authentication with remote collections
-	d3.json(phylomap.girder_API_root+"/collection", function (error, projects) {
+	girder.restRequest({path: "/collection"})
+	  .done(_.bind(function (projects) {
+
 	    console.log(projects,"\n");
 	    d3.select("#project").selectAll("option")
 	        .data(projects)
@@ -216,21 +225,27 @@ function initializeDataSelection(initialProject, initialData) {
 
 	        // retrieve collection ID from the name
 	        var collectionId = null
-	        d3.json(phylomap.girder_API_root+"/collection?text="+collectionName, function (error, collectionList) {
+	        //d3.json(phylomap.girder_API_root+"/collection?text="+collectionName, function (error, collectionList) {
+	        girder.restRequest({path: "/collection?text="+collectionName})
+		      .done(_.bind(function (collectionList) {
     			collectionId =  collectionList[0]["_id"]
     			console.log('collectionID=',collectionId);
 
 	        	// build the query url for girder to list the contents of the selected Data folder in the collection
 	        	// ex. http://localhost:9000/api/v1/folder?parentType=collection&parentId=5420814456c02c06f389739d&text=Data
-	        	var data_folder_url = phylomap.girder_API_root+'/folder?parentType=collection&parentId='+collectionId+'&text=Data'
+	        	var data_folder_url = '/folder?parentType=collection&parentId='+collectionId+'&text=Data'
 	        	var dataFolderId = null
-	        	d3.json(data_folder_url, function (error, datasetFolderList) {
+	        	//d3.json(data_folder_url, function (error, datasetFolderList) {
+	            girder.restRequest({path: data_folder_url})
+		      	  .done(_.bind(function (datasetFolderList) { 		
 	        		dataFolderId = datasetFolderList[0]["_id"]
     				console.log('dataFolderID=',dataFolderId)	
 
     				// now we can look up the items in the collection's Data Folder
-	        		var itemlist_url = phylomap.girder_API_root+'/item?folderId='+dataFolderId
-	        		d3.json(itemlist_url, function (error, itemList) {
+	        		var itemlist_url = '/item?folderId='+dataFolderId
+	        		//d3.json(itemlist_url, function (error, itemList) {
+					girder.restRequest({path: itemlist_url})
+		      		  .done(_.bind(function (itemList) {
   						d3.select("#data").selectAll("option").remove();
 	            		d3.select("#data").selectAll("option")
 	            			.filter(function(d) { return (d["name"].indexOf("nested-json") > -1) })
@@ -252,11 +267,11 @@ function initializeDataSelection(initialProject, initialData) {
 
                     	});    
             			performEvent(data, "change");
-        			});
-				});
-			});
+        			}));
+				}));
+			}));  // girder collectionID
 		});
-	});
+	}));  // end of girder projects
 }
 
 
