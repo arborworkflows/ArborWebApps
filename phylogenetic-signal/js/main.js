@@ -5,7 +5,6 @@
 
     $(document).ready(function () {
         girder.apiRoot = '/girder/api/v1';
-        //girder.handleRouting = false;
         var app = new flow.App();
 
         // Lookup the ID of the analysis that we wish to perform.
@@ -20,7 +19,6 @@
             app.analysisId = results["item"][0]._id;
             app.readyToAnalyze();
         });
-
 
         app.readyToAnalyze = function () {
             if ("column" in this && "table" in this && "tree" in this &&
@@ -149,14 +147,12 @@
 
         app.checkResult = function () {
             var check_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/status'
-            //d3.json(girder.apiRoot + '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/status', _.bind(function (error, result) {
-            girder.restRequest({path: check_url}).done(_.bind(function (result) {       
-                console.log('result=',result);
+            girder.restRequest({path: check_url}).done(_.bind(function (result) {
+                console.log(result.status);
                 if (result.status === 'SUCCESS') {
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result'
-                    //d3.json(girder.apiRoot + '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result', _.bind(function (error, data) {
-                    girder.restRequest({path: result_url}).done(_.bind(function (data) {       
+                    girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.result = data.result.result.data;
 
                         // render table
@@ -170,7 +166,7 @@
 
                 } else if (result.status === 'FAILURE') {
                     $("#analyze").removeAttr("disabled");
-                    $("#notice").text("Analysis failed. " + result.message);  
+                    $("#notice").text("Analysis failed. " + result.message);
                 } else {
                     setTimeout(_.bind(this.checkResult, this), 1000);
                 }
@@ -211,14 +207,3 @@
         app.render();
     });
 }(window.flow, window.$, window.girder));
-
-
-function indicateLoginStatus() {
-    // Check who is logged in initially.
-    girder.restRequest({
-        path: '/user/authentication',
-        error: null
-    }).done(function () {
-        girder.events.trigger('g:login');
-    });
-}
