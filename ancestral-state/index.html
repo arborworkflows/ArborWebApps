@@ -5,6 +5,13 @@
         <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
         <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="../app.min.css">
+
+  <!-- used for girder, so we can authenticate -->
+        <script src="/girder/static/built/libs.min.js"></script>
+        <script src="/girder/static/built/app.min.js"></script>
+        <link rel="stylesheet" href="/girder/static/lib/bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/girder/static/built/app.min.css">
+
         <style>
 
 html, body {
@@ -54,6 +61,13 @@ html, body {
         </nav>
 
         <div class="container-fluid">
+
+        <button class="btn btn-link" id="login" href="#">Login</button>
+        <button class="btn btn-link" id="register" href="#">Register</button>
+        <label class="hidden" id="name" href="#"></label>
+        <button class="btn btn-link hidden" id="logout" href="#">Logout</button>
+        <div class="modal fade" id="dialog-container"></div>
+
             <div class="row">
                 <div class="col-sm-3">
                     <div class="btn btn-default" id="help" data-toggle="button">Show help</div>
