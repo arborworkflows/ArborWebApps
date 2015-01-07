@@ -5,6 +5,7 @@
 
     $(document).ready(function () {
         girder.apiRoot = '/girder/api/v1';
+        girder.handleRouting = false;
         var app = new flow.App();
 
         // Lookup the ID of the analysis that we wish to perform.
@@ -19,6 +20,55 @@
             app.analysisId = results["item"][0]._id;
             app.readyToAnalyze();
         });
+
+
+        // process the login and user authentication
+        $('#login').click(function () {
+            var loginView = new girder.views.LoginView({
+                el: $('#dialog-container')
+            });
+            loginView.render();
+        });
+
+        $('#register').click(function () {
+            var registerView = new girder.views.RegisterView({
+                el: $('#dialog-container')
+            });
+            registerView.render();
+        });
+
+        $('#logout').click(function () {
+            girder.restRequest({
+                path: 'user/authentication',
+                type: 'DELETE'
+            }).done(function () {
+                girder.currentUser = null;
+                girder.events.trigger('g:login');
+            });
+        });
+
+        girder.events.on('g:login', function () {
+            if (girder.currentUser) {
+                $("#login").addClass("hidden");
+                $("#register").addClass("hidden");
+                $("#name").removeClass("hidden");
+                $("#logout").removeClass("hidden");
+                $("#name").text("Logged in as " + girder.currentUser.get('firstName') + " " +
+                                girder.currentUser.get('lastName'));
+
+
+            } else {
+                $("#login").removeClass("hidden");
+                $("#register").removeClass("hidden");
+                $("#name").addClass("hidden");
+                $("#logout").addClass("hidden");
+
+            }});
+
+            indicateLoginStatus()
+
+
+        // end of authentication
 
         app.readyToAnalyze = function () {
             if ("column" in this && "table" in this && "tree" in this &&
@@ -146,11 +196,15 @@
                 }, app));
 
         app.checkResult = function () {
-            d3.json(girder.apiRoot + '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/status', _.bind(function (error, result) {
-                console.log(result.status);
+            var check_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/status'
+            //d3.json(girder.apiRoot + '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/status', _.bind(function (error, result) {
+            girder.restRequest({path: check_url}).done(_.bind(function (result) {       
+                console.log('result=',result);
                 if (result.status === 'SUCCESS') {
                     // get result data
-                    d3.json(girder.apiRoot + '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result', _.bind(function (error, data) {
+                    var result_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result'
+                    //d3.json(girder.apiRoot + '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result', _.bind(function (error, data) {
+                    girder.restRequest({path: result_url}).done(_.bind(function (data) {       
                         app.result = data.result.result.data;
 
                         // render table
@@ -164,7 +218,7 @@
 
                 } else if (result.status === 'FAILURE') {
                     $("#analyze").removeAttr("disabled");
-                    $("#notice").text("Analysis failed. " + result.message);
+                    $("#notice").text("Analysis failed. " + result.message);  
                 } else {
                     setTimeout(_.bind(this.checkResult, this), 1000);
                 }
@@ -205,3 +259,14 @@
         app.render();
     });
 }(window.flow, window.$, window.girder));
+
+
+function indicateLoginStatus() {
+    // Check who is logged in initially.
+    girder.restRequest({
+        path: '/user/authentication',
+        error: null
+    }).done(function () {
+        girder.events.trigger('g:login');
+    });
+}
