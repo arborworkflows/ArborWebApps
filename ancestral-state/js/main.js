@@ -5,7 +5,7 @@
 
     $(document).ready(function () {
         girder.apiRoot = '/girder/api/v1';
-        girder.handleRouting = false;
+        //girder.handleRouting = false;
         var app = new flow.App();
 
 
@@ -23,6 +23,7 @@
         });
 
         // process the login and user authentication events 
+        /*
         $('#login').click(function () {
             var loginView = new girder.views.LoginView({
                 el: $('#dialog-container')
@@ -66,9 +67,7 @@
             indicateLoginStatus()
 
         // end of authentication
-
-
-
+*/
 
         app.readyToAnalyze = function () {
             if ("column" in this && "table" in this && "tree" in this && "ASRId" in this) {

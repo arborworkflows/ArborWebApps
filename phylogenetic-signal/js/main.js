@@ -5,7 +5,7 @@
 
     $(document).ready(function () {
         girder.apiRoot = '/girder/api/v1';
-        girder.handleRouting = false;
+        //girder.handleRouting = false;
         var app = new flow.App();
 
         // Lookup the ID of the analysis that we wish to perform.
@@ -21,54 +21,6 @@
             app.readyToAnalyze();
         });
 
-
-        // process the login and user authentication
-        $('#login').click(function () {
-            var loginView = new girder.views.LoginView({
-                el: $('#dialog-container')
-            });
-            loginView.render();
-        });
-
-        $('#register').click(function () {
-            var registerView = new girder.views.RegisterView({
-                el: $('#dialog-container')
-            });
-            registerView.render();
-        });
-
-        $('#logout').click(function () {
-            girder.restRequest({
-                path: 'user/authentication',
-                type: 'DELETE'
-            }).done(function () {
-                girder.currentUser = null;
-                girder.events.trigger('g:login');
-            });
-        });
-
-        girder.events.on('g:login', function () {
-            if (girder.currentUser) {
-                $("#login").addClass("hidden");
-                $("#register").addClass("hidden");
-                $("#name").removeClass("hidden");
-                $("#logout").removeClass("hidden");
-                $("#name").text("Logged in as " + girder.currentUser.get('firstName') + " " +
-                                girder.currentUser.get('lastName'));
-
-
-            } else {
-                $("#login").removeClass("hidden");
-                $("#register").removeClass("hidden");
-                $("#name").addClass("hidden");
-                $("#logout").addClass("hidden");
-
-            }});
-
-            indicateLoginStatus()
-
-
-        // end of authentication
 
         app.readyToAnalyze = function () {
             if ("column" in this && "table" in this && "tree" in this &&
