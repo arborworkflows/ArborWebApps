@@ -3,23 +3,26 @@
 	<head>
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
                 <link rel="shortcut icon" href=/img/tangelo.ico>
-	   <title>Arbor Tree and Distribution Browser</title>
+	   <title>Arbor Tree and Distribution Globe</title>
 
-<script src=https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false></script>
-<script src=//code.jquery.com/jquery-1.9.1.min.js></script>
-<script src=//code.jquery.com/ui/1.9.1/jquery-ui.min.js></script>
-<script src=js/d3.v3.min.js charset=utf-8></script>
+ <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+<!--
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+-->
 
-<!-- source the API for Google Maps so we can draw layers on the map -->
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+<script src=http://code.jquery.com/jquery-1.9.1.min.js></script>
+<script src=http://code.jquery.com/ui/1.9.1/jquery-ui.min.js></script>
+<script src=http://d3js.org/d3.v3.min.js charset=utf-8></script>
 
-<script src=js/tangelo.js></script>
+<script src=/js/tangelo.min.js></script>
 
 <!-- Styling for UI elements -->
-<link href=//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css rel=stylesheet>
-<link href=//code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css rel=stylesheet>
-<link href=//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-glyphicons.css rel=stylesheet>
-<script src=//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js></script>
+<link href=http://bootswatch.com/cosmo/bootstrap.min.css rel=stylesheet type=text/css>
+<link href=http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css rel=stylesheet>
+<link href=//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css rel=stylesheet>
+<script src=http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js></script>
 
 <link rel="shortcut icon" href=/img/tangelo.ico>
 
@@ -33,7 +36,6 @@
 <script src="js/slick.formatters.js"></script>
 <script src="js/slick.editors.js"></script>
 
-
 <!-- used for girder, so we can authenticate -->
 <script src="../girder/static/built/libs.min.js"></script>
 <script src="../girder/static/built/app.min.js"></script>
@@ -43,8 +45,37 @@
 <!-- interface to slickgrid -->
 <script src="gridControl.js"></script>
 
+<script src=https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false></script>
 
-<script type="text/javascript" src="phylomap.js"></script>
+<script src="../cesium/Build/Cesium/Cesium.js"></script>
+
+  <style>
+      @import url(../cesium/Build/Cesium/Widgets/widgets.css);
+      #cesiumContainer {
+        position: absolute;
+        top: 50;
+        left: 45%;
+        height: 90%;
+        width: 50%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+        font-family: sans-serif;
+      }
+
+      html {
+        height: 100%;
+      }
+
+      body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        height: 100%;
+      }
+    </style>
+
+<script type="text/javascript" src="phyloGlobe.js"></script>
 
 <!-- add badges for processing and other notifications -->
 <script type="text/javascript" src="badger.js"></script>
@@ -107,18 +138,17 @@
     <ul class="nav navbar-nav">
         <li class=active> <a>Arbor Trait Museum Explorer</a>
         <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
-
     </ul>
 </div>
 
 <div  style="margin-top:75px; margin-left:1px;">
 <div class='col-md-12' style='margin-bottom:30px'>
+
         <button class="btn btn-link" id="login" href="#">Login</button>
         <button class="btn btn-link" id="register" href="#">Register</button>
         <label class="hidden" id="name" href="#"></label>
         <button class="btn btn-link hidden" id="logout" href="#">Logout</button>
         <div class="modal fade" id="dialog-container"></div>
-
         Arbor Collection: 
         <select  id="project" class="input" style="margin-top:10px;">
         </select>
@@ -130,7 +160,7 @@
 
 
 <div class=row>
-    <div class=md-col-6 id="treebuttons" style="float:left; margin-left:30px; margin-bottom:10px; overflow: hidden;">
+    <div class=col-md-5 id="treebuttons" style="float:left; margin-left:30px; margin-bottom:10px; overflow: hidden;">
          <button type="button" onclick="emptyTree();">Empty Tree</button>
         <button type="button" onclick="onAllAndLoad(root);">Full Tree</button>
         <input type="checkbox" id="nodeNames" onchange="toggleText(this);" checked> Show Names
@@ -145,8 +175,8 @@
 </div>
 
     <div class=row>
-        <div class=col-md-6 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; border-style:solid; overflow:hidden; border-width:medium"></div>
-            <div class=col-md-5 id="map_canvas" style="  margin-left: 20px; margin-right:20px; height:800px; float-right; border-style:solid; border-width:medium"></div>
+        <div class=col-md-5 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; border-style:solid; overflow:hidden; border-width:medium"></div>
+            <div class=col-md-5 id="cesiumContainer" style="  margin-left: 20px; margin-right:40px; height:850px; float-right; border-style:solid; border-width:medium"></div>
     </div>
     <div class=row>
         <div  id='tablecontent' style="margin-left:50px; margin-top:40px; margin-bottom:40px; width:90%; height: 500px;"> </div>

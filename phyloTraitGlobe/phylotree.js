@@ -14,8 +14,9 @@ var phylomap = {}
 // global constants 
 phylomap.currentProjectName = ''
 phylomap.currentDatasetName = ''
-phylomap.currentDatasetArchiveId = null
 phylomap.currentTree = null
+phylomap.viewer = null
+phylomap.currentDatasetArchiveId = null
 
 // added for authentication
 phylomap.usertoken = ''
@@ -27,15 +28,23 @@ phylomap.allnodelist = []
 // this table is updated dynamically during operations to list what has been enabled on the map
 phylomap.selectedOccurrences = []
 
+// keep record of the Cesium instance
+phylomap.cesium = {}
+phylomap.cesium.viewer = null
+phylomap.cesium.scene = null
+phylomap.cesium.ellipsoid = null
+phylomap.cesium.billboards = null
+
 phylomap.girder_API_root = '../girder/api/v1'
+
 
 // when the document is loaded, try to load a default dataset.  This fails quietly if the
 // dataset is not available
 
 $(document).ready(function(){
+
 	girder.apiRoot = '../girder/api/v1';
     girder.handleRouting = false;
-
 
 	$('#login').click(function () {
 	    var loginView = new girder.views.LoginView({
@@ -73,6 +82,7 @@ $(document).ready(function(){
 	        // Do anything else you would like to do on login.
 	        // populate the collection selectors using the login status we have nows
 	        initializeDataSelection()
+
 	    } else {
 	        $("#login").removeClass("hidden");
 	        $("#register").removeClass("hidden");
@@ -93,11 +103,25 @@ $(document).ready(function(){
 	    girder.events.trigger('g:login');
 	});
 
-    initializeDataSelection("Default","anolis")
+	// populate the collections and dataset selectors
+    initializeDataSelection()
 });
 
 
-//----- end of authentication --------
+/*
+function authenticateWithArbor() {
+	var currentUser = document.getElementById('usernameInput').value;
+	var currentPassword = document.getElementById('passwordInput').value;
+	console.log('received login info:',currentUser,currentPassword)
+	d3.json('service/authenticate/'+currentUser+'/' + currentPassword, function(err, json) {
+		girdertoken = json['result']
+		console.log('received auth token:', girdertoken)
+		phylomap.usertoken = girdertoken
+		// force database requery now that we are authenticated
+		initializeDataSelection()
+	});
+}
+*/
 
 
 function performEvent(element, name) {
@@ -111,7 +135,7 @@ function performEvent(element, name) {
 }
 
 
-function drawSelectedTree_orig(projectName,datasetName) {
+function drawSelectedTree(projectName,datasetName) {
 	// Can probably make this a better API
 	d3.json('service/phylotree/' + projectName + '/' + datasetName, function(json) {
 		// added with new Arbor datastore as more processing is in javascript
@@ -130,6 +154,7 @@ function drawSelectedTree_orig(projectName,datasetName) {
 		update(root);
 	});
 }
+
 
 
 function drawSelectedTree(projectName,datasetName) {
@@ -156,26 +181,25 @@ function drawSelectedTree(projectName,datasetName) {
     		var itemlist_url = phylomap.girder_API_root+'/item?folderId='+dataFolderId
     		d3.json(itemlist_url, function (error, itemList) {
 				var itemId = null
-				console.log('item list: ',itemList)
+				//console.log('item list: ',itemList)
 				for (var i = itemList.length - 1; i >= 0; i--) {
 					if (itemList[i]["name"]== datasetName) {
 						itemId = itemList[i]["_id"]
 					}
 				};
 				if (itemId != null) {
-					console.log('found item number ',itemId)
+					//console.log('found item number ',itemId)
 					phylomap.currentDatasetArchiveId = itemId
 
 					// item/54a01a4456c02c0551c04d40/romanesco/tree/nested/nested
 		    		var tree_return_url = 'item/'+itemId+'/romanesco/tree/nested/nested'
-					girder.restRequest({path: tree_return_url})
+		    		girder.restRequest({path: tree_return_url})
 		    			.done(_.bind(function (result) {
-
 							//console.log('girder response:',result)
 							// added with new Arbor datastore as more processing is in javascript
 							phylomap.currentTree = JSON.parse(result.data);
 							root = phylomap.currentTree;
-							//console.log("tree returned:",root)
+							console.log("tree returned:",root)
 							root.x0 = height / 2;
 							root.y0 = 0;
 
@@ -193,9 +217,9 @@ function drawSelectedTree(projectName,datasetName) {
 	});
 
 	// http://localhost:9080/girder/api/v1/item/543b374956c02c04bd338496/romanesco/tree/newick/nested
-
-	
 }
+
+
 
 // initialize the Arbor collection and item viewers according to the dataset information
 // that comes back from the Arbor instance
@@ -624,11 +648,8 @@ function update(source) {
 	});
 }
 
+// 1/6/2015 - replaced with girder-based access to Arbor instead of python service to retrieve the tree node contents
 
-
-
-//SGZ 4-11-13: Fixed this so it's just one call
-// makes an async javascript call to load more tree levels
 function updateJSON(options) {
 	var oldJSON = options.oldJSON;
 	var node = options.node || null;
@@ -796,7 +817,7 @@ function clearBadge() {
 // CRL: changed embedded call to distinguish this case from other uses of searchLocations and highlight the clade in the tree
 function mapAllChildNodes(d, node) {
 	// ensure our helper functions have been included via javascript includes
-	if (typeof createMarker != 'undefined' && typeof google.maps.LatLng != 'undefined') {
+	if (typeof createMarker != 'undefined' ) {
 		// this process can take a long time, so put up a processing sign
 		setProcessingBadge()
 

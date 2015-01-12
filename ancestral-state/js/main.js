@@ -161,11 +161,13 @@
                 }, app));
 
         app.checkASRResult = function () {
-            d3.json(girder.apiRoot + '/item/' + this.ASRId + '/romanesco/' + this.taskId + '/status', _.bind(function (error, result) {
+            var check_url = '/item/' + this.ASRId + '/romanesco/' + this.taskId + '/status'
+            girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
                 if (result.status === 'SUCCESS') {
                     // get result data
-                    d3.json(girder.apiRoot + '/item/' + this.ASRId + '/romanesco/' + this.taskId + '/result', _.bind(function (error, data) {
+                    var result_url = '/item/' + this.ASRId + '/romanesco/' + this.taskId + '/result'
+                    girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.treePlot = data.result.treePlot.data;
 
                         // render tree plot

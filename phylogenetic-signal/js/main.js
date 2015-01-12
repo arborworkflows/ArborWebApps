@@ -146,11 +146,13 @@
                 }, app));
 
         app.checkResult = function () {
-            d3.json(girder.apiRoot + '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/status', _.bind(function (error, result) {
+            var check_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/status'
+            girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
                 if (result.status === 'SUCCESS') {
                     // get result data
-                    d3.json(girder.apiRoot + '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result', _.bind(function (error, data) {
+                    var result_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result'
+                    girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.result = data.result.result.data;
 
                         // render table
