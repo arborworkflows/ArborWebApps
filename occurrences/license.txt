@@ -1,3 +1,10 @@
+PhyloTraitMap and Arbor are made avaialable through the Apache License V2:
+
+Please see the full text here: 
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+
 Badger.js is made available through the MIT license:
 
 Copyright (c) Daniel Raftery 

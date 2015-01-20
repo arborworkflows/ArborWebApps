@@ -215,20 +215,6 @@ function mapAllLocations() {
 		for (var i = phylomap.currentRows.length - 1; i >= 0; i--) {
 			var entry = phylomap.currentRows[i]
 
-			var text = "species: " + entry.name + "<br>loc: ( " + entry.longitude +  "," + entry.latitude + ")";
-			// add other attributes to display tag if they are present in the taxon node
-			var attribs = []
-			/*
-			if ('attributes' in entry.node_data) {
-				if (treeNode.node_data['attributes'].length >= i) {
-					attribs = treeNode.node_data['attributes'][i]
-					// add descriptions to the text markers
-					for (var attrib in attribs) {
-						text = text + ' [' + attrib+']:'+attribs[attrib]
-					};
-				}
-			}
-			*/
 
 			// look for locations as under latidude, Latidue, Longitude, longitude, lat, long, or lng.  This won't
 			// catch everything, but it allows some variation. 
@@ -254,8 +240,10 @@ function mapAllLocations() {
 				point.longitude = entry.Longitude
 			}
 
+	
+
 			var latlng = new google.maps.LatLng(parseFloat(point.latitude), parseFloat(point.longitude));
-			createMarker(latlng, entry.name, text, selectionID, icon);
+			createMarker(latlng, entry.name, '', selectionID, icon);
 			addLocationToSelectedList(entry,point.latitude,point.longitude)
 		};
 	//updateTableDisplay(phylomap.selectedOccurrences)
@@ -322,18 +310,45 @@ function getIconColor(id) {
                 	var cartographic = ellipsoid.cartesianToCartographic(cartesian);
                 	// this is the scale for the text label
                 	label.scale = 0.65;
-            		label.text = phylomap.selectedOccurrences[pickedId]['species'] +' (' + Cesium.Math.toDegrees(cartographic.longitude).toFixed(2) + ', ' + Cesium.Math.toDegrees(cartographic.latitude).toFixed(2) + ')';
-            		label.position = cartesian;
+            		label.text = phylomap.selectedOccurrences[pickedId]['species'] +' (' + Cesium.Math.toDegrees(cartographic.longitude).toFixed(2) + ', ' + Cesium.Math.toDegrees(cartographic.latitude).toFixed(2) + ')\n';
+          		label.position = cartesian;
+          			// display the attributes in the table on the UI
+          			displayOccurrenceAttributes(phylomap.selectedOccurrences[pickedId])
                 } else {
                     label.text = ''
+                    clearOccurrenceAttributes()
                 }
         },
         Cesium.ScreenSpaceEventType.MOUSE_MOVE
     );
-
-
-
 }
+
+function displayOccurrenceAttributes(entry) {
+	// add other attributes to display tag if they are present in the observation table
+
+	// use the prettier Bootstrap list group instead of the old style output list
+        d3.select("#attributes").selectAll("a").remove();
+        var datasetTable = []
+	     for (attrib in entry) {
+        	attribtext =  ' <b>[' + attrib+']: </b>'+entry[attrib]
+           datasetTable.push(attribtext)
+        };
+        
+        //attempt to reset so second list is draggable, but it doesn't work
+        //d3.select("#currentdatasetlist").attr("ondragstart","dragStartHandler(event)");	
+      
+	  for (var i = 0; i < datasetTable.length; ++i) {
+           // create drag-and-drop elements here
+           var myurl = datasetTable[i]
+           $("#attributes")
+           		.append('<a href="'+myurl+'" class="list-group-item draggable="false" data-value="'+datasetTable[i]+'">'+ datasetTable[i] + '</a>');
+      }	
+}
+
+function clearOccurrenceAttributes() {
+	d3.select("#attrbitues").selectAll("a").remove();
+}
+
 
 // this function adds one new pointBillboard to an existing billboard collection in Cesium
 function addPointToCesiumBillboard(scene, ellipsoid,lng,lat,colorIndex,index) {

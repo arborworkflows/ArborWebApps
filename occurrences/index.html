@@ -2,8 +2,8 @@
 <html>
 	<head>
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-                <link rel="shortcut icon" href=/img/tangelo.ico>
-	   <title>Arbor Tree and Distribution Globe</title>
+                <link rel="shortcut icon" href=arbor.ico>
+	   <title>Arbor Occurrence Set Explorer</title>
 
  <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
 <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
@@ -24,7 +24,7 @@
 <link href=//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css rel=stylesheet>
 <script src=http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js></script>
 
-<link rel="shortcut icon" href=/img/tangelo.ico>
+<link rel="shortcut icon" href=arbor.ico>
 
 <!-- for slickGrid -->
 <link rel="stylesheet" href="css/examples.css" type="text/css"/>
@@ -54,9 +54,9 @@
       #cesiumContainer {
         position: relative;
         top: 50;
-        left: 5%;
+        left: 2%;
         height: 90%;
-        width: 90%;
+        width: 70%;
         margin: 0;
         overflow: hidden;
         padding: 0;
@@ -132,7 +132,7 @@
     </div>
 
     <ul class="nav navbar-nav">
-        <li class=active> <a>Arbor Trait Museum Explorer</a>
+        <li class=active> <a>Arbor Occurrence Set Explorer</a>
         <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
     </ul>
 </div>
@@ -163,7 +163,8 @@
 </div>
 
     <div class=row>
-            <div class=col-md-12 id="cesiumContainer" style="  margin-left: 20px; margin-right:40px; height:850px; float-right; border-style:solid; border-width:medium"></div>
+        <div class=col-md-9 id="cesiumContainer" style="  margin-left: 20px; margin-right:20px; height:850px; float-right; border-style:solid; border-width:medium"></div>
+        <div class=col-md-3 id="attributes"  class="list-group" style="  margin-left: 10px; margin-right:10px; height:850px; float-right; "></div>            
     </div>
     <div class=row>
         <div  id='tablecontent' style="margin-left:50px; margin-top:40px; margin-bottom:40px; width:90%; height: 500px;"> </div>

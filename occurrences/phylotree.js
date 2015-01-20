@@ -184,6 +184,7 @@ function findSelectedOccurrences(projectName,datasetName) {
 function loadTableFromArbor() {
 	var itemId = phylomap.currentDatasetArchiveId 
 	if (itemId != null) {
+		clearLocations()
 		var table_return_url = 'item/'+itemId+'/romanesco/table/csv/rows'
 		girder.restRequest({path: table_return_url})
 			.done(_.bind(function (result) {
