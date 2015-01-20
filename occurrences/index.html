@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+                <link rel="shortcut icon" href=/img/tangelo.ico>
+	   <title>Arbor Tree and Distribution Globe</title>
+
+ <!-- Tell IE to use the latest, best version (or Chrome Frame if pre-IE11). -->
+<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+<!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+<!--
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+-->
+
+<script src=http://code.jquery.com/jquery-1.9.1.min.js></script>
+<script src=http://code.jquery.com/ui/1.9.1/jquery-ui.min.js></script>
+<script src=http://d3js.org/d3.v3.min.js charset=utf-8></script>
+
+<script src=/js/tangelo.min.js></script>
+
+<!-- Styling for UI elements -->
+<link href=http://bootswatch.com/cosmo/bootstrap.min.css rel=stylesheet type=text/css>
+<link href=http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css rel=stylesheet>
+<link href=//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css rel=stylesheet>
+<script src=http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js></script>
+
+<link rel="shortcut icon" href=/img/tangelo.ico>
+
+<!-- for slickGrid -->
+<link rel="stylesheet" href="css/examples.css" type="text/css"/>
+<link rel="stylesheet" href="css/slick.grid.css" type="text/css"/>
+<link rel="stylesheet" href="css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
+<script src="js/jquery.event.drag-2.2.js"></script>
+<script src="js/slick.core.js"></script>
+<script src="js/slick.grid.js"></script>
+<script src="js/slick.formatters.js"></script>
+<script src="js/slick.editors.js"></script>
+
+<!-- used for girder, so we can authenticate -->
+<script src="../girder/static/built/libs.min.js"></script>
+<script src="../girder/static/built/app.min.js"></script>
+<link rel="stylesheet" href="../girder/static/lib/bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" href="../girder/static/built/app.min.css">
+
+<!-- interface to slickgrid -->
+<script src="gridControl.js"></script>
+
+<script src=https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false></script>
+
+<script src="../cesium/Build/Cesium/Cesium.js"></script>
+
+  <style>
+      @import url(../cesium/Build/Cesium/Widgets/widgets.css);
+      #cesiumContainer {
+        position: relative;
+        top: 50;
+        left: 5%;
+        height: 90%;
+        width: 90%;
+        margin: 0;
+        overflow: hidden;
+        padding: 0;
+        font-family: sans-serif;
+      }
+
+      html {
+        height: 100%;
+      }
+
+      body {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        height: 100%;
+      }
+    </style>
+
+<script type="text/javascript" src="phyloGlobe.js"></script>
+
+<!-- add badges for processing and other notifications -->
+<script type="text/javascript" src="badger.js"></script>
+<link rel="stylesheet" href="badger.css" type="text/css" />
+
+<style>
+        .node circle {
+                cursor: pointer;
+                fill: #fff;
+                stroke: steelblue;
+                stroke-width: 1.5px;
+        }
+        .node text {
+                font: 11px sans-serif;
+        }
+        path.link {
+                fill: none;
+                stroke: #ccc;
+                stroke-width: 1.5px;
+        }
+        .navbar {
+                z-index: 1;
+        }
+
+</style>
+
+</head>
+<body>
+
+<div id=info-panel class="modal fade">
+  <div class=modal-dialog>
+        <div class=modal-content>
+            <div class=modal-header>
+                <h3>Information</h3>
+            </div>
+
+            <div class=modal-body>
+                    <p>This application lets you explore set of species observations. 
+                    The observations are displayed on the map.  Hover over an observation
+                    to view the additional attribute data.</p>
+            </div>
+                <div class=modal-footer>
+                <a class="btn btn-default" data-dismiss=modal>OK</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class=navbar-header>
+        <a class=navbar-brand href=/examples>Arbor</a>
+    </div>
+
+    <ul class="nav navbar-nav">
+        <li class=active> <a>Arbor Trait Museum Explorer</a>
+        <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
+    </ul>
+</div>
+
+<div  style="margin-top:75px; margin-left:1px;">
+<div class='col-md-12' style='margin-bottom:30px'>
+
+        <button class="btn btn-link" id="login" href="#">Login</button>
+        <button class="btn btn-link" id="register" href="#">Register</button>
+        <label class="hidden" id="name" href="#"></label>
+        <button class="btn btn-link hidden" id="logout" href="#">Logout</button>
+        <div class="modal fade" id="dialog-container"></div>
+        Arbor Collection: 
+        <select  id="project" class="input" style="margin-top:10px;">
+        </select>
+        Dataset
+        <select id="data" class="input" style="margin-top:10px;" >
+        </select>
+      <!--  <button type="button" onclick="initDatasetFromArbor();">Open Dataset</button>  -->
+</div>
+
+
+<div class=row>
+    <div class=col-md-5 id="treebuttons" style="float:left; margin-left:30px; margin-bottom:10px; overflow: hidden;">
+        <button type="button" onclick="loadTableFromArbor();">Load Dataset</button>
+        <button type="button" onclick="clearLocations();">Clear Map Markers</button>
+    </div>
+</div>
+
+    <div class=row>
+            <div class=col-md-12 id="cesiumContainer" style="  margin-left: 20px; margin-right:40px; height:850px; float-right; border-style:solid; border-width:medium"></div>
+    </div>
+    <div class=row>
+        <div  id='tablecontent' style="margin-left:50px; margin-top:40px; margin-bottom:40px; width:90%; height: 500px;"> </div>
+    </div>
+
+
+<script type="text/javascript" src="phylotree.js"></script>
+
+    </body>
+</html>
