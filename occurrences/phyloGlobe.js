@@ -39,6 +39,8 @@ function clearLocations() {
 	// clear occurrence compilation list
 	phylomap.selectedOccurrences = []
 	updateTableDisplay(phylomap.selectedOccurrences)
+	// clear out the attribute table, too, if someone has cleared markers
+	clearOccurrenceAttributes()
 }
 
 // Can create serious problems as it doesn't delete markerIndex references!
@@ -310,8 +312,15 @@ function getIconColor(id) {
                 	var cartographic = ellipsoid.cartesianToCartographic(cartesian);
                 	// this is the scale for the text label
                 	label.scale = 0.65;
-            		label.text = phylomap.selectedOccurrences[pickedId]['species'] +' (' + Cesium.Math.toDegrees(cartographic.longitude).toFixed(2) + ', ' + Cesium.Math.toDegrees(cartographic.latitude).toFixed(2) + ')\n';
-          		label.position = cartesian;
+                	label.text = ''
+                	label.position = cartesian;
+                	if (typeof phylomap.selectedOccurrences[pickedId]['species'] != 'undefined') {
+            			label.text = phylomap.selectedOccurrences[pickedId]['species'] 
+            		} else if (typeof phylomap.selectedOccurrences[pickedId]['name'] != 'undefined') {
+            			label.text = phylomap.selectedOccurrences[pickedId]['name'] 
+  					}
+  					label.text = label.text + ' (' + Cesium.Math.toDegrees(cartographic.longitude).toFixed(2) + 
+  									', ' + Cesium.Math.toDegrees(cartographic.latitude).toFixed(2) + ')\n';
           			// display the attributes in the table on the UI
           			displayOccurrenceAttributes(phylomap.selectedOccurrences[pickedId])
                 } else {
