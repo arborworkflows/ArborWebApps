@@ -22,8 +22,9 @@ which will be exposed on your host machine. ::
 
     cd /vagrant
     git clone https://github.com/arborworkflows/ArborWebApps.git
-    cp -r ArborWebApps/phylogenetic-signal app/phylogenetic-signal
-    cp -r ArborWebApps/ancestral-state app/ancestral-state
+    cd app
+    ln -s ../ArborWebApps/phylogenetic-signal .
+    ln -s ../ArborWebApps/ancestral-state  .
 
 Now you will also need to import the "Phylogenetic signal" and "Ancestral state" analyses from
 the public Arbor at `https://arbor.kitware.com <https://arbor.kitware.com>`_ by selecting the analysis
