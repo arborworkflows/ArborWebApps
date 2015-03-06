@@ -136,7 +136,8 @@
             };
 
             var outputs = {
-                result: {type: "table", format: "rows"}
+                result: {type: "table", format: "rows"},
+                analysisType: {type: "string", format: "text"}
             };
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
@@ -154,6 +155,7 @@
                     var result_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.result = data.result.result.data;
+                        app.analysisType = data.result.analysisType.text;
 
                         // render table
                         $("#result").table({ data: app.result });
@@ -162,7 +164,9 @@
                         $('html, body').animate({
                             scrollTop: $("#result").offset().top
                         }, 1000);
-                        $("#discussion").text("Analysis complete. You have run <test>. The test statistic, <teststat>, was equal to <value>.")
+                        $("#discussion").text("Analysis complete. You have run ")
+                        $("#discussion").append({ data: app.analysisType})
+                        $("#discussion").append(". The test statistic, <teststat>, was equal to <value>.")
                     }, this));
 
                 } else if (result.status === 'FAILURE') {
