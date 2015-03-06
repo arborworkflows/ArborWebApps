@@ -158,10 +158,11 @@
                         // render table
                         $("#result").table({ data: app.result });
                         $("#analyze").removeAttr("disabled");
-                        $("#notice").text("Analysis succeeded!");
+                        $("#notice").text("Analysis succeeded.");
                         $('html, body').animate({
                             scrollTop: $("#result").offset().top
                         }, 1000);
+                        $("#discussion").text("Analysis complete. You have run <test>. The test statistic, <teststat>, was equal to <value>.")
                     }, this));
 
                 } else if (result.status === 'FAILURE') {
