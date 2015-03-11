@@ -136,8 +136,12 @@
             };
 
             var outputs = {
-                result: {type: "table", format: "rows"},
-                analysisType: {type: "string", format: "text"}
+                analysisType: {type: "string", format: "text"},
+                parameter: {type: "number", format: "number"},
+                testStatistic: {type: "number", format: "number"},
+                lnlNull: {type: "number", format: "number"},
+                lnlAlt: {type: "number", format: "number"},
+                pVal: {type: "number", format: "number"}			
             };
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
@@ -154,19 +158,45 @@
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        app.result = data.result.result.data;
-                        app.analysisType = data.result.analysisType.text;
+                        app.analysisType = data.result.analysisType.data;
+                        app.parameter = data.result.parameter.data;
+                        app.testStatistic = data.result.testStatistic.data;
+                        app.lnlNull = data.result.lnlNull.data;
+                        app.lnlAlt = data.result.lnlAlt.data;
+                        app.pVal = data.result.pVal.data;
 
-                        // render table
-                        $("#result").table({ data: app.result });
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded.");
-                        $('html, body').animate({
-                            scrollTop: $("#result").offset().top
-                        }, 1000);
-                        $("#discussion").text("Analysis complete. You have run ")
-                        $("#discussion").append({ data: app.analysisType})
-                        $("#discussion").append(". The test statistic, <teststat>, was equal to <value>.")
+                        $("#discussion").append("<h2>Analysis complete</h2><br>")
+                        $("#discussion").append("<b>Analysis type: <b>")
+                        $("#discussion").append(app.analysisType)
+                        $("#discussion").append("<br><b>Estimated test statistic: <b>")
+                        if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
+							$("#discussion").append("lambda = ")
+						} else {
+							$("#discussion").append("K = ")
+						}
+                        $("#discussion").append(app.parameter)
+                        if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
+							$("#discussion").append(".<br><br><b>Test: likelihood ratio</b><br>")
+							$("#discussion").append("lnL of the null model (lambda = 0): ")
+							$("#discussion").append(app.lnlNull)
+							$("#discussion").append("<br>lnL of the alternative model (lambda estimated): ")
+							$("#discussion").append(app.lnlAlt)
+							$("#discussion").append("<br>Chi-squared test statistic: ")
+							$("#discussion").append(app.testStatistic)
+							$("#discussion").append("<br>P-value: ")
+							$("#discussion").append(app.pVal)
+							
+							if(app.pVal < 0.05) {
+								$("#discussion").append("<br><br><b>Conclusion: </b> Reject the null hypothesis of no phylogenetic signal.<br>")
+							} else {
+								$("#discussion").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no phylogenetic signal.<br>")
+							}
+
+						} else {
+							$("#discussion").append("xxx")
+						}
                     }, this));
 
                 } else if (result.status === 'FAILURE') {
