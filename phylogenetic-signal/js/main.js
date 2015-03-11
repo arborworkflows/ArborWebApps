@@ -136,6 +136,7 @@
             };
 
             var outputs = {
+				analysisType: {type: "string", format: "text"},
                 result: {type: "table", format: "rows"}
             };
 
@@ -154,14 +155,42 @@
                     var result_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.result = data.result.result.data;
+						app.analysisType = data.result.analysisType.data;
+						
+						console.log(app.result.rows[0])
 
-                        // render table
-                        $("#result").table({ data: app.result });
+
+                        // render results
+						$("#result").append("<h2>Results:<\h2>");
+						$("#result").append("<b>Column analyzed: <b>", app.column, "<br>");
+						$("#result").append("<b>Analysis type: <b>", app.analysisType, "<br>");
+						$("#result").append("<b>Estimated test statistic: <b>");
+                        if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
+							$("#result").append("lambda = ", app.result.rows[0][app.column + ".lambdaValue"].toFixed(2), "<br><br>")
+						} else {
+							$("#result").append("K = ", app.result.rows[0][app.column + ".KValue"].toFixed(2), "<br><br>")
+						}
+						
+                       if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
+							$("#result").append("<b>Statistical test: likelihood ratio</b><br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the null model (lambda = 0): ", app.result.rows[0][app.column + ".lnlValues.Lambda fixed at zero"].toFixed(2), "<br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the alternative model (lambda estimated): ", app.result.rows[0][app.column + ".lnlValues.Lambda estimated"].toFixed(2), "<br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chi-squared test statistic: ", app.result.rows[0][app.column + ".chisqTestStat"].toFixed(2), "<br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0][app.column + ".chisqPVal"].toFixed(3), "<br>")
+							
+							if(app.result.rows[0][app.column + ".chisqPVal"] < 0.05) {
+								$("#result").append("<br><br><b>Conclusion: </b> Reject the null hypothesis of no phylogenetic signal.<br>")
+							} else {
+								$("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no phylogenetic signal.<br>")
+							}
+
+						} else {
+							$("#result").append("xxx")
+						}
+                        
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded!");
-                        $('html, body').animate({
-                            scrollTop: $("#result").offset().top
-                        }, 1000);
+
                     }, this));
 
                 } else if (result.status === 'FAILURE') {
