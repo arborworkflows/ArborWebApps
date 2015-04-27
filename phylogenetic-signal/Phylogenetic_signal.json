@@ -1,0 +1,43 @@
+{
+    "inputs": [
+        {
+            "format": "r.dataframe",
+            "name": "table",
+            "type": "table"
+        },
+        {
+            "format": "r.apetree",
+            "name": "tree",
+            "type": "tree"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "name": "column",
+            "type": "string"
+        },
+        {
+            "default": "[object Object]",
+            "domain": [
+                "lambda",
+                "K"
+            ],
+            "format": "text",
+            "name": "method",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "Phylogenetic signal",
+    "outputs": [
+        {
+            "format": "r.dataframe",
+            "name": "result",
+            "type": "table"
+        }
+    ],
+    "script": "#data(anolis); tree <- anolis$phy; table <- anolis$dat; column <- \"SVL\"; method <- \"lambda\"; discreteModelType=\"ER\"\nlibrary(devtools)\n#options(repos=\"http://cran.cnr.Berkeley.edu\")\n#install_github(\"arborworkflows/aRbor\")\n# measure phylogenetic signal\nrequire(aRbor)\n\n# Names and data match - so data integrator might be needed at this step\n# (in general) but is not needed in this case.\n\ntd <- make.treedata(tree, table)\ntd <- select(td, which(colnames(td$dat)==column))\nphy <- td$phy\ndat <- td$dat\n\ncharType <- aRbor:::detectCharacterType(dat[[1]], cutoff=0.2)\n\nif(charType==\"discrete\"){\n  result <- physigArbor(td, charType=charType, signalTest=\"pagelLambda\")\n}\nif(charType==\"continuous\"){\n  if(method==\"lambda\") result <- physigArbor(td, charType=charType, signalTest=\"pagelLambda\")\n  if(method==\"K\") result <- physigArbor(td, charType=charType, signalTest=\"Blomberg\")\n}\n\nresult <- t(as.data.frame(unlist(result)))\nrownames(result) <- NULL\nresult"
+}
