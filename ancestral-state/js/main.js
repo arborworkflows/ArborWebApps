@@ -156,7 +156,7 @@
 
             flow.performAnalysis(app.ASRId, inputs, outputs,
                 _.bind(function (error, result) {
-                    app.taskId = result.id;
+                    app.taskId = result._id;
                     setTimeout(_.bind(app.checkASRResult, app), 1000);
                 }, app));
 
