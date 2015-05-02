@@ -73,31 +73,8 @@ function markerExists(id) {
 
 // ---- build node lists to aid traversal, finding locations or matching nodes
 
-function addTaxaToTaxaList(treenode) {
-  if ('children' in treenode) {
-  	// case for intermediate nodes, continue traversal
-  	for (var i=0;i<treenode.children.length;i++) {
-  		addTaxaToTaxaList(treenode.children[i])
-  	}
-  } else {
-  	// case for a taxon
-  	phylomap.taxalist.push(treenode)
-  }
-}
 
-// this is a pre-processing function that is called once each time a tree is loaded.  It runs throgh
-// the tree and builds a list of all nodes, so searching doesn't have to involve recursive searching 
-// each time.  The routine assumes phylomap.currentTree is valid.
 
-function addAllNodesToAllNodeList(treenode) {
-  phylomap.allnodelist.push(treenode)
-  if ('children' in treenode) {
-  	// case for intermediate nodes, continue traversal
-  	for (var i=0;i<treenode.children.length;i++) {
-  		addAllNodesToAllNodeList(treenode.children[i])
-  	}
-  }
-}
 
 // this is a pre-processing function that is called once each time a tree is loaded.  It runs throgh
 // the tree and builds a list of the taxa, so searching doesn't have to involve recursive searching 
@@ -174,41 +151,9 @@ function addLocationToSelectedList(node,lat,lon) {
 }
 
 
-
-
-function mapSingleNode(treeNode, rootNode,icon,selectionID) {
-	var bounds = new google.maps.LatLngBounds();
-	var name = treeNode.node_data['node name'];
-	//console.log('map single node of id=',id, treeNode)
-
-	// if this node has locations, then add them to the map
-	if ('loc' in treeNode.node_data) {
-		for (var i = 0; i< treeNode.node_data['loc'].length; i++) {
-			var thisloc = treeNode.node_data['loc'][i]
-			var latlng = new google.maps.LatLng(
-				parseFloat(thisloc[1]),
-				parseFloat(thisloc[0]));
-			var text = "species: " + name + "<br>id: " + selectionID;
-			// add other attributes to display tag if they are present in the taxon node
-			var attribs = []
-			if ('attributes' in treeNode.node_data) {
-				if (treeNode.node_data['attributes'].length >= i) {
-					attribs = treeNode.node_data['attributes'][i]
-					// add descriptions to the text markers
-					for (var attrib in attribs) {
-						text = text + ' [' + attrib+']:'+attribs[attrib]
-					};
-				}
-			}
-
-			createMarker(latlng, name, text, selectionID, icon);
-			//bounds.extend(latlng);
-			addLocationToSelectedList(treeNode,attribs,thisloc[1],thisloc[0])		
-		};
-	}
-}
-
-
+// this function is called to plot the entire dataset.  It adds all the markers to the Cesium globe, via 
+// calls to createMarker, after discovering and normalizing the name of the latitude and longitude fields.  
+// finally, the selectedOccurrence list is updated to show all the 
 
 
 function mapAllLocations() {
@@ -216,7 +161,6 @@ function mapAllLocations() {
 		var icon = getIcon();
 		for (var i = phylomap.currentRows.length - 1; i >= 0; i--) {
 			var entry = phylomap.currentRows[i]
-
 
 			// look for locations as under latidude, Latidue, Longitude, longitude, lat, long, or lng.  This won't
 			// catch everything, but it allows some variation. 
@@ -228,6 +172,10 @@ function mapAllLocations() {
 				point.latitude = entry.lat
 			} else if (typeof entry.Latitude != 'undefined') {
 				point.latitude = entry.Latitude
+			} else if (typeof entry.LAT != 'undefined') {
+				point.latitude = entry.LAT
+			} else if (typeof entry.LATITUDE != 'undefined') {
+				point.latitude = entry.LATITUDE
 			}
 
 			if ( typeof entry.longitude != 'undefined') {
@@ -240,17 +188,34 @@ function mapAllLocations() {
 				point.longitude = entry.lng
 			} else if (typeof entry.Longitude != 'undefined') {
 				point.longitude = entry.Longitude
+			}  else if (typeof entry.LONG != 'undefined') {
+				point.longitude = entry.LONG
+			} else if (typeof entry.LONG != 'undefined') {
+				point.longitude = entry.LONG
+			} else if (typeof entry.LONGITDUE != 'undefined') {
+				point.longitude = entry.LONGITDUE
 			}
 
-	
+
+			// set the species name for display
+			if ( typeof entry.species != 'undefined') {
+				entry.name = entry.species;
+			} else if (typeof entry.SPECIES != 'undefined') {
+				entry.name = entry.SPECIES
+			}
 
 			var latlng = new google.maps.LatLng(parseFloat(point.latitude), parseFloat(point.longitude));
 			createMarker(latlng, entry.name, '', selectionID, icon);
 			addLocationToSelectedList(entry,point.latitude,point.longitude)
+			buildMinMaxValueList()
 		};
-	//updateTableDisplay(phylomap.selectedOccurrences)
+}
+
+// go through the occurrence list (already built) and calculate the min and max values for each column
+function buildMinMaxValueList() {
 
 }
+
 
 function getIcon(nodeid) {
 	if (typeof iconIndex === "undefined" || iconIndex == null || iconIndex == iconList.length) {
@@ -289,6 +254,9 @@ function getIconColor(id) {
 }
 
 
+// this function initializes the billboards in the virtual globe.  It registers a callback to enable
+// the hover over points to display a text label.
+
  function addCesiumPointBillboard(scene, ellipsoid) {
         // add an empty billboard collection.  Points will be added later
         phylomap.cesium.billboards = new Cesium.BillboardCollection();
@@ -297,7 +265,7 @@ function getIconColor(id) {
         var label = phylomap.cesium.labels.add()
         var ellipsoid = phylomap.cesium.scene.globe.ellipsoid;
 
- // If the mouse is over the billboard, show a text label with the species name
+ 	// If the mouse is over the billboard, show a text label with the species name
     handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
     handler.setInputAction(
         function (movement) {
@@ -331,6 +299,10 @@ function getIconColor(id) {
         Cesium.ScreenSpaceEventType.MOUSE_MOVE
     );
 }
+
+// fill the table to the right of the globe with the value of the attributes.  All columns are drawn on the 
+// table on the right of the page. 
+
 
 function displayOccurrenceAttributes(entry) {
 	// add other attributes to display tag if they are present in the observation table
@@ -429,15 +401,6 @@ function createMarker(latlng, name, text, id, icon) {
 
 
 
-function highlightParents (node, color, size) {
-	// ensure our helper functions were included
-	if (typeof highlightPath != 'undefined' && typeof nodeFromId != 'undefined') {
-		if (node[0].length > 0) {
-			highlightPath(node.datum(), color, size);
-		}
-	}
-}
-
 var map;
 var clickedOn;
 var mapOptions;
@@ -486,54 +449,7 @@ var treeHighLightColorListAsRGB = [
 		[1,0.71,0.75,1.0],[0.746,0.933,1,1.0],[0.5,0,0.5,1],[1,1,0,1]]
 
 
-/*
-phylomap.getMongoDBInfo = function () {
-    "use strict";
 
-    // Read in the config options regarding which MongoDB
-    // server/database/collection to use.
-    return {
-        server: localStorage.getItem('phylomap:mongodb-server') || 'localhost',
-        db: localStorage.getItem('phylomap:mongodb-db') || 'xdata',
-        coll: localStorage.getItem('phylomap:mongodb-coll') || 'anolis'
-    };
-};
-
-phylomap.updateConfig = function() {
-	"use strict";
-
-	var server,
-		db,
-		coll;
-
-	// Grab the elements
-	server = document.getElementById("mongodb-server");
-	db = document.getElementById("mongodb-db");
-	coll = document.getElementById("mongodb-coll");
-
-	// Write the options into DOM storage.
-	localStorage.setItem('phylomap:mongodb-server', server.value);
-	localStorage.setItem('phylomap:mongodb-db', db.value);
-	localStorage.setItem('phylomap:mongodb-coll', coll.value);
-};
-
-phylomap.setConfigDefaults = function () {
-    "use strict";
-
-    var cfg;
-
-    // Clear out the locally stored options.
-    localStorage.removeItem('phylomap:mongodb-server');
-    localStorage.removeItem('phylomap:mongodb-db');
-    localStorage.removeItem('phylomap:mongodb-coll');
-
-    // Retrieve the new config values, and set them into the fields.
-    cfg = phylomap.getMongoDBInfo();
-    d3.select("#mongodb-server").property("value", cfg.server);
-    d3.select("#mongodb-db").property("value", cfg.db);
-    d3.select("#mongodb-coll").property("value", cfg.coll);
-};
-*/
 
 //function load() {
 
