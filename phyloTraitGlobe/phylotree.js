@@ -677,8 +677,8 @@ function updateJSON(options) {
 
 // CRL: added to allow path to be highlighted only up to a certain ancestor.  At first we were calling "highlightPaths", but
 // there is a subtle difference in the definition of what a "node" is (whether it is a mongoDB JSON node or a node gleaned
-// by select from the DOM.  These have slightly different organizations, so the parent discovery below was changed to use
-// node.ID.$oid instead of node._id, since we are calling this routine wit nodes returned from an AJAX search
+// by select from the DOM.  These have slightly different organizations.
+
 function highlightLimitedPath(node, rootId, color, size) {
 	color = ((color != null) ? color : "red");
 	size = ((size != null) ? size : "3px");
