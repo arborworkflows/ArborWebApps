@@ -36,6 +36,9 @@ $(document).ready(function(){
 	girder.apiRoot = '../girder/api/v1';
     girder.handleRouting = false;
 
+    // enable tabs on UI
+    $('#tabs').tab();
+
 
 	$('#login').click(function () {
 	    var loginView = new girder.views.LoginView({
@@ -741,7 +744,7 @@ function toggleText(element) {
 
 // state variable for automatic clade selection mode.  When set, click on clade will highlight all
 // children below it in the tree (of all species)
-var cladeSelectEnabled = false;
+var cladeSelectEnabled = true;
 
 // turn text on or off cladeSelect based on what element (checkbox) is set to
 function toggleCladeSelect(element) {
