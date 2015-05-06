@@ -29,13 +29,16 @@ phylomap.selectedOccurrences = []
 
 phylomap.girder_API_root = '../girder/api/v1'
 
+// declare a spot for the analysis used by romanesco to filter a girder item. 
+phylomap.aggregateAnalysisName = "Aggregate table by average"
+phylomap.aggregateAnalysis = null
+
 // when the document is loaded, try to load a default dataset.  This fails quietly if the
 // dataset is not available
 
 $(document).ready(function(){
 	girder.apiRoot = '../girder/api/v1';
     girder.handleRouting = false;
-
 
 	$('#login').click(function () {
 	    var loginView = new girder.views.LoginView({
@@ -93,7 +96,32 @@ $(document).ready(function(){
 	    girder.events.trigger('g:login');
 	});
 
-    initializeDataSelection("Default","anolis")
+
+	// Lookup the ID of the aggregation analysis that we will need to perform later.  This analysis accepts 
+	// a table and a column to aggregate on.  
+
+    girder.restRequest({
+        path: 'resource/search',
+        data: {
+            q: phylomap.aggregateAnalysisName,
+            types: JSON.stringify(["item"])
+        }
+    }).done(function (results) {
+    	console.log('results', results)
+        phylomap.aggregateAnalysis = results["item"][0]._id;
+        // populate the collections and dataset selectors
+        console.log("found analysis at id:",phylomap.aggregateAnalysis)
+        initializeDataSelection("Default","anolis")
+    });
+
+    // initialize an empty grid object for table display
+    editableGrid = new EditableGrid("DemoGridSimple", {
+    enableSort: true, // true is the default, set it to false if you don't want sorting to be enabled
+	editmode: "absolute", // change this to "fixed" to test out editorzone, and to "static" to get the old-school mode
+	editorzoneid: "edition", // will be used only if editmode is set to "fixed"
+	pageSize: 40
+    });
+
 });
 
 
@@ -741,7 +769,7 @@ function toggleText(element) {
 
 // state variable for automatic clade selection mode.  When set, click on clade will highlight all
 // children below it in the tree (of all species)
-var cladeSelectEnabled = false;
+var cladeSelectEnabled = true;
 
 // turn text on or off cladeSelect based on what element (checkbox) is set to
 function toggleCladeSelect(element) {
@@ -751,6 +779,24 @@ function toggleCladeSelect(element) {
 		cladeSelectEnabled = false;
 	}
 }
+
+// state variable for display of the trait scatterplot.  When set, click on tree or matrix will update
+// the matrix to show the pairwise relations between all traits in the dataset
+var scatterplotEnabled = false;
+
+function toggleScatterplot(element) {
+	if (element.checked) {
+		scatterplotEnabled = true;
+		updateTableDisplay(phylomap.selectedOccurrences)
+	} else {
+		scatterplotEnabled = false;
+		// clear out content from any previous scatterplot
+  		$('#morphplot').empty()
+	}
+}
+
+
+
 
 function mapItem(item) {
 // update the phylomap!

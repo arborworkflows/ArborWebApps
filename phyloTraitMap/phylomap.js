@@ -198,7 +198,7 @@ function searchLocationsNearCircle(lat,lon,radius) {
 
 
 function addLocationToSelectedList(node,attribs,lat,lon) {
-    console.log('adding node to selection list.  Length now:',phylomap.selectedOccurrences.length)
+    //console.log('adding node to selection list.  Length now:',phylomap.selectedOccurrences.length)
     var record = {}
     // if there are extra attributes on this node, copy them over to the trait matrix selection entry
     for (attrib in attribs) {
@@ -436,54 +436,7 @@ var iconList = [
 
 // adding matching hightlight colors to match the icons, so the tree hightlight color matches the icon color
 var treeHighlightColorList = [ "red","blue","green","orange","pink","lightblue","purple","yellow","red","blue","green","pink","lightblue","purple","yellow"]
-/*
-phylomap.getMongoDBInfo = function () {
-    "use strict";
 
-    // Read in the config options regarding which MongoDB
-    // server/database/collection to use.
-    return {
-        server: localStorage.getItem('phylomap:mongodb-server') || 'localhost',
-        db: localStorage.getItem('phylomap:mongodb-db') || 'xdata',
-        coll: localStorage.getItem('phylomap:mongodb-coll') || 'anolis'
-    };
-};
-
-phylomap.updateConfig = function() {
-	"use strict";
-
-	var server,
-		db,
-		coll;
-
-	// Grab the elements
-	server = document.getElementById("mongodb-server");
-	db = document.getElementById("mongodb-db");
-	coll = document.getElementById("mongodb-coll");
-
-	// Write the options into DOM storage.
-	localStorage.setItem('phylomap:mongodb-server', server.value);
-	localStorage.setItem('phylomap:mongodb-db', db.value);
-	localStorage.setItem('phylomap:mongodb-coll', coll.value);
-};
-
-phylomap.setConfigDefaults = function () {
-    "use strict";
-
-    var cfg;
-
-    // Clear out the locally stored options.
-    localStorage.removeItem('phylomap:mongodb-server');
-    localStorage.removeItem('phylomap:mongodb-db');
-    localStorage.removeItem('phylomap:mongodb-coll');
-
-    // Retrieve the new config values, and set them into the fields.
-    cfg = phylomap.getMongoDBInfo();
-    d3.select("#mongodb-server").property("value", cfg.server);
-    d3.select("#mongodb-db").property("value", cfg.db);
-    d3.select("#mongodb-coll").property("value", cfg.coll);
-};
-*/
 
 //function load() {
 
