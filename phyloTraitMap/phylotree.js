@@ -29,16 +29,16 @@ phylomap.selectedOccurrences = []
 
 phylomap.girder_API_root = '../girder/api/v1'
 
+// declare a spot for the analysis used by romanesco to filter a girder item. 
+phylomap.aggregateAnalysisName = "Aggregate table by average"
+phylomap.aggregateAnalysis = null
+
 // when the document is loaded, try to load a default dataset.  This fails quietly if the
 // dataset is not available
 
 $(document).ready(function(){
 	girder.apiRoot = '../girder/api/v1';
     girder.handleRouting = false;
-
-    // enable tabs on UI
-    $('#tabs').tab();
-
 
 	$('#login').click(function () {
 	    var loginView = new girder.views.LoginView({
@@ -96,7 +96,24 @@ $(document).ready(function(){
 	    girder.events.trigger('g:login');
 	});
 
-    initializeDataSelection("Default","anolis")
+
+	// Lookup the ID of the aggregation analysis that we will need to perform later.  This analysis accepts 
+	// a table and a column to aggregate on.  
+
+    girder.restRequest({
+        path: 'resource/search',
+        data: {
+            q: phylomap.aggregateAnalysisName,
+            types: JSON.stringify(["item"])
+        }
+    }).done(function (results) {
+    	console.log('results', results)
+        phylomap.aggregateAnalysis = results["item"][0]._id;
+        // populate the collections and dataset selectors
+        console.log("found analysis at id:",phylomap.aggregateAnalysis)
+        initializeDataSelection("Default","anolis")
+    });
+
 });
 
 

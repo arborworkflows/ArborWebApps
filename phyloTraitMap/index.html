@@ -34,10 +34,11 @@
 
 
 <!-- used for girder, so we can authenticate -->
-<script src="../girder/static/built/libs.min.js"></script>
-<script src="../girder/static/built/app.min.js"></script>
-<link rel="stylesheet" href="../girder/static/lib/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="../girder/static/built/app.min.css">
+<!-- these declaraations have to be just right, or romanesco and window.flow aren't defined -->
+<script src="../libs.min.js" charset="utf-8"></script>
+<script src="../lib/ace-builds/src-noconflict/ace.js" charset="utf-8"></script>
+<script src="/girder/static/built/app.min.js" charset="utf-8"></script>
+<script src="../app.min.js" charset="utf-8"></script>
 
 <!-- interface to slickgrid -->
 <script src="gridControl.js"></script>
@@ -191,6 +192,7 @@ circle.hidden {
             <div class=col-md-6 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; border-style:solid; overflow:hidden; border-width:medium"></div>
             <div class=col-md-5 id="map_canvas" style="  margin-left: 20px; margin-right:20px; height:800px; float-right; border-style:solid; border-width:medium"></div>
         </div>
+        <button type="button" onclick="updateDrillDownDataDisplay();" style="margin-top:25px; margin-left:25px;">Aggregate Trait Results By Species</button>
         <div class=row>
             <div  class='scatterplot' id='morphplot' style="margin-left:40px; margin-top:40px; margin-bottom:40px; width: 100%; "> </div>
         </div>

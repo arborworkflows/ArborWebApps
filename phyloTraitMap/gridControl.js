@@ -16,7 +16,7 @@ function isNumeric(n) {
 var brushCell;
 
 var width = 960,
-    size = 250,
+    size = 150,
     padding = 25;
 
 var x = d3.scale.linear()
@@ -66,8 +66,6 @@ function loadScatterplot(data) {
     }
   }
   */
-
-  n = traits.length;
 
   n = traits.length;
 
@@ -207,6 +205,10 @@ function updateTableDisplay(studyList) {
   //grid_columns.push( {id: attrib, name: attrib, field: attrib} )  
  // }
 
+  // scatterplot render used to be here until we added aggregation. Now removed and called separately so aggregation 
+  // doesn't affect the scatterplot.  Scatterplot should always work on unaggregated data.
+  renderScatterPlot(studyList) 
+
   // global options for SlickGrid
   grid_options = {
     enableCellNavigation: true,
@@ -215,11 +217,6 @@ function updateTableDisplay(studyList) {
     fullWidthRows: true
   };
 
-  // draw the scatterplot for the selected data, if it has been enabled
-  if (scatterplotEnabled == true) {
-    loadScatterplot(studyList)
-  }
-
   // re-instantiate the grid each time, it didn't seem to update correctly using the invalidate()
   // method, so safer to start afresh each time
   grid = new Slick.Grid("#tablecontent", studyList, grid_columns, grid_options);
@@ -227,28 +224,47 @@ function updateTableDisplay(studyList) {
 }
 
 
+function renderScatterPlot(studyList) {
+ // draw the scatterplot for the selected data, if it has been enabled
+  if (scatterplotEnabled == true) {
+    loadScatterplot(studyList)
+  }
+}
+
 
 // Run Romanesco Step
 //
-// this function takes the name of the hovered entry, queries a data table through romanesco, and graphs 
-// the corresponding detail in the UI using vega.  It is called each time a hover occurs over an entity on the map. This
-// is a heavy activity to be performing on hover, but it is instructive to see how to invoke romanesco processing. Since 
-// the romanesco step could take awhile, a checkQueryResult() routine is called after a 1/2 second
+// this function runs an aggregation analysis stored in Arbor on the currently selected map entries. Since 
+// the romanesco step could take awhile, a checkQueryResult() routine is called after a 1/2 second.  
 
 function updateDrillDownDataDisplay() {
-  var entry = phylomap.selectedOccurrences[phylomap.pickedId]
-  console.log('entry to process: ',entry)
+
+  // first convert the currently selected entries into a table.rows format object
+  var fields = [];
+  var dataobject;
+  for (var i=0; i<phylomap.selectedOccurrences.length; i++) {
+      dataobject = phylomap.selectedOccurrences[i]
+      for (var attrib in dataobject) {
+          // if this attribute is not already stored in our array, then add it
+          if (fields.indexOf(attrib)<0) { 
+              fields.push(attrib)
+          }
+      }
+  }
+  var tableForProcessing = {}
+  tableForProcessing['fields'] = fields
+  tableForProcessing['rows'] = phylomap.selectedOccurrences
+
+  // now format the input and output "deck" for the Romanesco job and call it
   var inputs = {
-                inputTable:  {type: "table",  format: "rows",   data: phylomap.awsData},
-                operation:   {type: "string", format: "text",   data: "EqualTo"},
-                columnname: {type: "string", format: "text",    data: "stationName"},
-                testvalue:   {type: "string", format: "text",   data: entry.name}
+                table:  {type: "table",  format: "rows",   data: tableForProcessing},
+                column: {type: "string", format: "text",    data: "species"}
             };
     var outputs = {
-                outTable:  {type: "table",  format: "rows"}
+                output:  {type: "table",  format: "rows"}
             };
   console.log('analysis inputs=',inputs)
-    window.flow.performAnalysis(phylomap.filterAnalysis, inputs, outputs,
+    window.flow.performAnalysis(phylomap.aggregateAnalysis, inputs, outputs,
         _.bind(function (error, result) {
             phylomap.taskId = result.id;
             setTimeout(_.bind(checkQueryResult, window.app), 500);
@@ -261,17 +277,16 @@ function updateDrillDownDataDisplay() {
 // to render the result, print out a failure console message, or wait another period and re-request status. 
 
 checkQueryResult = function () {
-    var check_url = '/item/' + phylomap.filterAnalysis + '/romanesco/' + phylomap.taskId + '/status'
+    var check_url = '/item/' + phylomap.aggregateAnalysis + '/romanesco/' + phylomap.taskId + '/status'
     girder.restRequest({path: check_url}).done(_.bind(function (result) {
         console.log(result.status);
         if (result.status === 'SUCCESS') {
             // get result data
-            var result_url = '/item/' + phylomap.filterAnalysis  + '/romanesco/' + phylomap.taskId  + '/result'
+            var result_url = '/item/' + phylomap.aggregateAnalysis  + '/romanesco/' + phylomap.taskId  + '/result'
             girder.restRequest({path: result_url}).done(_.bind(function (data) {
-              //console.log("filtered result:",data.result.outTable.data.rows)
-                // render AWS station plot in Vega
-          parseVegaSpec("vegaBarChartSpec.json",{rows: data.result.outTable.data.rows},"#vega-content");
-                $("#notice").text("AWS station lookup succeeded!");
+            // once the result is back, render it back in the table
+            updateTableDisplay(data.result.output.data.rows);
+            $("#notice").text("AWS station lookup succeeded!");
                 //$('html, body').animate({
                 //    scrollTop: $("#tablecontent").offset().top
                 //}, 1000);
