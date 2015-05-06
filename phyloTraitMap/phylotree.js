@@ -114,6 +114,14 @@ $(document).ready(function(){
         initializeDataSelection("Default","anolis")
     });
 
+    // initialize an empty grid object for table display
+    editableGrid = new EditableGrid("DemoGridSimple", {
+    enableSort: true, // true is the default, set it to false if you don't want sorting to be enabled
+	editmode: "absolute", // change this to "fixed" to test out editorzone, and to "static" to get the old-school mode
+	editorzoneid: "edition", // will be used only if editmode is set to "fixed"
+	pageSize: 40
+    });
+
 });
 
 

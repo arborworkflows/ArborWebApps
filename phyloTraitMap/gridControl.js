@@ -6,12 +6,13 @@
 
 
 
-// start scatterplot
-
 // utility function to test for numeric attributes
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
+
+
+// start of D3 scatterplot, based on the standard one from mbostock
 
 var brushCell;
 
@@ -42,7 +43,6 @@ function loadScatterplot(data) {
 
   var domainByTrait = {}, traits = []
 
-  // d3.keys(data[0]).filter(function(d) { return d !== "species"; })
 
   // clear out content from any previous scatterplot
   $('#morphplot').empty()
@@ -179,9 +179,13 @@ function loadScatterplot(data) {
 // end scatterplot 
 
 
-
-
 function updateTableDisplay(studyList) {
+  updateTableDisplay_EditableGrid(studyList)
+  //updateTableDisplay_SlickGrid(studyList)
+}
+
+
+function updateTableDisplay_SlickGrid(studyList) {
 
   var attrib;
     grid_columns = [];
@@ -199,14 +203,9 @@ function updateTableDisplay(studyList) {
         }
     }
 
-  // introspect to find the attributes for the table columns
-  //grid_columns = []
-  // for (var attrib in studyList[0]) {
-  //grid_columns.push( {id: attrib, name: attrib, field: attrib} )  
- // }
+  // scatterplot render here.  This will sometimes show unaggregated data and sometimes aggregated data, depending
+  // on what granularity the table is currently displaying
 
-  // scatterplot render used to be here until we added aggregation. Now removed and called separately so aggregation 
-  // doesn't affect the scatterplot.  Scatterplot should always work on unaggregated data.
   renderScatterPlot(studyList) 
 
   // global options for SlickGrid
@@ -220,8 +219,67 @@ function updateTableDisplay(studyList) {
   // re-instantiate the grid each time, it didn't seem to update correctly using the invalidate()
   // method, so safer to start afresh each time
   grid = new Slick.Grid("#tablecontent", studyList, grid_columns, grid_options);
- 
 }
+
+
+
+// alternative grid display 
+
+
+function updateTableDisplay_EditableGrid(studyList) {
+
+  var attrib;
+    metadata = [];
+    var thisObject;
+    var attriblist = [];
+    var dataobject;
+    for (i=0; i<studyList.length; i++) {
+        dataobject = studyList[i]
+        for (attrib in dataobject) {
+            // if this attribute is not already stored in our array, then add it
+            if (attriblist.indexOf(attrib)<0) {
+                 // special purpose code here to further refine what javascript returns (which is 'string' or 'number').
+                // We further test for integer-ness in order to tell the editable grid the correct types to support sorting.
+                var thisType = typeof dataobject[attrib];
+                if (thisType != "number") {
+                    metadata.push({ name: attrib, label:attrib, datatype: (typeof dataobject[attrib]), editable: false});
+                }
+                else if (Number.isInteger(dataobject[attrib])) {
+                    metadata.push({ name: attrib, label:attrib, datatype: "integer", editable: false});
+                }
+                else {
+                    metadata.push({ name: attrib, label:attrib, datatype: "double", editable: false});
+                }
+                attriblist.push(attrib)
+            }
+        }
+    }
+
+    // get the source data in the proper form for EditableGrid
+    var rowdata = []
+    for (var i = 0; i < studyList.length; i++)
+    {
+      rowdata.push({id:i,values: studyList[i]})
+    }
+
+  // scatterplot render here.  This will sometimes show unaggregated data and sometimes aggregated data, depending
+  // on what granularity the table is currently displaying
+
+  renderScatterPlot(studyList) 
+
+  // now render the table
+  editableGrid.load({"metadata": metadata, "data": rowdata});
+  editableGrid.renderGrid("tablecontent","testgrid");
+  editableGrid.refreshGrid();
+  // update paginator whenever the table is rendered (after a sort, filter, page change, etc.)
+  //editableGrid.updatePaginator();
+}
+// ** end alternative grid display
+
+
+
+
+
 
 
 function renderScatterPlot(studyList) {
