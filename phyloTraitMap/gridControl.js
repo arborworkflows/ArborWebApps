@@ -16,7 +16,7 @@ function isNumeric(n) {
 var brushCell;
 
 var width = 960,
-    size = 150,
+    size = 250,
     padding = 25;
 
 var x = d3.scale.linear()
@@ -215,11 +215,76 @@ function updateTableDisplay(studyList) {
     fullWidthRows: true
   };
 
-  // draw the scatterplot for the selected data
-  loadScatterplot(studyList)
+  // draw the scatterplot for the selected data, if it has been enabled
+  if (scatterplotEnabled == true) {
+    loadScatterplot(studyList)
+  }
 
   // re-instantiate the grid each time, it didn't seem to update correctly using the invalidate()
   // method, so safer to start afresh each time
   grid = new Slick.Grid("#tablecontent", studyList, grid_columns, grid_options);
  
 }
+
+
+
+// Run Romanesco Step
+//
+// this function takes the name of the hovered entry, queries a data table through romanesco, and graphs 
+// the corresponding detail in the UI using vega.  It is called each time a hover occurs over an entity on the map. This
+// is a heavy activity to be performing on hover, but it is instructive to see how to invoke romanesco processing. Since 
+// the romanesco step could take awhile, a checkQueryResult() routine is called after a 1/2 second
+
+function updateDrillDownDataDisplay() {
+  var entry = phylomap.selectedOccurrences[phylomap.pickedId]
+  console.log('entry to process: ',entry)
+  var inputs = {
+                inputTable:  {type: "table",  format: "rows",   data: phylomap.awsData},
+                operation:   {type: "string", format: "text",   data: "EqualTo"},
+                columnname: {type: "string", format: "text",    data: "stationName"},
+                testvalue:   {type: "string", format: "text",   data: entry.name}
+            };
+    var outputs = {
+                outTable:  {type: "table",  format: "rows"}
+            };
+  console.log('analysis inputs=',inputs)
+    window.flow.performAnalysis(phylomap.filterAnalysis, inputs, outputs,
+        _.bind(function (error, result) {
+            phylomap.taskId = result.id;
+            setTimeout(_.bind(checkQueryResult, window.app), 500);
+            
+        }, window.app));
+}
+
+
+// this checks the status of a running Romanesco job.  The status value returned is examined and action is taken
+// to render the result, print out a failure console message, or wait another period and re-request status. 
+
+checkQueryResult = function () {
+    var check_url = '/item/' + phylomap.filterAnalysis + '/romanesco/' + phylomap.taskId + '/status'
+    girder.restRequest({path: check_url}).done(_.bind(function (result) {
+        console.log(result.status);
+        if (result.status === 'SUCCESS') {
+            // get result data
+            var result_url = '/item/' + phylomap.filterAnalysis  + '/romanesco/' + phylomap.taskId  + '/result'
+            girder.restRequest({path: result_url}).done(_.bind(function (data) {
+              //console.log("filtered result:",data.result.outTable.data.rows)
+                // render AWS station plot in Vega
+          parseVegaSpec("vegaBarChartSpec.json",{rows: data.result.outTable.data.rows},"#vega-content");
+                $("#notice").text("AWS station lookup succeeded!");
+                //$('html, body').animate({
+                //    scrollTop: $("#tablecontent").offset().top
+                //}, 1000);
+            }, this));
+
+        } else if (result.status === 'FAILURE') {
+            $("#notice").text("AWS station lookup failed. " + result.message);
+        } else {
+          // no answer yet, so wait an interval and check again.  250 = 250ms = 1/4 second
+            setTimeout(_.bind(checkQueryResult, this), 500);
+        }
+    }, this));
+};
+
+
+

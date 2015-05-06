@@ -755,6 +755,24 @@ function toggleCladeSelect(element) {
 	}
 }
 
+// state variable for display of the trait scatterplot.  When set, click on tree or matrix will update
+// the matrix to show the pairwise relations between all traits in the dataset
+var scatterplotEnabled = false;
+
+function toggleScatterplot(element) {
+	if (element.checked) {
+		scatterplotEnabled = true;
+		updateTableDisplay(phylomap.selectedOccurrences)
+	} else {
+		scatterplotEnabled = false;
+		// clear out content from any previous scatterplot
+  		$('#morphplot').empty()
+	}
+}
+
+
+
+
 function mapItem(item) {
 // update the phylomap!
 	// ensure our helper functions have been included via javascript includes
