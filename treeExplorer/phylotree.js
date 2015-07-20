@@ -33,6 +33,14 @@ phylomap.girder_API_root = '../girder/api/v1'
 phylomap.aggregateAnalysisName = "Aggregate table by average"
 phylomap.aggregateAnalysis = null
 
+
+// for piechart rendering
+
+var pieheight = 40
+var piewidth = 40
+var pieradius = 15
+var enablePie = true
+
 // when the document is loaded, try to load a default dataset.  This fails quietly if the
 // dataset is not available
 
@@ -207,10 +215,6 @@ function drawSelectedTree(projectName,datasetName) {
 							//console.log("tree returned:",root)
 							root.x0 = height / 2;
 							root.y0 = 0;
-
-							// this builds a list of the taxa nodes with their locations for 
-					        // faster searching and also a list of all nodes for finding nodes by id
-					        processTreeForMapLocations()
 
 							// initialize the display to show children nodes
 							root.children.forEach(toggleAll);
@@ -501,12 +505,66 @@ if (d['node_data']) {
 }
 
 
+// this function is used to examine the nodes currently being rendered and build an array of the attributes on the nodes
+// for rendering pie charts on the nodes.   Javascript object introspection is used to traverse the "attribs" of the node object 
+// and build up arrays used by d3's "data & select" engine to fill the pie charts instanced during the node.enter() procedure.
+
+function updateAttribArray(nodes) {
+	attribValueArray = []
+	attribNameArray = []
+	for (var i = nodes.length - 1; i >= 0; i--) {
+		var characterValues = []
+		var characterNames = []
+		if ('0' in nodes[i]['node_data']) {
+			var characterInfo = {}
+			characterInfo.name = '0'
+			characterInfo.value = nodes[i]['node_data']['0']
+			characterValues.push(characterInfo)
+		}
+		attribValueArray.push(characterValues)
+		if ('1' in nodes[i]['node_data']) {
+			var characterInfo = {}
+			characterInfo.name = '1'
+			characterInfo.value = nodes[i]['node_data']['1']
+			characterValues.push(characterInfo)
+		attribValueArray.push(characterValues)
+			//attribNameArray.push(characterNames)
+		}
+	};
+	console.log("updated attribValueArray",attribValueArray);
+	//console.log("updated attribNameArray",attribNameArray);
+}
+
+/*
+function updateAttribArray(nodes) {
+	attribValueArray = []
+	attribNameArray = []
+	for (var i = nodes.length - 1; i >= 0; i--) {
+		var characterValues = []
+		var characterNames = []
+		if ('characters' in nodes[i]) {
+			for (attrib in nodes[i].characters) {
+				var characterInfo = {}
+				characterInfo.name = attrib
+				characterInfo.value = nodes[i].characters[attrib]
+				characterValues.push(characterInfo)
+			};
+			attribValueArray.push(characterValues)
+			//attribNameArray.push(characterNames)
+		}
+	};
+	console.log("updated attribValueArray",attribValueArray);
+	//console.log("updated attribNameArray",attribNameArray);
+}
+*/
+
 function update(source) {
 	// set animatio time, slow animation if alt key is pressed
 	var duration = d3.event && d3.event.altKey ? 5000 : 500;
 
 	// Compute the new tree layout
 	nodes = cluster.nodes(root);
+	updateAttribArray(nodes);
 
 	// Update the nodes...
 	var node = vis.selectAll("g.node")
@@ -575,6 +633,39 @@ function update(source) {
 		.style("visibility", function() {
 			return d3.select("#nodeNames").property("checked") ? "visible" : "hidden";
 		});
+
+		// add a piechart at each node that displays
+		// the value of characters at this node.  The filter method passes only the non-leaf nodes
+		// so the piecharts don't render on the taxa. 
+
+    	var pievis = nodeEnter
+	//.filter(function(d) {return (d._clades != null || d.clades != null); })
+    		.append("svg:svg")   
+    	           //create the SVG element inside the <body>
+    		.data(attribValueArray)
+   		.attr("width", piewidth)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+    		.attr("height", pieheight)
+    		.attr("class","piechart")
+    		.append("svg:g")                //make a group to hold our pie chart
+    		.attr("transform", "translate(" + pieradius + "," + 1.5*pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+
+    	var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
+    		.outerRadius(pieradius);
+
+    	var pie = d3.layout.pie()        //this will create arc data for us given a list of values
+    		.value(function (d) {return d.value});    //we must tell it out to access the value of each element in our data array
+
+   	 var arcs = pievis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+    		.data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties)
+    		.enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+    		.append("svg:g")                    //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+    		.attr("class", "slice");            //allow us to style things in the slices (like text)
+
+    	piecolor = d3.scale.category10();     //builtin range of colors
+
+    	arcs.append("svg:path")
+            	.attr("fill", function(d, i) { return piecolor(i); } ) //set the color for each slice to be chosen from the color function defined above
+            	.attr("d", arc)               
 
 	// Transition nodes to their new position.
 	var nodeUpdate = node.transition()
