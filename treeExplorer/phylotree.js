@@ -509,6 +509,7 @@ if (d['node_data']) {
 // for rendering pie charts on the nodes.   Javascript object introspection is used to traverse the "attribs" of the node object 
 // and build up arrays used by d3's "data & select" engine to fill the pie charts instanced during the node.enter() procedure.
 
+/*
 function updateAttribArray(nodes) {
 	attribValueArray = []
 	attribNameArray = []
@@ -521,32 +522,33 @@ function updateAttribArray(nodes) {
 			characterInfo.value = nodes[i]['node_data']['0']
 			characterValues.push(characterInfo)
 		}
-		attribValueArray.push(characterValues)
+		//attribValueArray.push(characterValues)
 		if ('1' in nodes[i]['node_data']) {
 			var characterInfo = {}
 			characterInfo.name = '1'
 			characterInfo.value = nodes[i]['node_data']['1']
 			characterValues.push(characterInfo)
-		attribValueArray.push(characterValues)
 			//attribNameArray.push(characterNames)
 		}
+		attribValueArray.push(characterValues)
 	};
 	console.log("updated attribValueArray",attribValueArray);
 	//console.log("updated attribNameArray",attribNameArray);
 }
+*/
 
-/*
+
 function updateAttribArray(nodes) {
 	attribValueArray = []
 	attribNameArray = []
-	for (var i = nodes.length - 1; i >= 0; i--) {
+	for (var i = 0; i < nodes.length;  i++) {
 		var characterValues = []
 		var characterNames = []
-		if ('characters' in nodes[i]) {
-			for (attrib in nodes[i].characters) {
+		if ('characters' in nodes[i]['node_data']) {
+			for (attrib in nodes[i]['node_data'].characters) {
 				var characterInfo = {}
 				characterInfo.name = attrib
-				characterInfo.value = nodes[i].characters[attrib]
+				characterInfo.value = nodes[i]['node_data'].characters[attrib]
 				characterValues.push(characterInfo)
 			};
 			attribValueArray.push(characterValues)
@@ -556,7 +558,8 @@ function updateAttribArray(nodes) {
 	console.log("updated attribValueArray",attribValueArray);
 	//console.log("updated attribNameArray",attribNameArray);
 }
-*/
+
+
 
 function update(source) {
 	// set animatio time, slow animation if alt key is pressed
@@ -639,6 +642,8 @@ function update(source) {
 		// so the piecharts don't render on the taxa. 
 
     	var pievis = nodeEnter
+    	.filter(function(d) {return (d['node_data']['characters'] != null)})	
+
 	//.filter(function(d) {return (d._clades != null || d.clades != null); })
     		.append("svg:svg")   
     	           //create the SVG element inside the <body>
@@ -665,7 +670,17 @@ function update(source) {
 
     	arcs.append("svg:path")
             	.attr("fill", function(d, i) { return piecolor(i); } ) //set the color for each slice to be chosen from the color function defined above
-            	.attr("d", arc)               
+            	.attr("d", arc)   
+
+/*
+        // add the text
+		arcs.append("svg:text").attr("transform", function(d){
+					d.innerRadius = 0;
+					d.outerRadius = pieradius;
+    				return "translate(" + arc.centroid(d) + ")";}).attr("text-anchor", "middle").text( function(d, i) {
+    		return d[i].name;
+    		});    	     
+ */      
 
 	// Transition nodes to their new position.
 	var nodeUpdate = node.transition()
