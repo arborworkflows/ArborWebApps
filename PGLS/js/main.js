@@ -42,16 +42,32 @@
             $("#input-table-vis").toggle('slow');
         }
 
+
         function toggleCorrelationModel() {
-            if ($("#model-select").first_toggle.checked) {
-              app.correlation="BM";
-            }
-            else if ($("#model-select").second_toggle.checked){
-              app.correlation="OU";
-            }
-            else if ($("#model-select").third_toggle.checked){
-              app.correlation="lambda";
-            }
+
+          if(document.getElementById("first_toggle").checked)
+          {
+            app.correlation="BM";
+          }
+          if(document.getElementById("second_toggle").checked)
+          {
+            app.correlation="OU";
+          }
+          if(document.getElementById("third_toggle").checked)
+          {
+            app.correlation="lambda";
+          }
+        //  console.log($("#model-select").value)
+
+            //if ($("#model-select").toggle_option) {
+              //app.correlation="BM";
+            //}
+            //else if ($("#model-select").second_toggle.checked){
+              //app.correlation="OU";
+            //}
+            //else if ($("#model-select").third_toggle){
+              //app.correlation="lambda";
+            //}
         }
 
         app.correlation="BM";
@@ -267,6 +283,8 @@
         $("#table-preview").click(function() {
             toggleInputTablePreview();
         });
+
+
 
         app.render();
     });
