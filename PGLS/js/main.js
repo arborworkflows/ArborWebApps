@@ -42,6 +42,19 @@
             $("#input-table-vis").toggle('slow');
         }
 
+        function toggleCorrelationModel() {
+            if ($("#model-select").first_toggle.checked) {
+              app.correlation="BM";
+            }
+            else if ($("#model-select").second_toggle.checked){
+              app.correlation="OU";
+            }
+            else if ($("#model-select").third_toggle.checked){
+              app.correlation="lambda";
+            }
+        }
+
+        app.correlation="BM";
         // override upload function for simple mode
         app.datasetsView.upload = function (file) {
             var reader = new FileReader();
@@ -153,6 +166,8 @@
             $("#analyze").text("Re-run");
             $("#notice").text("Performing analysis...");
 
+           toggleCorrelationModel();
+
             var inputs = {
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
@@ -181,39 +196,32 @@
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        app.result = data.result.result.data;
-						app.analysisType = data.result.analysisType.data;
-
-						console.log(app.result.rows[0])
+                        app.coefficients = data.result.coefficients.data;
+                        app.modelfit_summary = data.result.modelfit_summary.data;
+                        app.pglsPlot = data.result.pglsPlot.data;
 
 
                         // render results
 						$("#result").append("<h2>Results:<\h2>");
-						$("#result").append("<b>Independent (Y) variable analyzed: <b>", app.column, "<br>");
-						//$("#result").append("<b>Analysis type: <b>", app.analysisType, "<br>");
-						//$("#result").append("<b>Estimated test statistic: <b>");
-            //            if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
-						//	$("#result").append("lambda = ", app.result.rows[0][app.column + ".lambdaValue"].toFixed(2), "<br><br>")
-					//	} else {
-						//	$("#result").append("K = ", app.result.rows[0][app.column + ".KValue"].toFixed(2), "<br><br>")
-						//}
+						$("#result").append("<b>Independent (Y) variable analyzed: <b>", app.columny, "<br>");
+            $("#result").append("<b>Dependent (X) variable analyzed: <b>", app.columnx, "<br>");
 
-            //           if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
-						//	$("#result").append("<b>Statistical test: likelihood ratio</b><br>")
-						//	$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the null model (lambda = 0): ", app.result.rows[0][app.column + ".lnlValues.Lambda fixed at zero"].toFixed(2), "<br>")
-						//	$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the alternative model (lambda estimated): ", app.result.rows[0][app.column + ".lnlValues.Lambda estimated"].toFixed(2), "<br>")
-						//	$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chi-squared test statistic: ", app.result.rows[0][app.column + ".chisqTestStat"].toFixed(2), "<br>")
-						//	$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0][app.column + ".chisqPVal"].toFixed(3), "<br>")
+						$("#result").append("<b>Analysis type: <b>PGLS with residuals following ");
+            $("#result").append(app.correlation, "<br><br>");
 
-						//	if(app.result.rows[0][app.column + ".chisqPVal"] < 0.05) {
-						//		$("#result").append("<br><br><b>Conclusion: </b> Reject the null hypothesis of no phylogenetic signal.<br>")
-						//	} else {
-						//		$("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no phylogenetic signal.<br>")
-						//	}
+            $("#result").append("<b>Model fit:</b>\t");
 
-						//} else {
-						//	$("#result").append("xxx")
-						//}
+            $("#result").append("lnL = ", app.modelfit_summary.rows[0]["loglik"].toFixed(2), "\t")
+            $("#result").append("AIC = ", app.modelfit_summary.rows[0]["AIC"].toFixed(2), "<br><br>")
+
+            d3.select("#output-table-vis-container").classed('hidden', false);
+            $("#output-table-vis").table({ data: app.coefficients });
+
+            $("#pgls-plot").image({ data: app.pglsPlot });
+            $('html, body').animate({
+                scrollTop: $("#result").offset().top
+              }, 1000);
+
 
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded!");

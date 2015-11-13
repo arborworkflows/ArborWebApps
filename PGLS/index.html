@@ -5,6 +5,7 @@
         <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
         <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="../app.min.css">
+        <link rel="stylesheet" href="css/pgls.css">
         <style>
 
 html, body {
@@ -84,6 +85,21 @@ html, body {
                                 <span class="glyphicon glyphicon-exclamation-sign"></span>
                             </p>
                         </div>
+                        <div class="spacer text-center">
+                        <b>Model for residuals:</b>
+                       </div>
+                          <div class="toggle_radio" id="model-select">
+                            <input type="radio" class="toggle_option" id="first_toggle" name="toggle_option">
+                            <input type="radio" checked class="toggle_option" id="second_toggle" name="toggle_option">
+                            <input type="radio" class="toggle_option" id="third_toggle" name="toggle_option">
+                            <label for="first_toggle"><p>BM</p></label>
+                            <label for="second_toggle"><p>OU</p></label>
+                            <label for="third_toggle"><p>Lambda</p></label>
+                            <div class="toggle_option_slider">
+                            </div>
+                          </div>
+
+
                         <div id="column-input-y" class="bg-warning btn spacer full-width">
                             Load data above to proceed
                         </div>
@@ -106,8 +122,10 @@ html, body {
                 </div>
             </div>
             <div class="row">
-                <div id="result" class="col-sm-12 full-width">
-                </div>
+                <div id="result" class="col-sm-12 full-width"></div>
+                <div class="spacer" id="output-table-vis"></div>
+                <div id="pgls-plot" class="col-sm-12 text-center"></div>
+
             </div>
         </div>
         <div id="vis" class="hidden"></div>
