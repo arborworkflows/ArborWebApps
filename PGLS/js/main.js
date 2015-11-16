@@ -230,7 +230,7 @@
             $("#result").append("lnL = ", app.modelfit_summary.rows[0]["loglik"].toFixed(2), "\t")
             $("#result").append("AIC = ", app.modelfit_summary.rows[0]["AIC"].toFixed(2), "<br><br>")
 
-            d3.select("#output-table-vis-container").classed('hidden', false);
+            //d3.select("#output-table-vis").classed('hidden', false);
             $("#output-table-vis").table({ data: app.coefficients });
 
             $("#pgls-plot").image({ data: app.pglsPlot });
