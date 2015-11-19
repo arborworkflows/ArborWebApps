@@ -1,0 +1,24 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "description": "Phylogenetic tree",
+            "format": "r.apetree",
+            "id": "tree",
+            "name": "tree",
+            "type": "tree"
+        }
+    ],
+    "mode": "r",
+    "name": "ltt_plot",
+    "outputs": [
+        {
+            "description": "LTT plot",
+            "format": "png.base64",
+            "id": "lttPlot",
+            "name": "lttPlot",
+            "type": "image"
+        }
+    ],
+    "script": "require(ape)\nrequire(cardoonTools)\n\nlttPlot <- cardoonPlot(expression(ltt.plot(tree, log=\"y\")), width=1000, height=1000, res=100)\nlttPlot <- lttPlot$png"
+}
