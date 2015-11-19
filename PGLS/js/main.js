@@ -209,34 +209,45 @@
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
                 if (result.status === 'SUCCESS') {
+
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        app.coefficients = data.result.coefficients.data;
+                        var coefficients = data.result.coefficients.data;
                         app.modelfit_summary = data.result.modelfit_summary.data;
                         app.pglsPlot = data.result.pglsPlot.data;
 
 
                         // render results
-						$("#result").append("<h2>Results:<\h2>");
-						$("#result").append("<b>Independent (Y) variable analyzed: <b>", app.columny, "<br>");
-            $("#result").append("<b>Dependent (X) variable analyzed: <b>", app.columnx, "<br>");
+			var newRow = $('<div class="row"></div>');
+			$(".main-content").append(newRow);
+			newRow.append('<hr/>');
 
-						$("#result").append("<b>Analysis type: <b>PGLS with residuals following ");
-            $("#result").append(app.correlation, "<br><br>");
+			var result = $('<div class="col-sm-12 full-width"></div>');
+			newRow.append(result);
+			result.append("<h2>Results:<\h2>");
+			result.append("<b>Independent (Y) variable analyzed: <b>", app.columny, "<br>");
+$(result).append("<b>Dependent (X) variable analyzed: <b>", app.columnx, "<br>");
 
-            $("#result").append("<b>Model fit:</b>\t");
+			result.append("<b>Analysis type: <b>PGLS with residuals following ");
+			result.append(app.correlation, "<br><br>");
 
-            $("#result").append("lnL = ", app.modelfit_summary.rows[0]["loglik"].toFixed(2), "\t")
-            $("#result").append("AIC = ", app.modelfit_summary.rows[0]["AIC"].toFixed(2), "<br><br>")
+			result.append("<b>Model fit:</b>\t");
 
-            //d3.select("#output-table-vis").classed('hidden', false);
-            $("#output-table-vis").table({ data: app.coefficients });
+			result.append("lnL = ", app.modelfit_summary.rows[0]["loglik"].toFixed(2), "\t")
+			result.append("AIC = ", app.modelfit_summary.rows[0]["AIC"].toFixed(2), "<br><br>")
 
-            $("#pgls-plot").image({ data: app.pglsPlot });
-            $('html, body').animate({
-                scrollTop: $("#result").offset().top
-              }, 1000);
+			var output_table = $('<div class="spacer"></div>');
+			newRow.append(output_table);
+			output_table.table({ data: coefficients });
+
+			var pgls_plot = $('<div class="col-sm-12 text-center"></div>');
+			newRow.append(pgls_plot);
+			pgls_plot.image({ data: app.pglsPlot });
+
+			$('html, body').animate({
+				scrollTop: result.offset().top
+			}, 1000);
 
 
                         $("#analyze").removeAttr("disabled");
