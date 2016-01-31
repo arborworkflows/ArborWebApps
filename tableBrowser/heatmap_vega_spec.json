@@ -1,0 +1,59 @@
+{
+  "width": 800,
+  "height": 500,
+
+  "data": [
+    {
+      "name": "table"
+    },
+     {
+      "name": "fields"
+    },
+    {
+      "name": "namelist"
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "x",
+      "type": "ordinal",
+      "domain": {"data": "fields", "field": "data"},
+      "range": "width"
+    }, {
+      "name": "y",
+      "type": "ordinal",
+      "domain": {"data": "namelist", "field": "data"},
+      "range": "height"
+    }, {
+      "name": "c",
+      "type": "linear",
+      "domain": [0,10],
+      "range": ["#313695","#a50026"],
+      "zero": false
+    }
+  ],
+
+  "axes": [
+    {"type": "x", "scale": "x"},
+    {"type": "y", "scale": "y"}
+  ],
+
+  "legends": [{"fill": "c", "values": [0,10]}],
+
+  "marks": [
+    {
+      "type": "rect",
+      "from": {"data": "table"},
+      "properties": {
+        "enter": {
+          "x": {"scale": "x", "field": "measurement"},
+          "width": {"scale": "x", "band": true},
+          "y": {"scale": "y", "field": "name"},
+          "height": {"scale": "y", "band": true},
+          "fill": {"scale": "c", "field": "value"}
+        }
+      }
+    }
+  ]
+}

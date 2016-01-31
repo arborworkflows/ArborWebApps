@@ -38,7 +38,7 @@ phylomap.aggregateAnalysis = null
 
 var pieheight = 40
 var piewidth = 40
-var pieradius = 15
+var pieradius = 10
 var enablePie = true
 
 // when the document is loaded, try to load a default dataset.  This fails quietly if the
@@ -115,7 +115,7 @@ $(document).ready(function(){
             types: JSON.stringify(["item"])
         }
     }).done(function (results) {
-    	console.log('results', results)
+    	//console.log('results', results)
         phylomap.aggregateAnalysis = results["item"][0]._id;
         // populate the collections and dataset selectors
         console.log("found analysis at id:",phylomap.aggregateAnalysis)
@@ -555,7 +555,7 @@ function updateAttribArray(nodes) {
 			//attribNameArray.push(characterNames)
 		}
 	};
-	console.log("updated attribValueArray",attribValueArray);
+	//console.log("updated attribValueArray",attribValueArray);
 	//console.log("updated attribNameArray",attribNameArray);
 }
 
@@ -652,8 +652,19 @@ function update(source) {
     		.attr("height", pieheight)
     		.attr("class","piechart")
     		.append("svg:g")                //make a group to hold our pie chart
-    		.attr("transform", "translate(" + pieradius + "," + 1.5*pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+    		.attr("transform", "translate(" + 0*pieradius + "," + 1.5*pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+    		.attr("visibility","hidden")
 
+    		// try to manage visual complexity by starting all pie charts turned off initially,
+    		// a mouseover of the SVG eleement (below and right of node) displays the pie chart.  
+    		.on("mouseover",function() {
+    			d3.select(this)
+    				.attr("visibility","visible")
+    		})
+    		.on("mouseout",function() {
+    			d3.select(this)
+    				.attr("visibility","hidden")
+    		})
     	var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
     		.outerRadius(pieradius);
 
@@ -777,7 +788,7 @@ function updateJSON(options) {
 	var tree_return_url = 'item/'+phylomap.currentDatasetArchiveId+'/romanesco/tree/nested/nested'
 	girder.restRequest({path: tree_return_url})
 		.done(_.bind(function (result) {
-		console.log('json:',result)
+		//console.log('json:',result)
 		var json = JSON.parse(result.data)
 		toggleAll (json, function() {
 			oldJSON.children = json._children;
