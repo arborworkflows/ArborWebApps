@@ -301,6 +301,26 @@ function update_table(tableRows,keyvalue) {
     }
     dynamData.fields = tableRows.fields
     console.log('data:',dynamData)
+
+/**  trying to write out to a python service to get a json blob of the data. 
+ **  but the service didn't discover for some reason... maybe I didn't include the tangelo
+ **  javascript header successfully... 
+
+    $.ajax({
+        type: 'POST',
+        url: 'service/acceptblob',
+        data: {
+            dynam: dynamData
+        },
+        dataType: 'json',
+        success: function (response) {
+            var val;
+            console.log(response);
+        }
+    });
+
+**/
+
     parseVegaSpec("./heatmap_vega_spec.json",dynamData);
     //console.log('render complete');
 
