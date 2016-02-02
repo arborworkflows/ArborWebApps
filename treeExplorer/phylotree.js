@@ -122,14 +122,6 @@ $(document).ready(function(){
         initializeDataSelection("Default","anolis")
     });
 
-    // initialize an empty grid object for table display
-    editableGrid = new EditableGrid("DemoGridSimple", {
-    enableSort: true, // true is the default, set it to false if you don't want sorting to be enabled
-	editmode: "absolute", // change this to "fixed" to test out editorzone, and to "static" to get the old-school mode
-	editorzoneid: "edition", // will be used only if editmode is set to "fixed"
-	pageSize: 40
-    });
-
 });
 
 
@@ -168,6 +160,159 @@ function drawSelectedTree_orig(projectName,datasetName) {
 	});
 }
 
+function TnT_tree_draw_fixed(newick) {
+	console.log('drawing tree')
+	var tree = tnt.tree();
+    tree
+        .data(tnt.tree.parse_newick(newick))
+        .node_display(tree.node_display()
+            .size(4)
+            .fill("#888888")
+        )
+        .label (tnt.tree.label.text()
+            .fontsize(12)
+            .height(24)
+        )
+        .layout(tnt.tree.layout.vertical()
+            .width(1050)
+            .scale(false)
+        );
+
+	tree(document.getElementById("tree"));
+}
+
+// this collapsable tree looks nice, but it renders low and seems to gradually work down the
+// page when changed.. 
+
+function TnT_tree_draw_collapsing(newick) {
+
+	//console.log('parsing')
+ 	var data = tnt.tree.parse_newick(newick);
+ 	//console.log('parsing complete')
+
+    // Show different node shapes for collapsed/non-collapsed nodes
+    var node_size = 7;
+    var node_fill="lightgrey";
+    var node_stroke="black";
+
+    var expanded_node = tnt.tree.node_display.circle()
+        .size(node_size)
+        .fill(node_fill)
+        .stroke(node_stroke);
+
+    var collapsed_node = tnt.tree.node_display.triangle()
+        .size(node_size)
+        .fill(node_fill)
+        .stroke(node_stroke);
+
+    var node_display = tnt.tree.node_display()
+        .size(15)
+        .display (function (node) {
+            if (node.is_collapsed()) {
+                collapsed_node.display().call(this, node);
+            } else {
+                expanded_node.display().call(this, node);
+            }
+        });
+
+    var tree = tnt.tree()
+        .node_display(node_display)
+        .data(data)
+        .duration(500)
+        .layout(tnt.tree.layout.vertical()
+            .width(600)
+            .scale(true)
+        );
+
+    tree.on ("click", function(node){
+        node.toggle();
+        tree.update();
+    });
+
+    // The tree renders at this point
+    tree(document.getElementById("tree"));
+}
+
+
+function TnT_tree_draw_layouts(newick) {
+
+    var div = document.getElementById("tree")
+    var width = 760;
+    var scale = false;
+
+    // In the div, we set up a "select" to transition between a radial and a vertical layouts
+    var menu_pane = d3.select(div)
+        .append("div")
+        .append("span")
+        .text("Layout:  ");
+
+    var sel = menu_pane
+        .append("select")
+        .on("change", function(d) {
+            var layout = tnt.tree.layout[this.value]().width(width).scale(scale);
+            tree.layout(layout);
+            tree.update();
+        });
+
+    sel
+        .append("option")
+        .attr("value", "vertical")
+        .attr("selected", 1)
+        .text("vertical");
+
+    sel
+        .append("option")
+        .attr("value", "radial")
+        .text("radial");
+
+    var trans_speed = menu_pane
+        .append("span")
+        .style("margin-left", "50px")
+        .text("Transition speed: 100ms ");
+
+    trans_speed
+        .append("input")
+        .attr("type", "range")
+        .attr("min", 100)
+        .attr("max", 5000)
+        .attr("step", 100)
+        .attr("value", 2000)
+        .on("change", function(d) {
+            tree.duration(this.value);
+        });
+
+    trans_speed
+        .append("text")
+        .text("5s");
+
+    var tree = tnt.tree()
+        .node_display(tnt.tree.node_display.circle()
+            .size(5)
+            .stroke('black')
+            .fill('grey')
+        )
+        .label(tnt.tree.label.text()
+            .fontsize(12)
+            .height(20)
+            .text(function (node) {
+                if (node.is_leaf()) {
+                    return node.node_name();
+                }
+                return "";
+            })
+        )
+        .data(tnt.tree.parse_newick(newick))
+        .layout(tnt.tree.layout.vertical()
+            .width(width)
+            .scale(scale)
+        )
+        .duration(1000);
+
+    // The visualization renders at this point
+    tree(div);
+};
+
+
 
 function drawSelectedTree(projectName,datasetName) {
 	// use the girder API to extract the tree.  We used to use a tangelo service, which 
@@ -204,21 +349,17 @@ function drawSelectedTree(projectName,datasetName) {
 					phylomap.currentDatasetArchiveId = itemId
 
 					// item/54a01a4456c02c0551c04d40/romanesco/tree/nested/nested
-		    		var tree_return_url = 'item/'+itemId+'/romanesco/tree/nested/nested'
+		    		var tree_return_url = 'item/'+itemId+'/romanesco/tree/newick/newick'
 					girder.restRequest({path: tree_return_url})
 		    			.done(_.bind(function (result) {
 
 							//console.log('girder response:',result)
 							// added with new Arbor datastore as more processing is in javascript
-							phylomap.currentTree = JSON.parse(result.data);
+							phylomap.currentTree = result.data;
 							root = phylomap.currentTree;
-							//console.log("tree returned:",root)
-							root.x0 = height / 2;
-							root.y0 = 0;
-
-							// initialize the display to show children nodes
-							root.children.forEach(toggleAll);
-							update(root);
+							//TnT_tree_draw_fixed(result.data)	
+							//TnT_tree_draw_collapsing(result.data)
+							TnT_tree_draw_layouts(result.data)
 		    			}))
 				}
 			});
@@ -226,7 +367,6 @@ function drawSelectedTree(projectName,datasetName) {
 	});
 
 	// http://localhost:9080/girder/api/v1/item/543b374956c02c04bd338496/romanesco/tree/newick/nested
-
 	
 }
 
@@ -281,7 +421,6 @@ function initializeDataSelection(initialProject, initialData) {
 		      		  .done(_.bind(function (itemList) {
   						d3.select("#data").selectAll("option").remove();
 	            		d3.select("#data").selectAll("option")
-	            			.filter(function(d) { return (d["name"].indexOf("nested-json") > -1) })
 	                		.data(itemList)
 	                		.enter().append("option")
 	                		.text(function (d) { return d.name; });
@@ -291,15 +430,11 @@ function initializeDataSelection(initialProject, initialData) {
                     		dataName = dataselector.options[dataselector.selectedIndex].text;
                     		phylomap.currentProjectName = projectName;
                     		phylomap.currentDatasetName = dataName;
-                    		// this pulls the tree from Arbor, draws the tree, and saves
-                    		// the tree in the global phylomap.currentTree.  Only attempt this if it is a 
-                    		// nested json type of tree
-                    		if (dataName.indexOf("nested-json") > -1) {
-                    			drawSelectedTree(projectName,dataName);
-                    		}
+
+                    		console.log("*** rendering tree here ")
 
                     	});    
-            			performEvent(data, "change");
+            			//performEvent(data, "change");
         			}));
 				}));
 			}));  // girder collectionID
@@ -309,15 +444,7 @@ function initializeDataSelection(initialProject, initialData) {
 
 
 function initDatasetFromArbor() {
-	var project = d3.select("#project").node()
-    var projectName = project.options[project.selectedIndex].text
-    var data = d3.select("#data").node();
-    dataName = data.options[data.selectedIndex].text;
-    phylomap.currentProjectName = projectName;
-    phylomap.currentDatasetName = dataName;
-    phylomap.selectedOccurrences = [];
-    updateTableDisplay(phylomap.selectedOccurrences);
-    drawSelectedTree(projectName,dataName);
+  console.log("initDatasetFrom Arbor stub")
 }
 
 function addLoadEvent(func) {
@@ -405,92 +532,7 @@ function zoomGraph()
 	}
 } // end zoomGraph
 
-function off(d, callback) {
-	// not an end node
-	if (d.children) {
-		d._children = d.children;
-		d.children = null;
 
-	}
-	// end-node
-	else if (!d._children) {
-		d.selected = false;
-	}
-	if (callback && typeof(callback) === "function") {
-		callback(d);
-	}
-}
-
-function offAll(d, callback) {
-	// counter for async control
-	togCount++;
-	off(d);
-	if (d._children) {
-		d._children.forEach(function(el) {offAll(el);});
-	}
-	togCount--;
-	// if done and we have a callback function, execute it
-	if (togCount === 0 && callback && typeof(callback) === "function") {
-	    callback();
-	}
-}
-
-// turns on a specific node
-function on(d, callback) {
-	// do nothing if d.children exists (not an end node)
-	if (!d.children && d._children) {
-		// ensure child is actually loaded in memory
-		if (typeof(d._children[0]) === "object") {
-			d.children = d._children;
-			d._children = null;
-		}
-	} else if (!d.children) {
-		d.selected = true;
-	}
-	if (callback && typeof(callback) === "function") {
-		callback(d);
-	}
-}
-
-// turns on all nodes that have currently been loaded in memory
-function onAll(d, callback) {
-	// counter for async control
-	togCount++;
-	if (typeof(d.children) === "object") {
-		on(d);
-		if (d.children) {
-			d.children.forEach(function(el) {onAll(el);});
-		}
-	}
-
-	togCount--;
-	// if done and we have a callback function, execute it
-	if (togCount === 0 && callback && typeof(callback) === "function") {
-	    callback();
-	}
-}
-
-// turns on all nodes in the tree, performs ajax calls to get more of the tree
-// if necessary
-// SGZ 4-11-13: Modified and consolidated to only use new updateJSON function
-function onAllAndLoad(d, callback) {
-	offAll(d, function() {
-		updateJSON({
-			oldJSON:d,
-			maxDepth:100,
-			callback:function(){onAll(d, function() {update(d);});}
-		});
-	});
-}
-
-function emptyTree() {
-	offAll(root);
-	update(root);
-}
-
-function entireTree() {
-	onAll(root, function() {update(root);});
-}
 
 // allow a standard way to try for node naming a few different ways
 function returnNodeName(d) {
@@ -505,269 +547,12 @@ if (d['node_data']) {
 }
 
 
-// this function is used to examine the nodes currently being rendered and build an array of the attributes on the nodes
-// for rendering pie charts on the nodes.   Javascript object introspection is used to traverse the "attribs" of the node object 
-// and build up arrays used by d3's "data & select" engine to fill the pie charts instanced during the node.enter() procedure.
-
-/*
-function updateAttribArray(nodes) {
-	attribValueArray = []
-	attribNameArray = []
-	for (var i = nodes.length - 1; i >= 0; i--) {
-		var characterValues = []
-		var characterNames = []
-		if ('0' in nodes[i]['node_data']) {
-			var characterInfo = {}
-			characterInfo.name = '0'
-			characterInfo.value = nodes[i]['node_data']['0']
-			characterValues.push(characterInfo)
-		}
-		//attribValueArray.push(characterValues)
-		if ('1' in nodes[i]['node_data']) {
-			var characterInfo = {}
-			characterInfo.name = '1'
-			characterInfo.value = nodes[i]['node_data']['1']
-			characterValues.push(characterInfo)
-			//attribNameArray.push(characterNames)
-		}
-		attribValueArray.push(characterValues)
-	};
-	console.log("updated attribValueArray",attribValueArray);
-	//console.log("updated attribNameArray",attribNameArray);
-}
-*/
-
-
-function updateAttribArray(nodes) {
-	attribValueArray = []
-	attribNameArray = []
-	for (var i = 0; i < nodes.length;  i++) {
-		var characterValues = []
-		var characterNames = []
-		if ('characters' in nodes[i]['node_data']) {
-			for (attrib in nodes[i]['node_data'].characters) {
-				var characterInfo = {}
-				characterInfo.name = attrib
-				characterInfo.value = nodes[i]['node_data'].characters[attrib]
-				characterValues.push(characterInfo)
-			};
-			attribValueArray.push(characterValues)
-			//attribNameArray.push(characterNames)
-		}
-	};
-	//console.log("updated attribValueArray",attribValueArray);
-	//console.log("updated attribNameArray",attribNameArray);
-}
-
-
 
 function update(source) {
 	// set animatio time, slow animation if alt key is pressed
 	var duration = d3.event && d3.event.altKey ? 5000 : 500;
 
-	// Compute the new tree layout
-	nodes = cluster.nodes(root);
-	updateAttribArray(nodes);
-
-	// Update the nodes...
-	var node = vis.selectAll("g.node")
-		.data(nodes, function(d) {
-			return d.selectionid || (d.selectionid = ++i);
-		});
-
-	// Enter any new nodes at the parent's previous position.
-	var nodeEnter = node.enter().append("svg:g")
-		.attr("class", "node")
-		// copy the unique ID into the DOM, so selections on nodes can return the nodeID.  This is important
-		// to highlight all the children in a clade.  When the user selects a node, the 'nodeid'
-		// is returned as an attribute of the <g> element selected amd passed to the callback
-		.attr("nodeid", function(d) { return d.node_data['nodeid']})		
-		.attr("transform", function(d) {
-			return "translate(" + source.y0 + "," + source.x0 + ")"; })
-		.on("click", function(datum, index, el) {
-			// if shift key is selected when on keypress
-			if (d3.event.shiftKey || cladeSelectEnabled) {
-				// display all nodes below this on map...
-				mapAllChildNodes(datum, this);
-			} else {
-				toggle(datum, this, function() {
-					update(datum);
-					mapItem(datum);
-				});
-			}
-		})
-		.on("mouseover.text", function() {
-			textOn(this);
-		})
-		.on("mouseout.text", function() {
-			textOff(this, true);
-		});
-
-	nodeEnter.append("svg:circle")
-		.attr("r", 1e-6)
-		.style("fill", function(d) {
-			return d._children ? "lightsteelblue" : "#fff";
-		});
-//		.on("mouseover.pathColor", function(d) {
-//			highlightPath(d);
-//		})
-//		.on("mouseout.pathColor", function(d) {
-//			highlightPath(d, pathColor, pathWidth);
-//		});
-
-	nodeEnter.append("svg:text")
-		.attr("x", function(d) {
-			return d.children || d._children ? - 10 : 10; })
-		.attr("dy", ".35em")
-
-		.attr("text-anchor", function(d) {
-			return d.children || d._children ? "end" : "start"; })
-		.text(function(d) {
-			// truncate ID's to last 4 characters; return name if there is a name assigned
-            if (d.node_data['node name']) {
-                return d.node_data['node name'];  
-			} else if (d.node_data['node weight']) {
-				// round to 3 decimal places
-				return d.node_data['node weight'].toString().substring(0,5);
-			}
-		})
-			//return d.taxonomies ? d.taxonomies[0].scientific_name : d._id.substring(d._id.length - 4); })
-		.style("fill-opacity", 1e-6)
-		.style("visibility", function() {
-			return d3.select("#nodeNames").property("checked") ? "visible" : "hidden";
-		});
-
-		// add a piechart at each node that displays
-		// the value of characters at this node.  The filter method passes only the non-leaf nodes
-		// so the piecharts don't render on the taxa. 
-
-    	var pievis = nodeEnter
-    	.filter(function(d) {return (d['node_data']['characters'] != null)})	
-
-	//.filter(function(d) {return (d._clades != null || d.clades != null); })
-    		.append("svg:svg")   
-    	           //create the SVG element inside the <body>
-    		.data(attribValueArray)
-   		.attr("width", piewidth)           //set the width and height of our visualization (these will be attributes of the <svg> tag
-    		.attr("height", pieheight)
-    		.attr("class","piechart")
-    		.append("svg:g")                //make a group to hold our pie chart
-    		.attr("transform", "translate(" + 0*pieradius + "," + 1.5*pieradius + ")")    //move the center of the pie chart from 0, 0 to radius, radius
-    		.attr("visibility","hidden")
-
-    		// try to manage visual complexity by starting all pie charts turned off initially,
-    		// a mouseover of the SVG eleement (below and right of node) displays the pie chart.  
-    		.on("mouseover",function() {
-    			d3.select(this)
-    				.attr("visibility","visible")
-    		})
-    		.on("mouseout",function() {
-    			d3.select(this)
-    				.attr("visibility","hidden")
-    		})
-    	var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
-    		.outerRadius(pieradius);
-
-    	var pie = d3.layout.pie()        //this will create arc data for us given a list of values
-    		.value(function (d) {return d.value});    //we must tell it out to access the value of each element in our data array
-
-   	 var arcs = pievis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
-    		.data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties)
-    		.enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
-    		.append("svg:g")                    //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
-    		.attr("class", "slice");            //allow us to style things in the slices (like text)
-
-    	piecolor = d3.scale.category10();     //builtin range of colors
-
-    	arcs.append("svg:path")
-            	.attr("fill", function(d, i) { return piecolor(i); } ) //set the color for each slice to be chosen from the color function defined above
-            	.attr("d", arc)   
-
-/*
-        // add the text
-		arcs.append("svg:text").attr("transform", function(d){
-					d.innerRadius = 0;
-					d.outerRadius = pieradius;
-    				return "translate(" + arc.centroid(d) + ")";}).attr("text-anchor", "middle").text( function(d, i) {
-    		return d[i].name;
-    		});    	     
- */      
-
-	// Transition nodes to their new position.
-	var nodeUpdate = node.transition()
-		.duration(duration)
-		.attr("transform", function(d) {
-			return "translate(" + d.y + "," + d.x + ")";
-		});
-
-	nodeUpdate.select("circle")
-		.attr("r", 4.5)
-		.style("fill", function(d) {
-			if (d._children) {
-				// non end-node color before it is clicked
-				return "lightsteelblue";
-			} else if (d.children || d.selected) {
-				// any node's color after being clicked
-				return "#fff";
-			} else {
-				// end-node color that hasn't been clicked yet
-				return "lightsteelblue";
-			}
-		});
-
-	nodeUpdate.select("text")
-		.style("fill-opacity", 1);
-
-	// Transition existing nodes to their parent's new position.
-	var nodeExit = node.exit().transition()
-		.duration(duration)
-		.attr("transform", function(d) {
-			return "translate(" + source.y + "," + source.x + ")"; })
-      	.remove();
-
-	nodeExit.select("circle")
-		.attr("r", 1e-6);
-
-	nodeExit.select("text")
-		.style("fill-opacity", 1e-6);
-
-	// Update the links…
-	var link = vis.selectAll("path.link")
-	//	.data(tree.links(nodes), function(d) {
-		.data(cluster.links(nodes), function(d) {
-			return d.target.node_data['nodeid'];
-		});
-
-	// Enter any new links at the parent's previous position.
-	link.enter().insert("svg:path", "g")
-		.attr("class", "link")
-		.attr("d", function(d) {
-			var o = {x: source.x0 != null ? source.x0 : root.x , y: source.y0 != null ? source.y0 : root.y};
-			return elbow({source: o, target: o});
-		})
-		.transition()
-		.duration(duration)
-		.attr("d", elbow);
-
-	// Transition links to their new position.
-	link.transition()
-		.duration(duration)
-		.attr("d", elbow);
-
-	// Transition exiting nodes to the parent's new position.
-	link.exit().transition()
-		.duration(duration)
-		.attr("d", function(d) {
-			var o = {x: source.x, y: source.y};
-			return elbow({source: o, target: o});
-		})
-		.remove();
-
-	// Stash the old positions for transition.
-	nodes.forEach(function(d) {
-		d.x0 = d.x;
-		d.y0 = d.y;
-	});
+	
 }
 
 
@@ -775,89 +560,11 @@ function update(source) {
 
 //SGZ 4-11-13: Fixed this so it's just one call
 // makes an async javascript call to load more tree levels
-function updateJSON(options) {
-	var oldJSON = options.oldJSON;
-	var node = options.node || null;
-	var callback = options.callback || null;
-	var maxDepth = options.maxDepth || 3;
-
-	if (node != null) {
-		// on loading the data change the circle color to red
-		d3.select(node.childNodes[0]).style("fill", "red");
-	}
-	var tree_return_url = 'item/'+phylomap.currentDatasetArchiveId+'/romanesco/tree/nested/nested'
-	girder.restRequest({path: tree_return_url})
-		.done(_.bind(function (result) {
-		//console.log('json:',result)
-		var json = JSON.parse(result.data)
-		toggleAll (json, function() {
-			oldJSON.children = json._children;
-			oldJSON._children = null;
-			if (callback && typeof(callback) === "function") {
-				callback();
-			}
-		});
-	}));
+function onAllAndLoad() {
+	drawSelectedTree(phylomap.currentProjectName,phylomap.currentDatasetName)
 }
 
-// CRL: added to allow path to be highlighted only up to a certain ancestor.  At first we were calling "highlightPaths", but
-// there is a subtle difference in the definition of what a "node" is (whether it is a mongoDB JSON node or a node gleaned
-// by select from the DOM.  These have slightly different organizations, so the parent discovery below was changed to use
-// node.ID.$oid instead of node._id, since we are calling this routine wit nodes returned from an AJAX search
-function highlightLimitedPath(node, rootId, color, size) {
-	color = ((color != null) ? color : "red");
-	size = ((size != null) ? size : "3px");
-	var id = node.node_data['nodeid']
-        //console.log("highlight node: ",node);
-        //console.log("highlightLimitedPath from id: ",id, " with color: ",color);
-	var parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === id ? this : null; });
-	// turn on the text for this node
-	var domNode = nodeFromId(id);
-	// have to pick the first element from the dictionary, since DOM structure is returned
-	textOn(domNode[0]);
-	// highlight all parent paths as well
-	while (parent[0].length > 0) {
-		// highlight the path
-		parent.style("stroke", color).style("stroke-width", size);
-		// get the next parent
-		parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === parent.datum().source.node_data['nodeid'] ? this : null; });
-	}
 
-}
-
-// The traversal back up the DOM hierarchy is somewhat magical. Reviewing the paths in the browser doesn't show the node linkage 
-// traversed by the parent.datum().source.xxxx link, but it works to traverse back to the root of the tree.  Can't really see how it
-// is built either, likely the d3 path stores node information somewhere... 
-
-function highlightPath(node, color, size) {
-	color = ((color != null) ? color : "red");
-	size = ((size != null) ? size : "3px");
-	var id = node.node_data['nodeid'];
-	// get the current path
-	var parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === id ? this : null; });
-	//console.log('parent ',parent)
-
-	// highlight all parent paths as well
-	while (parent[0].length > 0) {
-		// highlight the path
-		parent.style("stroke", color).style("stroke-width", size);
-		// get the next parent
-		parent = vis.selectAll("path").filter(function (d,i) { return d.target.node_data['nodeid'] === parent.datum().source.node_data['nodeid'] ? this : null; });
-	}
-}
-
-// CRL: clear away all the tree highlights.  Must be a simpler way, but
-// SGZ: there is, implemented it
-// CRL:  :-)
-function clearAllHighlights(color, size) {
-	color = ((color != null) ? color : pathColor);
-	size = ((size != null) ? size : pathWidth);
-	vis.selectAll("path").style("stroke", color).style("stroke-width", size);
-	// added text off on all nodes
-	if (d3.select("#nodeNames").property("checked") == false) {
-		vis.selectAll("g.node").selectAll("text").style("visibility", "hidden")
-	}
-}
 
 // turn on text label for a node
 function textOn(node) {
@@ -915,32 +622,6 @@ function toggleScatterplot(element) {
 
 
 
-
-function mapItem(item) {
-// update the phylomap!
-	// ensure our helper functions have been included via javascript includes
-	if (typeof createMarker != 'undefined' && typeof google.maps.LatLng != 'undefined') {
-		// do we have location data, also must be an end node
-		if (typeof item.loc != 'undefined') {
-			// do markers already exist?
-			if (markerExists(item._id)) {
-				clearOneId(item._id);
-			} else {
-				// add markers
-				var icon = getIcon();
-				item.loc.forEach(function(d){
-					var latlng = new google.maps.LatLng(
-						parseFloat(d[1]),
-						parseFloat(d[0]));
-					var text = "location: " + latlng + "<br>id: " + item._id;
-					var name = item['node_data']['node name'];
-					createMarker(latlng, name, text, item._id, icon);
-				});
-			}
-		}
-		//createMarker ()
-	}
-}
 
 function setProcessingBadge() {
 	$(document).ready(function() {

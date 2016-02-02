@@ -5,55 +5,23 @@
                 <link rel="shortcut icon" href=/img/tangelo.ico>
 	   <title>Arbor Tree Explorer</title>
 
-<script src=https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false></script>
+
 <script src=//code.jquery.com/jquery-2.1.0.min.js></script>
 <script src=//code.jquery.com/ui/1.11.4/jquery-ui.min.js></script>
-<script src=js/d3.v3.min.js charset=utf-8></script>
 
-<!-- source the API for Google Maps so we can draw layers on the map -->
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+<link rel="stylesheet" href="http://tntvis.github.io/tnt.tree/build/tnt.tree.css" type="text/css" />
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+<!-- TnT tree rendering library reference from github site -->
+<script src="http://tntvis.github.io/tnt.tree/build/tnt.tree.min.js" charset="utf-8"></script>
 
 <script src=js/tangelo.js></script>
-
 
 <!-- Styling for UI elements -->
 <link href=//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css rel=stylesheet>
 <script src=//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js></script>
 
 <link rel="shortcut icon" href=/img/tangelo.ico>
-
-<!-- for slickGrid -->
-<!--
-<link rel="stylesheet" href="css/examples.css" type="text/css"/>
-<link rel="stylesheet" href="css/slick.grid.css" type="text/css"/>
-<link rel="stylesheet" href="css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
-<script src="js/jquery.event.drag-2.2.js"></script>
-<script src="js/slick.core.js"></script>
-<script src="js/slick.grid.js"></script>
-<script src="js/slick.formatters.js"></script>
-<script src="js/slick.editors.js"></script>
--->
-
-<!-- for editableGrid -->
-<script src="js/editablegrid.js"></script>
-<script src="js/editablegrid_renderers.js" ></script>
-<script src="js/editablegrid_editors.js" ></script>
-<script src="js/editablegrid_validators.js" ></script>
-<script src="js/editablegrid_utils.js" ></script>
-<script src="js/editablegrid_charts.js" ></script>
-<link rel="stylesheet" href="editablegrid.css" type="text/css" media="screen">
-<style>
-    body { font-family:'lucida grande', tahoma, verdana, arial, sans-serif; font-size:12px; }
-    h1 { font-size: 16px; }
-    a { color: #548dc4; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    table.testgrid { border-collapse: collapse; border: 1px solid #CCB; width: 800px; }
-    table.testgrid td, table.testgrid th { padding: 5px; border: 1px solid #E0E0E0; }
-    table.testgrid th { background: #E5E5E5; text-align: left; }
-    input.invalid { background: red; color: #FDFDFD; }
-</style>
-
-
 
 <!-- used for girder, so we can authenticate -->
 <!-- these declaraations have to be just right, or romanesco and window.flow aren't defined -->
@@ -62,81 +30,9 @@
 <script src="/girder/static/built/app.min.js" charset="utf-8"></script>
 <script src="../app.min.js" charset="utf-8"></script>
 
-<!-- interface to slickgrid -->
-<script src="gridControl.js"></script>
-
-<!--
-<script type="text/javascript" src="phylomap.js"></script>
--->
-
 <!-- add badges for processing and other notifications -->
 <script type="text/javascript" src="badger.js"></script>
 <link rel="stylesheet" href="badger.css" type="text/css" />
-
-<style>
-        .node circle {
-                cursor: pointer;
-                fill: #fff;
-                stroke: steelblue;
-                stroke-width: 1.5px;
-        }
-        .node text {
-                font: 11px sans-serif;
-        }
-        path.link {
-                fill: none;
-                stroke: #ccc;
-                stroke-width: 1.5px;
-        }
-        .navbar {
-                z-index: 1;
-        }
-
-</style>
-
-<!-- include style from d3 scatterplot example -->
-<style>
-
-svg {
-  font: 12px sans-serif;
-  padding: 10px;
-}
-
-.axis,
-.frame {
-  shape-rendering: crispEdges;
-}
-
-.axis line {
-  stroke: #ddd;
-}
-
-.axis path {
-  display: none;
-}
-
-.frame {
-  fill: none;
-  stroke: #aaa;
-}
-
-circle {
-  fill-opacity: .7;
-}
-
-circle.hidden {
-  fill: #ccc;;
-  fill-opacity: .1;
-}
-
-.extent {
-  fill: #000;
-  fill-opacity: .125;
-  stroke: #fff;
-}
-</style>
-
-
 
 </head>
 <body>
@@ -149,8 +45,7 @@ circle.hidden {
             </div>
 
             <div class=modal-body>
-                    <p>This application lets you explore a phylogenetic tree. Click on a
-                    node to expand/collapse its descendants recursively.  </p>
+                    <p>This application lets you explore a phylogenetic tree.  </p>
             </div>
                 <div class=modal-footer>
                 <a class="btn btn-default" data-dismiss=modal>OK</a>
@@ -158,7 +53,6 @@ circle.hidden {
         </div>
     </div>
 </div>
-
 
 
 <div class="navbar navbar-default navbar-fixed-top">
@@ -192,7 +86,6 @@ circle.hidden {
 
         <div class=row>
             <div class=md-col-6 id="treebuttons" style="float:left; margin-left:30px; margin-bottom:10px; overflow: hidden;">
-                <button type="button" onclick="emptyTree();">Empty Tree</button>
                 <button type="button" onclick="onAllAndLoad(root);">Full Tree</button>
                 <input type="checkbox" id="nodeNames" onchange="toggleText(this);" checked> Show Names
                 <input type="checkbox" id="scatterplotSelect" onchange="toggleScatterplot(this);" unchecked> Show Charts on All Nodes              
@@ -204,18 +97,15 @@ circle.hidden {
             </div>
         </div>
 
+        <!--
         <div class=row>
-            <div class=col-md-11 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; border-style:solid; overflow:hidden; border-width:medium"></div>
+            <div class=col-md-12 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; overflow:hidden; border-width:medium"></div>
         </div>
-        <div class=row>
-            <div  class='scatterplot' id='morphplot' style="margin-left:40px; margin-top:40px; margin-bottom:40px; width: 100%; "> </div>
-        </div>
-        <div class=row>
-            <div  id='tablecontent' style="margin-left:50px; margin-top:40px; margin-bottom:40px; width:90%; height: 500px;"> </div>
-        </div>
+    -->
+        <div  id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;"></div>
 
+ <!--  border-style:solid; -->
 </div>
-
 
 <script type="text/javascript" src="phylotree.js"></script>
 
