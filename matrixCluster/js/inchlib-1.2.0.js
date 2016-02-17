@@ -1193,9 +1193,9 @@ var InCHlib;
           var objects = node.objects;
           self.leaves_y_coordinates[node_id] = y;
 
-          for(var i = 0, len = objects.length; i<len; i++){
-              self.objects2leaves[objects[i]] = node_id;
-          }
+          //for(var i = 0, len = objects.length; i<len; i++){
+          //    self.objects2leaves[objects[i]] = node_id;
+          //}
 
           var count = node.objects.length;
           if(count<self.min_item_count){
