@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+                <link rel="shortcut icon" href=/img/tangelo.ico>
+	   <title>Arbor Tree Explorer</title>
+
+
+<script src=//code.jquery.com/jquery-2.1.0.min.js></script>
+<script src=//code.jquery.com/ui/1.11.4/jquery-ui.min.js></script>
+
+<link rel="stylesheet" href="http://tntvis.github.io/tnt.tree/build/tnt.tree.css" type="text/css" />
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+<!-- TnT tree rendering library reference from github site -->
+<script src="http://tntvis.github.io/tnt.tree/build/tnt.tree.min.js" charset="utf-8"></script>
+
+<script src=js/tangelo.js></script>
+
+<!-- Styling for UI elements -->
+<link href=//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css rel=stylesheet>
+<script src=//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js></script>
+
+<link rel="shortcut icon" href=/img/tangelo.ico>
+
+<!-- used for girder, so we can authenticate -->
+<!-- these declaraations have to be just right, or romanesco and window.flow aren't defined -->
+<script src="../libs.min.js" charset="utf-8"></script>
+<script src="../lib/ace-builds/src-noconflict/ace.js" charset="utf-8"></script>
+<script src="/girder/static/built/app.min.js" charset="utf-8"></script>
+<script src="../app.min.js" charset="utf-8"></script>
+
+<!-- add badges for processing and other notifications -->
+<script type="text/javascript" src="badger.js"></script>
+<link rel="stylesheet" href="badger.css" type="text/css" />
+
+</head>
+<body>
+
+<div id=info-panel class="modal fade">
+  <div class=modal-dialog>
+        <div class=modal-content>
+            <div class=modal-header>
+                <h3>Information</h3>
+            </div>
+
+            <div class=modal-body>
+                    <p>This application lets you explore a phylogenetic tree.  </p>
+            </div>
+                <div class=modal-footer>
+                <a class="btn btn-default" data-dismiss=modal>OK</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class=navbar-header>
+        <a class=navbar-brand href=/examples>Arbor</a>
+    </div>
+
+    <ul class="nav navbar-nav">
+        <li class=active> <a>Arbor Tree Explorer</a>
+        <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
+
+    </ul>
+</div>
+
+<div  style="margin-top:75px; margin-left:1px;">
+<div class='col-md-12' style='margin-bottom:30px'>
+        <button class="btn btn-link" id="login" href="#">Login</button>
+        <button class="btn btn-link" id="register" href="#">Register</button>
+        <label class="hidden" id="name" href="#"></label>
+        <button class="btn btn-link hidden" id="logout" href="#">Logout</button>
+        <div class="modal fade" id="dialog-container"></div>
+
+        Arbor Collection: 
+        <select  id="project" class="input" style="margin-top:10px;">
+        </select>
+        Dataset
+        <select id="data" class="input" style="margin-top:10px;" >
+        </select>
+      <!--  <button type="button" onclick="initDatasetFromArbor();">Open Dataset</button>  -->
+</div>
+
+        <div class=row>
+            <div class=md-col-6 id="treebuttons" style="float:left; margin-left:30px; margin-bottom:10px; overflow: hidden;">
+                <button type="button" onclick="onAllAndLoad(root);">Full Tree</button>
+                <input type="checkbox" id="nodeNames" onchange="toggleText(this);" checked> Show Names
+                <input type="checkbox" id="scatterplotSelect" onchange="toggleScatterplot(this);" unchecked> Show Charts on All Nodes              
+                <button type="button" onclick="increaseWidth(40);">Increase Depth</button>
+                <button type="button" onclick="increaseWidth(-40);">Decrease Depth</button>
+                <button type="button" onclick="increaseHeight(80);">Increase Height</button>
+                <button type="button" onclick="increaseHeight(-80);">Decrease Height</button>        
+                <button type="button" onclick="clearAllHighlights();">Clear Highlights</button>
+            </div>
+        </div>
+
+        <!--
+        <div class=row>
+            <div class=col-md-12 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; overflow:hidden; border-width:medium"></div>
+        </div>
+    -->
+        <div  id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;"></div>
+
+ <!--  border-style:solid; -->
+</div>
+
+<script type="text/javascript" src="phylotree.js"></script>
+
+    </body>
+</html>

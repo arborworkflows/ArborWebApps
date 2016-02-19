@@ -1,0 +1,105 @@
+{
+  "width": 1000,
+  "height": 300,
+  "data": [
+    {
+      "name": "rows"
+    },
+    {
+      "name": "metadata"
+    },
+    {
+      "name": "indexlist"
+    },
+       {
+      "name": "minarray"
+    },
+     {
+      "name": "maxarray"
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type":"linear",
+      "range": "width",
+       "domain": {"data":"rows", "field":"data.0"}
+    },
+    {
+      "name": "y",
+      "type": "linear",
+      "range": "height",
+      "nice": true,
+      "domain": {
+        "fields": [
+          {"data":"rows","field":"data.1"},
+          {"data":"rows","field":"data.2"},
+          {"data":"rows","field":"data.3"},
+          {"data":"rows","field":"data.4"}
+        ]}
+    },
+    {
+      "name": "color", "type": "ordinal", "range": "category10"
+    }
+  ],
+  "axes": [
+    {"type": "x", "scale": "x", "tickSizeEnd": 0, "ticks":10},
+    {"type": "y", "scale": "y"}
+  ],
+  "marks": [
+        {
+          "type": "line",
+          "from":  {"data":"rows"},
+          "properties": {
+            "enter": {
+              "x": {"scale": "x", "field": "data.0"},
+              "y": {"scale": "y", "field": "data.1"},
+              "stroke": {"scale": "color", "value": 1},
+              "strokeWidth": {"value": 2}
+            }
+          }
+        },
+       {
+          "type": "line",
+          "from":  {"data":"rows"},
+          "properties": {
+            "enter": {
+              "x": {"scale": "x", "field": "data.0"},
+              "y": {"scale": "y", "field": "data.2"},
+              "stroke": {"scale": "color", "value":2},
+              "strokeWidth": {"value": 2}
+            }
+          }
+        },
+         {
+          "type": "line",
+          "from":  {"data":"rows"},
+          "properties": {
+            "enter": {
+              "x": {"scale": "x", "field": "data.0"},
+              "y": {"scale": "y", "field": "data.3"},
+              "stroke": {"scale": "color", "value":3},
+              "strokeWidth": {"value": 3}
+            }
+          }
+        },
+         {
+          "type": "line",
+          "from":  {"data":"rows"},
+          "properties": {
+            "enter": {
+              "x": {"scale": "x", "field": "data.0"},
+              "y": {"scale": "y", "field": "data.4"},
+              "stroke": {"scale": "color", "value":4},
+              "strokeWidth": {"value": 4}
+            }
+          }
+        }
+      ],
+"legends": [
+   {
+     "fill": "color",
+     "title" : "Dataset Column Index"
+   }
+]
+}

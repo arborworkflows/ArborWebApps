@@ -1,0 +1,91 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <link rel="shortcut icon" href=/img/tangelo.ico>
+	<title>Arbor Matrix Expl<!--orer</title>
+	<script type="text/javascript" charset="utf-8" src="http://d3js.org/d3.v3.min.js"></script>
+
+
+        <script src=//code.jquery.com/jquery-2.1.0.min.js></script>
+        <script src=//code.jquery.com/ui/1.11.4/jquery-ui.min.js></script>
+
+        <!-- selectize.default = blue; selectize.legacy = green; selectize.bootstrap2=gray-gradient -->
+        <!-- <link rel="stylesheet" href="css/selectize.bootstrap2.css"> -->
+
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-7s5uDGW3AHqw6xtJmNNtr+OBRJUlgkNJEo78P4b0yRw= sha512-nNo+yCHEyn0smMxSswnf/OnX6/KwJuZTlNZBjauKhTK0c+zT+q5JOCx0UFhXQ6rJR9jg6Es8gPuD2uZcYDLqSw==" crossorigin="anonymous">
+
+        <!-- used for girder, so we can authenticate -->
+        <!-- these declaraations have to be just right, or romanesco and window.flow aren't defined -->
+        <script src="../libs.min.js" charset="utf-8"></script>
+        <script src="../lib/ace-builds/src-noconflict/ace.js" charset="utf-8"></script>
+        <script src="/girder/static/built/app.min.js" charset="utf-8"></script>
+        <script src="../app.min.js" charset="utf-8"></script>
+
+        <!-- girder includes vega 1.3.3. definition, so include newer vega here to overwrite -->
+        <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/vega/2.4.2/vega.js"></script> -->
+
+        <link rel="shortcut icon" href=/img/tangelo.ico>
+        <title>Matrix Explorer</title>
+
+        <script src="collectionBrowse.js"></script>
+
+</head>
+<body>
+
+
+<div id='info-panel' class="modal fade">
+  <div class=modal-dialog>
+        <div class=modal-content>
+            <div class=modal-header>
+                <h3>Information</h3>
+            </div>
+
+            <div class=modal-body>
+                <p>Generally in character matrices, each row of the matrix corresponds to a separate species and the columnsof the table correspond to individual characteristics (or "characters") observed in the species. At the bottom
+                of the window, each characteristic is listed.  The user can disable a column by clicking the 'x' next to the column name,
+                restore a column by reselecting the tag, and rearrange the columns by directly dragging the tags into the order desired.
+                Clicking the heading on a column sorts the matrix accordingly.  Entering text in the "Filter" box will mask the matrix
+                so that only rows containing matching text will be displays (like the unix "grep" command).  </p>
+            </div>
+                <div class=modal-footer>
+                <a class="btn btn-default" data-dismiss=modal>OK</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class=navbar-header>
+        <a class=navbar-brand href=/examples>Arbor</a>
+    </div>
+
+    <ul class="nav navbar-nav">
+        <li class=active> <a>Arbor Matrix Explorer</a>
+        <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
+
+    </ul>
+</div>
+
+
+        
+<div class="row" style="margin-top:70px; margin-left:1px;">
+        <div class="span12" >
+                Project
+                <select  id="project" class="input" style="margin-top:10px;">
+                </select>
+                Dataset
+                <select id="data" class="input" style="margin-top:10px;" >
+                </select>
+                <button id="load" style="margin-left:20px;">display character matrix</button>
+
+        </div>
+
+</div>
+<hr>
+
+  <div id="tablecontent" style="margin-left: 20px; margin-top:20px; width=90%" ></div>
+
+
+</body>
+</html>
