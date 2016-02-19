@@ -14,8 +14,15 @@ $(document).ready(function() { //run when the whole page is loaded
         max_height: 1600, //set maximum height of visualization in pixels
         //width: 1000, //set width of visualization in pixels
         heatmap_colors: "Greens", //set color scale for clustered data
-        metadata_colors: "Reds", //set color scale for metadata
+        metadata_colors: "AllTan", //set color scale for metadata
     });
+
+// rgb(255, 243, 230
+window.inchlib.add_color_scale("AllTan", 
+                {"start": {"r":200, "g": 100, "b": 0}, 
+                "middle": {"r": 200, "g": 100, "b": 0}, 
+                "end": {"r": 200, "g": 100, "b": 0}
+                })
 
 $("#dendrogramSwitch").change( function(){
    if( $(this).is(':checked') ) {
