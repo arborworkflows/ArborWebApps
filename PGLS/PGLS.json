@@ -1,0 +1,64 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.apetree",
+            "name": "tree",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "name": "table",
+            "type": "table"
+        },
+        {
+            "domain": [
+                "BM",
+                "OU",
+                "Pagel",
+                "ACDC"
+            ],
+            "format": "text",
+            "name": "correlation",
+            "type": "string"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "name": "ind_variable",
+            "type": "string"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "name": "dep_variable",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "PGLS",
+    "outputs": [
+        {
+            "format": "r.dataframe",
+            "name": "coefficients",
+            "type": "table"
+        },
+        {
+            "format": "r.dataframe",
+            "name": "modelfit_summary",
+            "type": "table"
+        },
+        {
+            "format": "png.base64",
+            "name": "pglsPlot",
+            "type": "image"
+        }
+    ],
+    "script": "\nrequire(ape)\nrequire(nlme)\nrequire(cardoonTools)\nrequire(aRbor)\nrequire(phylolm)\n\n\n\n\n  \nif(ind_variable==dep_variable) return(NA);\n  \ntd <- make.treedata(tree, table)\ntd <- select(td, which(colnames(td$dat)%in%c(ind_variable, dep_variable)))\n  \ntd <- filter(td, !is.na(td$dat[[1]]))\n  \nphy <- td$phy\ndat <- td$dat\nrownames(dat)<-phy$tip.label\n\n# the following code is needed in case of strange characters in the column names like . or spaces\ncolnames(dat)<-make.names(colnames(dat))\ndep_variable<-make.names(dep_variable)\nind_variable<-make.names(ind_variable)\n\n  \nif(correlation==\"OU\"){\n  correlation <- \"OUrandomRoot\"\n}\n  \n  \nfmla <- as.formula(paste(as.character(dep_variable), \"~\", as.character(ind_variable),sep=\"\"))\nres <- phylolm(formula=fmla, model=correlation, data=dat, phy=phy)\nsum_res <- summary(res)\ncoefficients <- coefficients(sum_res)\ncoefficients <- cbind(rownames(coefficients), coefficients)\ncolnames(coefficients)[1]<-\"parameter\"\n\n  \nmodelfit_summary <- data.frame(\"AIC\"= AIC(res), loglik=logLik(res)[[1]])\n\npgls_plot <- function() {\n  plot(dat[,c(ind_variable,dep_variable)], pch=21, bg=\"gray80\", xlab=ind_variable, ylab=dep_variable)\n  abline(res, lty=2, lwd=2)\n}\n  \npglsPlot = cardoonPlot(expression(pgls_plot()), width=1000, height=1000, res=100)\npglsPlot = pglsPlot$png"
+}
