@@ -2062,24 +2062,24 @@ jheatmap.components.CellBodyPanel = function(drawer, heatmap) {
         return;
     };
 
-    // Bind events
-    this.canvas.bind('mousewheel', function (e, delta, deltaX, deltaY) {
+
+    function wheelResponse(e, delta, deltaX, deltaY) {
         e.preventDefault();
 
         if (e.shiftKey) {
            // Zoom
-	        var currentTime = new Date().getTime();
-	        if ((currentTime - startWheel) > 500) {
-	            var pos = eventTarget.offset();
-	            x = (e.pageX - pos.left);
-	            y = (e.pageY - pos.top);
-	            col = Math.floor(x / heatmap.cols.zoom) + heatmap.offset.left;
-	            row = Math.floor(y / heatmap.rows.zoom) + heatmap.offset.top;
-	        }
-	        startWheel = currentTime;
+            var currentTime = new Date().getTime();
+            if ((currentTime - startWheel) > 500) {
+                var pos = eventTarget.offset();
+                x = (e.pageX - pos.left);
+                y = (e.pageY - pos.top);
+                col = Math.floor(x / heatmap.cols.zoom) + heatmap.offset.left;
+                row = Math.floor(y / heatmap.rows.zoom) + heatmap.offset.top;
+            }
+            startWheel = currentTime;
 
-	        var zoomin = delta / 120 > 0;
-	        zoomHeatmap(3, zoomin, col, row);
+            var zoomin = delta / 120 > 0;
+            zoomHeatmap(3, zoomin, col, row);
 
         } else {
              // Scroll rows
@@ -2092,29 +2092,52 @@ jheatmap.components.CellBodyPanel = function(drawer, heatmap) {
 
              heatmap.offset.top = heatmap.offset.top - delta * momentum;
 
-	         drawer.paint();
+             drawer.paint();
 
         }
-    });
-    this.canvas.bind('gesturechange', function (e) {
+    };
+
+
+    // Bind events
+    
+    // throttle the mouse wheel to avoid too much zoom. Unthrottled is ok with a mouse wheel, 
+    // but the apple trackpad sends a ton of events. So throttle them..
+
+    var throttled = _.throttle(wheelResponse,250)
+    this.canvas.bind('mousewheel', throttled);
+
+    function onthrottledGestureChange(e) {
         onGestureChange(e);
-    });
+    };
+
+    var throttledGestureChange = _.throttle(onthrottledGestureChange,200)
+    this.canvas.bind('gesturechange', throttledGestureChange);
+
+
     this.canvas.bind('gestureend', function (e) {
         onGestureEnd(e);
     });
+
     this.canvas.bind('mousedown', function (e) {
         onMouseDown(e, e.pageX, e.pageY);
     });
     this.canvas.bind('touchstart', function(e) {
         onMouseDown(e, e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);
     });
+ 
+    // also filter touchmove/mousemove events so an apple trackpad can be used to zoom or pan
 
-    this.canvas.bind('mousemove', function (e) {
-        onMouseMove(e, e.pageX, e.pageY);
-    });
-    this.canvas.bind('touchmove', function(e) {
+    function handleMouseMove(e) {
+         onMouseMove(e, e.pageX, e.pageY);
+    };
+    throttledMousehMove = _.throttle(handleMouseMove,200)
+    this.canvas.bind('mousemove', throttledMousehMove);
+    
+    function handleTouchMove(e) {
         onMouseMove(e, e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);
-    });
+    };
+    throttledTouchMove = _.throttle(handleTouchMove,200)
+    this.canvas.bind('touchmove', throttledTouchMove)
 
     this.canvas.bind('mouseup', function (e) {
         onMouseUp(e, e.pageX, e.pageY);
