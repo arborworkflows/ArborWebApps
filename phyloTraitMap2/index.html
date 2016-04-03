@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+                <link rel="shortcut icon" href=/img/tangelo.ico>
+	   <title>Arbor Tree and Distribution Browser</title>
+
+<script src=https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false></script>
+<script src=//code.jquery.com/jquery-2.1.0.min.js></script>
+<script src=//code.jquery.com/ui/1.11.4/jquery-ui.min.js></script>
+<script src=js/d3.v3.min.js charset=utf-8></script>
+
+<!-- include Geo.js -->
+<script src=js/geo.ext.js></script>
+<script src=js/geo.js></script>
+
+<!-- source the API for Google Maps so we can draw layers on the map -->
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+
+<script src=js/tangelo.js></script>
+
+
+<!-- Styling for UI elements -->
+<link href=//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css rel=stylesheet>
+<script src=//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js></script>
+
+<link rel="shortcut icon" href=/img/tangelo.ico>
+
+<!-- for slickGrid -->
+<!--
+<link rel="stylesheet" href="css/examples.css" type="text/css"/>
+<link rel="stylesheet" href="css/slick.grid.css" type="text/css"/>
+<link rel="stylesheet" href="css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
+<script src="js/jquery.event.drag-2.2.js"></script>
+<script src="js/slick.core.js"></script>
+<script src="js/slick.grid.js"></script>
+<script src="js/slick.formatters.js"></script>
+<script src="js/slick.editors.js"></script>
+-->
+
+<!-- for editableGrid -->
+<script src="js/editablegrid.js"></script>
+<script src="js/editablegrid_renderers.js" ></script>
+<script src="js/editablegrid_editors.js" ></script>
+<script src="js/editablegrid_validators.js" ></script>
+<script src="js/editablegrid_utils.js" ></script>
+<script src="js/editablegrid_charts.js" ></script>
+<link rel="stylesheet" href="editablegrid.css" type="text/css" media="screen">
+<style>
+    body { font-family:'lucida grande', tahoma, verdana, arial, sans-serif; font-size:12px; }
+    h1 { font-size: 16px; }
+    a { color: #548dc4; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    table.testgrid { border-collapse: collapse; border: 1px solid #CCB; width: 800px; }
+    table.testgrid td, table.testgrid th { padding: 5px; border: 1px solid #E0E0E0; }
+    table.testgrid th { background: #E5E5E5; text-align: left; }
+    input.invalid { background: red; color: #FDFDFD; }
+</style>
+
+
+
+<!-- used for girder, so we can authenticate -->
+<!-- these declaraations have to be just right, or romanesco and window.flow aren't defined -->
+<script src="../libs.min.js" charset="utf-8"></script>
+<script src="../lib/ace-builds/src-noconflict/ace.js" charset="utf-8"></script>
+<script src="/girder/static/built/app.min.js" charset="utf-8"></script>
+<script src="../app.min.js" charset="utf-8"></script>
+
+<!-- interface to slickgrid -->
+<script src="gridControl.js"></script>
+
+
+<script type="text/javascript" src="phylomap.js"></script>
+
+<!-- add badges for processing and other notifications -->
+<script type="text/javascript" src="badger.js"></script>
+<link rel="stylesheet" href="badger.css" type="text/css" />
+
+<style>
+        .node circle {
+                cursor: pointer;
+                fill: #fff;
+                stroke: steelblue;
+                stroke-width: 1.5px;
+        }
+        .node text {
+                font: 11px sans-serif;
+        }
+        path.link {
+                fill: none;
+                stroke: #ccc;
+                stroke-width: 1.5px;
+        }
+        .navbar {
+                z-index: 1;
+        }
+
+</style>
+
+<!-- include style from d3 scatterplot example -->
+<style>
+
+svg {
+  font: 12px sans-serif;
+  padding: 10px;
+}
+
+.axis,
+.frame {
+  shape-rendering: crispEdges;
+}
+
+.axis line {
+  stroke: #ddd;
+}
+
+.axis path {
+  display: none;
+}
+
+.frame {
+  fill: none;
+  stroke: #aaa;
+}
+
+circle {
+  fill-opacity: .7;
+}
+
+circle.hidden {
+  fill: #ccc;;
+  fill-opacity: .1;
+}
+
+.extent {
+  fill: #000;
+  fill-opacity: .125;
+  stroke: #fff;
+}
+</style>
+
+
+
+</head>
+<body>
+
+<div id=info-panel class="modal fade">
+  <div class=modal-dialog>
+        <div class=modal-content>
+            <div class=modal-header>
+                <h3>Information</h3>
+            </div>
+
+            <div class=modal-body>
+                    <p>This application lets you explore a phylogenetic tree and associated species location data. Click on a
+                    node to expand/collapse its descendants recursively.  Shift-click (or use clade selection mode) on a
+                    node corresponding to a clade to highlight all locations and species contained with the clade.</p>
+
+                    <p>Modern species appear in the leaves of the tree, while the
+                     nodes represent common ancestors of the modern species that
+                    lived at various times in the past.</p>
+            </div>
+                <div class=modal-footer>
+                <a class="btn btn-default" data-dismiss=modal>OK</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class=navbar-header>
+        <a class=navbar-brand href=/examples>Arbor</a>
+    </div>
+
+    <ul class="nav navbar-nav">
+        <li class=active> <a>Arbor Trait Museum Explorer</a>
+        <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
+
+    </ul>
+</div>
+
+<div  style="margin-top:75px; margin-left:1px;">
+<div class='col-md-12' style='margin-bottom:30px'>
+        <button class="btn btn-link" id="login" href="#">Login</button>
+        <button class="btn btn-link" id="register" href="#">Register</button>
+        <label class="hidden" id="name" href="#"></label>
+        <button class="btn btn-link hidden" id="logout" href="#">Logout</button>
+        <div class="modal fade" id="dialog-container"></div>
+
+        Arbor Collection: 
+        <select  id="project" class="input" style="margin-top:10px;">
+        </select>
+        Dataset
+        <select id="data" class="input" style="margin-top:10px;" >
+        </select>
+      <!--  <button type="button" onclick="initDatasetFromArbor();">Open Dataset</button>  -->
+</div>
+
+        <div class=row>
+            <div class=md-col-6 id="treebuttons" style="float:left; margin-left:30px; margin-bottom:10px; overflow: hidden;">
+                <button type="button" onclick="emptyTree();">Empty Tree</button>
+                <button type="button" onclick="onAllAndLoad(root);">Full Tree</button>
+                <input type="checkbox" id="nodeNames" onchange="toggleText(this);" checked> Show Names
+                <input type="checkbox" id="cladeSelect" onchange="toggleCladeSelect(this);" checked> Enable Clade Selection
+                <input type="checkbox" id="scatterplotSelect" onchange="toggleScatterplot(this);" unchecked> Enable Trait Scatterplot               
+                <button type="button" onclick="increaseWidth(40);">Increase Depth</button>
+                <button type="button" onclick="increaseWidth(-40);">Decrease Depth</button>
+                <button type="button" onclick="increaseHeight(80);">Increase Height</button>
+                <button type="button" onclick="increaseHeight(-80);">Decrease Height</button>        
+                <button type="button" onclick="clearAllHighlights();">Clear Highlights</button>
+                <button type="button" onclick="clearLocations();">Clear Map Markers</button>
+            </div>
+        </div>
+
+        <div class=row>
+            <div class=col-md-6 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; border-style:solid; overflow:hidden; border-width:medium"></div>
+            <div class=col-md-5 id="map_canvas" style="  margin-left: 40px; margin-right:20px; height:800px; float-right; border-style:solid; border-width:medium"></div>
+        </div>
+         <div class=row>
+            <div  class='geojsmap' id='geojs_map_canvas' style="margin-left:40px;  height:800px; margin-top:40px; margin-bottom:40px; width: 100%; "> </div>
+        </div>
+        <button type="button" onclick="updateDrillDownDataDisplay();" style="margin-top:25px; margin-left:25px;">Aggregate Trait Results By Species</button>
+        <div class=row>
+            <div  class='scatterplot' id='morphplot' style="margin-left:40px; margin-top:40px; margin-bottom:40px; width: 100%; "> </div>
+        </div>
+        <div class=row>
+            <div  id='tablecontent' style="margin-left:50px; margin-top:40px; margin-bottom:40px; width:90%; height: 500px;"> </div>
+        </div>
+
+</div>
+
+
+<script type="text/javascript" src="phylotree.js"></script>
+
+    </body>
+</html>
