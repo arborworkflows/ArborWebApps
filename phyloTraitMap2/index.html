@@ -4,18 +4,20 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
                 <link rel="shortcut icon" href=/img/tangelo.ico>
 	   <title>Arbor Tree and Distribution Browser</title>
-
+<!--
 <script src=https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false></script>
+-->
+
 <script src=//code.jquery.com/jquery-2.1.0.min.js></script>
 <script src=//code.jquery.com/ui/1.11.4/jquery-ui.min.js></script>
 <script src=js/d3.v3.min.js charset=utf-8></script>
 
+<!-- source the API for Google Maps so we can draw layers on the map -->
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+
 <!-- include Geo.js -->
 <script src=js/geo.ext.js></script>
 <script src=js/geo.js></script>
-
-<!-- source the API for Google Maps so we can draw layers on the map -->
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
 
 <script src=js/tangelo.js></script>
 
@@ -218,15 +220,23 @@ circle.hidden {
             <div class=col-md-6 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; border-style:solid; overflow:hidden; border-width:medium"></div>
             <div class=col-md-5 id="map_canvas" style="  margin-left: 40px; margin-right:20px; height:800px; float-right; border-style:solid; border-width:medium"></div>
         </div>
-         <div class=row>
-            <div  class='geojsmap' id='geojs_map_canvas' style="margin-left:40px;  height:800px; margin-top:40px; margin-bottom:40px; width: 100%; "> </div>
-        </div>
-        <button type="button" onclick="updateDrillDownDataDisplay();" style="margin-top:25px; margin-left:25px;">Aggregate Trait Results By Species</button>
-        <div class=row>
-            <div  class='scatterplot' id='morphplot' style="margin-left:40px; margin-top:40px; margin-bottom:40px; width: 100%; "> </div>
+         <div class=row style="margin-left:40px">
+            Attribute to Color By:
+            <select  class=md-col-6 id='geojs_attribute' style="margin-left:40px;  margin-top:40px; margin-bottom:40px;width=40%"> </div>
+            </select>
         </div>
         <div class=row>
-            <div  id='tablecontent' style="margin-left:50px; margin-top:40px; margin-bottom:40px; width:90%; height: 500px;"> </div>
+            <div  class=md-col-8 id='geojs_map_canvas' style="margin-left:40px;  height:800px; margin-top:40px; margin-bottom:40px; width=85% "> </div>
+            </div>
+
+        </div>
+        <div>     
+            <button type="button" onclick="updateDrillDownDataDisplay();" style="margin-top:25px; margin-left:25px;">Aggregate Trait Results By Species</button>
+            <div class=row>
+                <div  class='scatterplot' id='morphplot' style="margin-left:40px; margin-top:40px; margin-bottom:40px; width: 100%; "> </div>
+            </div>
+            <div class=row>
+                <div  id='tablecontent' style="margin-left:50px; margin-top:40px; margin-bottom:40px; width:90%; height: 500px;"> </div>
         </div>
 
 </div>

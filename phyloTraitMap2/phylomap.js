@@ -35,7 +35,7 @@ function clearLocations() {
 
 	// clear occurrence compilation list
 	phylomap.selectedOccurrences = []
-	updateTableDisplay(phylomap.selectedOccurrences)
+	//updateTableDisplay(phylomap.selectedOccurrences)
 	updateGeoJSDisplay()
 }
 
@@ -156,6 +156,7 @@ function pointInCircle(lat,lng,clat,clng,radius) {
 
 // This call adds markers to the map for all occurrence points within the boundaries of a circle. 
 function searchLocationsNearCircle(lat,lon,radius) {
+	var geomap;
 	var icon = getIcon();
 	var bounds = new google.maps.LatLngBounds();
 	// look through all taxa in precompiled list
@@ -194,8 +195,9 @@ function searchLocationsNearCircle(lat,lon,radius) {
 			}
 		}
 	}
-	updateTableDisplay(phylomap.selectedOccurrences)
-	updateGeoJSDisplay()
+	//updateTableDisplay(phylomap.selectedOccurrences)
+	geomap = updateGeoJSDisplay()
+	geomap.pan({x:0.01,y:0.01})
 }
 
 
@@ -301,7 +303,7 @@ function searchLocationsNearClade(selectedNode, callback) {
 	// icon here so each selection maps to just one type of icon
 	var icon = getIcon(selectedNodeID);
 	mapAllNodesInClade(rootOfClade, rootOfClade, icon, selectedNodeID)
-	updateTableDisplay(phylomap.selectedOccurrences)
+	//updateTableDisplay(phylomap.selectedOccurrences)
 	updateGeoJSDisplay()
 	// run the callback if one was passed.  Use for setting and clearing processing badge
 	if (callback != null) callback();
@@ -499,7 +501,7 @@ addLoadEvent(function () {
 });
 
 
-function updateGeoJSDisplay() {
+function old_updateGeoJSDisplay() {
 
   var spec = {
     center: {
@@ -523,8 +525,117 @@ function updateGeoJSDisplay() {
       }]
     }]
   };
-  
+
   spec.data = phylomap.selectedOccurrences;
-  $('#geojs_map_canvas').geojsMap(spec);
-  
+  return $('#geojs_map_canvas').geojsMap(spec);
+}
+
+//------------------------------------
+
+// this function looks at the first entry in the selection list and makes an entry for each 
+// attribute so it could be chosen as the one to color the occurrences by
+
+function fillAttributeSelector() {
+  var sample = phylomap.selectedOccurrences[0]
+  var list = []
+  for (attrib in sample) {
+  		list.push(attrib)
+  }
+  d3.select("#geojs_attribute").selectAll("option").remove();
+  d3.select("#geojs_attribute").selectAll("option")
+	.data(list)
+	.enter().append("option")
+	.text(function (d) { return d; });
+}
+
+
+function geojs_addVectorLayer(points) {
+    //console.log(points,"\n");
+
+	var markers = phylomap.geojsmap.map.createLayer("feature",{"renderer":"vgl"})
+    //var uiLayer = phylomap.geojsmap.map.createLayer('ui', {"renderer":"vgl"});
+    //var tooltip = uiLayer.createWidget('dom', {position: {x: 0, y: 0}});
+    // tooltipElem = $(tooltip.canvas()).attr('id', 'tooltip').addClass(
+    //    'hidden');
+
+    // Add a vector layer to the map.  Fill the layer with all the points that are currently selected
+
+
+
+	for (var i = points.length - 1; i >= 0; i--) {
+		//console.log(points[0])
+		var lng_float = points[i]['lon']
+		var lat_float = points[i]['lat']
+		// add a point to the d3 layer
+		markers.createFeature("point",{selectionAPI:true})
+		    .data([{x:lng_float, y:lat_float}])
+			.position(function(d) { return {x: d.x, y: d.y};} )
+			.style("fillColor", function(d) { return {r: 0, g: 1, b: 0};})
+			.style('strokeColor', 'black')
+			.geoOn(geo.event.feature.mouseclick, function (evt) {
+				//console.log(evt)
+        		phylomap.geojsmap.map.center({x: evt.data.x, y: evt.data.y});
+      		})
+			.geoOn(geo.event.feature.mouseover, function (evt) {
+        		evt.data.opacity = 1;
+        		evt.data.strokeOpacity = 1;
+        		this.modified();
+        		markers.map().draw();
+        		//tooltip.position({x: evt.data.x, y: evt.data.y});
+        		//tooltipElem.text(evt.data.text);
+       			//tooltipElem.removeClass('hidden');
+      		})
+      		.geoOn(geo.event.feature.mouseout, function (evt) {
+        		evt.data.opacity = 0.5;
+        		evt.data.strokeOpacity = 0.5;
+        		this.modified();
+        		markers.map().draw();
+        		//tooltipElem.addClass('hidden');
+      		})
+			.style('fillOpacity', 0.5)
+			.style('strokeOpacity', 0.5)
+	}	
+	// save markers layer globally
+	phylomap.geojsmap.markers = markers
+	phylomap.geojsmap.map.draw();
+}
+
+
+function geojs_resize() {
+    phylomap.geojsmap.map.resize(0, 0, $('#geojs_map_canvas').width(), $('#geojs_map_canvas').height());
+}
+ 
+
+function geojs_addBaseLayer() {
+    var map;
+
+    map = geo.map({
+        node: '#geojs_map_canvas',
+        zoom: 2
+    });
+    map.createLayer('osm');
+    phylomap.geojsmap.map = map;
+}
+
+
+// this function is called as soon as the page is finished loading
+function updateGeoJSDisplay() {   
+	phylomap.geojsmap = {}
+	phylomap.geojsmap.map = null
+	phylomap.geojsmap.markers = null
+
+	phylomap.geojsmap.map = null
+	phylomap.geojsmap.markers = null
+
+	//Proj4js.defs["EPSG:4326"] = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+	//Proj4js.defs["EPSG:3031"] = "+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+	//Proj4js.defs["EPSG:900913"] = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs";
+
+    $(window).resize(geojs_resize);
+
+    fillAttributeSelector();
+    geojs_addBaseLayer();
+    geojs_resize();
+    geojs_addVectorLayer(phylomap.selectedOccurrences);
+
 }
