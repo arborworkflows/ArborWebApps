@@ -548,6 +548,8 @@ function fillAttributeSelector() {
 	.text(function (d) { return d; });
 }
 
+// #bb5a00 - reddish/brown for low values
+// #ffffff  - white for top values
 
 function geojs_addVectorLayer(points) {
     //console.log(points,"\n");
@@ -559,8 +561,6 @@ function geojs_addVectorLayer(points) {
     //    'hidden');
 
     // Add a vector layer to the map.  Fill the layer with all the points that are currently selected
-
-
 
 	for (var i = points.length - 1; i >= 0; i--) {
 		//console.log(points[0])
@@ -586,18 +586,57 @@ function geojs_addVectorLayer(points) {
        			//tooltipElem.removeClass('hidden');
       		})
       		.geoOn(geo.event.feature.mouseout, function (evt) {
-        		evt.data.opacity = 0.5;
-        		evt.data.strokeOpacity = 0.5;
+        		evt.data.opacity = 1.0;
+        		evt.data.strokeOpacity = 1.0;
         		this.modified();
         		markers.map().draw();
         		//tooltipElem.addClass('hidden');
       		})
-			.style('fillOpacity', 0.5)
-			.style('strokeOpacity', 0.5)
+			.style('fillOpacity', 1.0)
+			.style('strokeOpacity', 1.0)
 	}	
 	// save markers layer globally
 	phylomap.geojsmap.markers = markers
 	phylomap.geojsmap.map.draw();
+}
+
+
+// this function loops through all of the occurrence points and assigns colors depending on the value
+// of the individual occurence point within the range across all the points
+
+function updateOccurrencePointColors() {
+	var minRed = 160.0/256.0
+	var minGreen = 80.0/256.0
+	// find out which attribute has been selected
+	var attribSelector = d3.select("#geojs_attribute").node();
+    var selectedAttrib = attribSelector.options[attribSelector.selectedIndex].text;
+    console.log('selected attrib is:',selectedAttrib)
+
+    // go through the points and figure out the min and max values of this particular attribute
+    var minVal = 1e99
+    var maxVal = -1e99
+    for (var i = phylomap.selectedOccurrences.length - 1; i >= 0; i--) {
+    	minVal = phylomap.selectedOccurrences[i][selectedAttrib] < minVal ? phylomap.selectedOccurrences[i][selectedAttrib] : minVal
+    	maxVal = phylomap.selectedOccurrences[i][selectedAttrib] > maxVal ? phylomap.selectedOccurrences[i][selectedAttrib] : maxVal
+    }
+    // now loop through and assign colors based on the interpolation.  The logic is simplified from
+    // complete interpolation because we are going between a fixed color for the min value and white
+
+    var valRange = maxVal - minVal
+    var interp_value = 0.0
+    var inverse_value = 0.0
+    var redColor = 0.0
+    var greenColor = 0.0
+    for (var i = phylomap.geojsmap.markers.features().length - 1; i >= 0; i--) {
+ 		interp_value = (phylomap.selectedOccurrences[i][selectedAttrib] - minVal) / valRange
+ 		inverse_value = 1.0 - interp_value
+ 		redColor = interp_value*(1.0-minRed) + inverse_value
+ 		greenColor = interp_value*(1.0-minGreen) + inverse_value
+ 		phylomap.geojsmap.markers.features()[i].style("fillColor", {r:redColor, g:greenColor, b:1})
+
+    }
+    // redraw the map
+    phylomap.geojsmap.markers.map().draw();
 }
 
 
@@ -634,6 +673,9 @@ function updateGeoJSDisplay() {
     $(window).resize(geojs_resize);
 
     fillAttributeSelector();
+
+     d3.select("#geojs_attribute")
+            .on("change", updateOccurrencePointColors);
     geojs_addBaseLayer();
     geojs_resize();
     geojs_addVectorLayer(phylomap.selectedOccurrences);
