@@ -667,7 +667,7 @@ function updateJSON(options) {
 		// on loading the data change the circle color to red
 		d3.select(node.childNodes[0]).style("fill", "red");
 	}
-	var tree_return_url = 'item/'+phylomap.currentDatasetArchiveId+'/romanesco/tree/nested/nested'
+	var tree_return_url = 'item/'+phylomap.currentDatasetArchiveId+'/flow/tree/nested/nested'
 	girder.restRequest({path: tree_return_url})
 		.done(_.bind(function (result) {
 		console.log('json:',result)
