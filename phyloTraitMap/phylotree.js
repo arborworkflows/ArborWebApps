@@ -299,6 +299,9 @@ function initializeDataSelection(initialProject, initialData) {
 				}));
 			}));  // girder collectionID
 		});
+	      // Because of the way datasets are loaded on projects, we need to trigger a change on the first
+	      // project to load the correct datasets.
+	      performEvent(document.getElementById('project'), 'change');
 	}));  // end of girder projects
 }
 
