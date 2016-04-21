@@ -562,7 +562,7 @@ function geojs_addVectorLayer(points) {
 
     // Add a vector layer to the map.  Fill the layer with all the points that are currently selected
 
-	for (var i = points.length - 1; i >= 0; i--) {
+	for (var i = 0;  i < points.length; i++) {
 		//console.log(points[0])
 		var lng_float = points[i]['lon']
 		var lat_float = points[i]['lat']
@@ -572,26 +572,26 @@ function geojs_addVectorLayer(points) {
 			.position(function(d) { return {x: d.x, y: d.y};} )
 			.style("fillColor", function(d) { return {r: 0, g: 1, b: 0};})
 			.style('strokeColor', 'black')
-			.geoOn(geo.event.feature.mouseclick, function (evt) {
-				//console.log(evt)
-        		phylomap.geojsmap.map.center({x: evt.data.x, y: evt.data.y});
-      		})
-			.geoOn(geo.event.feature.mouseover, function (evt) {
-        		evt.data.opacity = 1;
-        		evt.data.strokeOpacity = 1;
-        		this.modified();
-        		markers.map().draw();
+		//	.geoOn(geo.event.feature.mouseclick, function (evt) {
+		//		//console.log(evt)
+        //		phylomap.geojsmap.map.center({x: evt.data.x, y: evt.data.y});
+      	//	})
+		//	.geoOn(geo.event.feature.mouseover, function (evt) {
+        //		evt.data.opacity = 1;
+        //		evt.data.strokeOpacity = 1;
+        //		this.modified();
+        //		markers.map().draw();
         		//tooltip.position({x: evt.data.x, y: evt.data.y});
         		//tooltipElem.text(evt.data.text);
        			//tooltipElem.removeClass('hidden');
-      		})
-      		.geoOn(geo.event.feature.mouseout, function (evt) {
-        		evt.data.opacity = 1.0;
-        		evt.data.strokeOpacity = 1.0;
-        		this.modified();
-        		markers.map().draw();
+      	//	})
+      	//	.geoOn(geo.event.feature.mouseout, function (evt) {
+        //		evt.data.opacity = 1.0;
+        //		evt.data.strokeOpacity = 1.0;
+        //		this.modified();
+        //		markers.map().draw();
         		//tooltipElem.addClass('hidden');
-      		})
+      	//	})
 			.style('fillOpacity', 1.0)
 			.style('strokeOpacity', 1.0)
 	}	
@@ -615,7 +615,7 @@ function updateOccurrencePointColors() {
     // go through the points and figure out the min and max values of this particular attribute
     var minVal = 1e99
     var maxVal = -1e99
-    for (var i = phylomap.selectedOccurrences.length - 1; i >= 0; i--) {
+    for (var i = 0; i< phylomap.selectedOccurrences.length; i++) {
     	minVal = phylomap.selectedOccurrences[i][selectedAttrib] < minVal ? phylomap.selectedOccurrences[i][selectedAttrib] : minVal
     	maxVal = phylomap.selectedOccurrences[i][selectedAttrib] > maxVal ? phylomap.selectedOccurrences[i][selectedAttrib] : maxVal
     }
@@ -627,11 +627,11 @@ function updateOccurrencePointColors() {
     var inverse_value = 0.0
     var redColor = 0.0
     var greenColor = 0.0
-    for (var i = phylomap.geojsmap.markers.features().length - 1; i >= 0; i--) {
+    for (var i = 0; i < phylomap.geojsmap.markers.features().length; i++) {
  		interp_value = (phylomap.selectedOccurrences[i][selectedAttrib] - minVal) / valRange
  		inverse_value = 1.0 - interp_value
- 		redColor = interp_value*(1.0-minRed) + inverse_value
- 		greenColor = interp_value*(1.0-minGreen) + inverse_value
+ 		redColor = interp_value + inverse_value*minRed
+ 		greenColor = interp_value + inverse_value*minGreen
  		phylomap.geojsmap.markers.features()[i].style("fillColor", {r:redColor, g:greenColor, b:1})
 
     }
@@ -641,7 +641,7 @@ function updateOccurrencePointColors() {
 
 
 function geojs_resize() {
-    phylomap.geojsmap.map.resize(0, 0, $('#geojs_map_canvas').width(), $('#geojs_map_canvas').height());
+    phylomap.geojsmap.map.resize(0, 0, $('#geojs_map_canvas').width()*0.5, $('#geojs_map_canvas').height());
 }
  
 
