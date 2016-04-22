@@ -548,17 +548,26 @@ function fillAttributeSelector() {
 	.text(function (d) { return d; });
 }
 
-// #bb5a00 - reddish/brown for low values
+function returnDataAsText(p) {
+	var text = ''
+	for (var attrib in p) {
+		if (attrib.length>0) {
+			text += attrib+':'+p[attrib]+'\n'
+		}
+	}
+	return text
+}
+
+// #bb5a00 - reddish/brows for low values
 // #ffffff  - white for top values
 
 function geojs_addVectorLayer(points) {
     //console.log(points,"\n");
 
 	var markers = phylomap.geojsmap.map.createLayer("feature",{"renderer":"vgl"})
-    //var uiLayer = phylomap.geojsmap.map.createLayer('ui', {"renderer":"vgl"});
-    //var tooltip = uiLayer.createWidget('dom', {position: {x: 0, y: 0}});
-    // tooltipElem = $(tooltip.canvas()).attr('id', 'tooltip').addClass(
-    //    'hidden');
+    var uiLayer = phylomap.geojsmap.map.createLayer('ui', {"renderer":"vgl"});
+    var tooltip = uiLayer.createWidget('dom', {position: {x: 0, y: 0}});
+    tooltipElem = $(tooltip.canvas()).attr('id', 'tooltip').addClass('hidden');
 
     // Add a vector layer to the map.  Fill the layer with all the points that are currently selected
 
@@ -566,32 +575,33 @@ function geojs_addVectorLayer(points) {
 		//console.log(points[0])
 		var lng_float = points[i]['lon']
 		var lat_float = points[i]['lat']
+		var pointText = returnDataAsText(points[i])
 		// add a point to the d3 layer
 		markers.createFeature("point",{selectionAPI:true})
-		    .data([{x:lng_float, y:lat_float}])
+		    .data([{x:lng_float, y:lat_float,text:pointText }])
 			.position(function(d) { return {x: d.x, y: d.y};} )
 			.style("fillColor", function(d) { return {r: 0, g: 1, b: 0};})
 			.style('strokeColor', 'black')
-		//	.geoOn(geo.event.feature.mouseclick, function (evt) {
-		//		//console.log(evt)
-        //		phylomap.geojsmap.map.center({x: evt.data.x, y: evt.data.y});
-      	//	})
-		//	.geoOn(geo.event.feature.mouseover, function (evt) {
-        //		evt.data.opacity = 1;
-        //		evt.data.strokeOpacity = 1;
-        //		this.modified();
-        //		markers.map().draw();
-        		//tooltip.position({x: evt.data.x, y: evt.data.y});
-        		//tooltipElem.text(evt.data.text);
-       			//tooltipElem.removeClass('hidden');
-      	//	})
-      	//	.geoOn(geo.event.feature.mouseout, function (evt) {
+			.geoOn(geo.event.feature.mouseclick, function (evt) {
+				console.log(evt)
+        		phylomap.geojsmap.map.center({x: evt.data.x, y: evt.data.y});
+      		})
+			.geoOn(geo.event.feature.mouseover, function (evt) {
+        		//evt.data.opacity = 1;
+        		//evt.data.strokeOpacity = 1;
+        		this.modified();
+        		markers.map().draw();
+        		tooltip.position({x: evt.data.x+0.015, y: evt.data.y+0.015});
+        		tooltipElem.text(' '+evt.data.text);
+       			tooltipElem.removeClass('hidden');
+      		})
+      		.geoOn(geo.event.feature.mouseout, function (evt) {
         //		evt.data.opacity = 1.0;
         //		evt.data.strokeOpacity = 1.0;
         //		this.modified();
-        //		markers.map().draw();
-        		//tooltipElem.addClass('hidden');
-      	//	})
+        		//markers.map().draw();
+        		tooltipElem.addClass('hidden');
+      		})
 			.style('fillOpacity', 1.0)
 			.style('strokeOpacity', 1.0)
 	}	
@@ -641,7 +651,7 @@ function updateOccurrencePointColors() {
 
 
 function geojs_resize() {
-    phylomap.geojsmap.map.resize(0, 0, $('#geojs_map_canvas').width()*0.5, $('#geojs_map_canvas').height());
+    phylomap.geojsmap.map.resize(0, 0, $('#geojs_map_canvas').width()*0.9, $('#geojs_map_canvas').height());
 }
  
 

@@ -28413,62 +28413,60 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	module.exports = {
-		"name": "proj4",
-		"version": "2.3.14",
-		"description": "Proj4js is a JavaScript library to transform point coordinates from one coordinate system to another, including datum transformations.",
-		"main": "lib/index.js",
-		"directories": {
-			"test": "test",
-			"doc": "docs"
-		},
-		"scripts": {
-			"test": "./node_modules/istanbul/lib/cli.js test ./node_modules/mocha/bin/_mocha test/test.js"
-		},
-		"repository": {
-			"type": "git",
-			"url": "git://github.com/proj4js/proj4js.git"
-		},
-		"author": "",
-		"license": "MIT",
-		"jam": {
-			"main": "dist/proj4.js",
-			"include": [
-				"dist/proj4.js",
-				"README.md",
-				"AUTHORS",
-				"LICENSE.md"
+		"_args": [
+			[
+				"proj4@^2.3.14",
+				"/Users/jbeezley/git/geojs2"
 			]
+		],
+		"_from": "proj4@>=2.3.14 <3.0.0",
+		"_id": "proj4@2.3.14",
+		"_inCache": true,
+		"_installable": true,
+		"_location": "/proj4",
+		"_nodeVersion": "4.2.6",
+		"_npmOperationalInternal": {
+			"host": "packages-13-west.internal.npmjs.com",
+			"tmp": "tmp/proj4-2.3.14.tgz_1457689264880_0.9409773757215589"
 		},
-		"devDependencies": {
-			"grunt-cli": "~0.1.13",
-			"grunt": "~0.4.2",
-			"grunt-contrib-connect": "~0.6.0",
-			"grunt-contrib-jshint": "~0.8.0",
-			"chai": "~1.8.1",
-			"mocha": "~1.17.1",
-			"grunt-mocha-phantomjs": "~0.4.0",
-			"browserify": "~12.0.1",
-			"grunt-browserify": "~4.0.1",
-			"grunt-contrib-uglify": "~0.11.1",
-			"curl": "git://github.com/cujojs/curl.git",
-			"istanbul": "~0.2.4",
-			"tin": "~0.4.0"
+		"_npmUser": {
+			"email": "andreas.hocevar@gmail.com",
+			"name": "ahocevar"
 		},
-		"dependencies": {
-			"mgrs": "~0.0.2"
+		"_npmVersion": "2.14.12",
+		"_phantomChildren": {},
+		"_requested": {
+			"name": "proj4",
+			"raw": "proj4@^2.3.14",
+			"rawSpec": "^2.3.14",
+			"scope": null,
+			"spec": ">=2.3.14 <3.0.0",
+			"type": "range"
+		},
+		"_requiredBy": [
+			"#DEV:/"
+		],
+		"_resolved": "https://registry.npmjs.org/proj4/-/proj4-2.3.14.tgz",
+		"_shasum": "928906144388980c914c5a357fc493aba59a747a",
+		"_shrinkwrap": null,
+		"_spec": "proj4@^2.3.14",
+		"_where": "/Users/jbeezley/git/geojs2",
+		"author": "",
+		"bugs": {
+			"url": "https://github.com/proj4js/proj4js/issues"
 		},
 		"contributors": [
 			{
-				"name": "Mike Adair",
-				"email": "madair@dmsolutions.ca"
+				"email": "madair@dmsolutions.ca",
+				"name": "Mike Adair"
 			},
 			{
-				"name": "Richard Greenwood",
-				"email": "rich@greenwoodmap.com"
+				"email": "rich@greenwoodmap.com",
+				"name": "Richard Greenwood"
 			},
 			{
-				"name": "Calvin Metcalf",
-				"email": "calvin.metcalf@gmail.com"
+				"email": "calvin.metcalf@gmail.com",
+				"name": "Calvin Metcalf"
 			},
 			{
 				"name": "Richard Marsden",
@@ -28484,17 +28482,67 @@ return /******/ (function(modules) { // webpackBootstrap
 				"name": "S. Nelson"
 			}
 		],
-		"readme": "# PROJ4JS [![Build Status](https://travis-ci.org/proj4js/proj4js.svg)](https://travis-ci.org/proj4js/proj4js)\n\nProj4js is a JavaScript library to transform point coordinates from one coordinate system to another, including datum transformations.\nOriginally a port of [PROJ.4](http://trac.osgeo.org/proj/) and [GCTCP C](http://edcftp.cr.usgs.gov/pub//software/gctpc) it is\na part of the [MetaCRS](http://wiki.osgeo.org/wiki/MetaCRS) group of projects.\n\n## Installing\n\nDepending on your preferences\n\n```bash\nnpm install proj4\nbower install proj4\njam install proj4\ncomponent install proj4js/proj4js\n```\n\nor just manually grab the file `proj4.js` from the [latest release](https://github.com/proj4js/proj4js/releases)'s `dist/` folder.\n\nif you do not want to download anything, Proj4js is also hosted on [cdnjs](http://www.cdnjs.com/libraries/proj4js) for direct use in your browser applications.\n\n## Using\n\nthe basic signature is:\n\n```javascript\nproj4(fromProjection[, toProjection, coordinates])\n```\n\nProjections can be proj or wkt strings.\n\nCoordinates may an object of the form `{x:x,y:y}` or an array of the form `[x,y]`.\n\nWhen all 3 arguments  are given, the result is that the coordinates are transformed from projection1 to projection 2. And returned in the same format that they were given in.\n\n```javascript\nvar firstProjection = 'PROJCS[\"NAD83 / Massachusetts Mainland\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"standard_parallel_1\",42.68333333333333],PARAMETER[\"standard_parallel_2\",41.71666666666667],PARAMETER[\"latitude_of_origin\",41],PARAMETER[\"central_meridian\",-71.5],PARAMETER[\"false_easting\",200000],PARAMETER[\"false_northing\",750000],AUTHORITY[\"EPSG\",\"26986\"],AXIS[\"X\",EAST],AXIS[\"Y\",NORTH]]';\nvar secondProjection = \"+proj=gnom +lat_0=90 +lon_0=0 +x_0=6300000 +y_0=6300000 +ellps=WGS84 +datum=WGS84 +units=m +no_defs\";\n//I'm not going to redefine those two in latter examples.\nproj4(firstProjection,secondProjection,[2,5]);\n// [-2690666.2977344505, 3662659.885459918]\n```\n\nIf only 1 projection is given then it is assumed that it is being projected *from* WGS84 (fromProjection is WGS84).\n\n```javascript\nproj4(firstProjection,[-71,41]);\n// [242075.00535055372, 750123.32090043]\n```\n\nIf no coordinates are given an object with two methods is returned, its methods are `forward` which projects from the first projection to the second and `inverse` which projects from the second to the first.\n\n```javascript\nproj4(firstProjection,secondProjection).forward([2,5]);\n// [-2690666.2977344505, 3662659.885459918]\nproj4(secondProjection,firstProjection).inverse([2,5]);\n// [-2690666.2977344505, 3662659.885459918]\n```\n\nand as above if only one projection is given, it's assumed to be coming from wgs84\n\n```javascript\nproj4(firstProjection).forward([-71,41]);\n// [242075.00535055372, 750123.32090043]\nproj4(firstProjection).inverse([242075.00535055372, 750123.32090043]);\n//[-71, 40.99999999999986]\n//the floating points to answer your question\n```\n\n## Named Projections\n\nIf you prefer to define a projection as a string and reference it that way, you may use the proj4.defs method which can be called 2 ways, with a name and projection:\n\n```js\nproj4.defs('WGS84', \"+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees\");\n```\n\nor with an array\n\n```js\nproj4.defs([\n  [\n    'EPSG:4326',\n    '+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees'],\n  [\n    'EPSG:4269',\n    '+title=NAD83 (long/lat) +proj=longlat +a=6378137.0 +b=6356752.31414036 +ellps=GRS80 +datum=NAD83 +units=degrees'\n  ]\n]);\n```\n\nyou can then do\n\n```js\nproj4('EPSG:4326');\n```\n\ninstead of writing out the whole proj definition, by default proj4 has the following projections predefined:\n\n- 'EPSG:4326', which has the following alias\n    - 'WGS84'\n- 'EPSG:4269'\n- 'EPSG:3857', which has the following aliases\n    - 'EPSG:3785'\n    - 'GOOGLE'\n    - 'EPSG:900913'\n    - 'EPSG:102113'\n\ndefined projections can also be accessed through the proj4.defs function (`proj4.defs('EPSG:4326')`).\n\nproj4.defs can also be used to define a named alias:\n\n```javascript\nproj4.defs('urn:x-ogc:def:crs:EPSG:4326', proj4.defs('EPSG:4326'));\n```\n\n## Developing\nto set up build tools make sure you have node and grunt-cli installed and then run `npm install`\n\nto do the complete build and browser tests run\n\n```bash\nnode_modules/.bin/grunt\n```\n\nto run node tests run\n\n```bash\nnpm test\n```\n\nto run node tests with coverage run\n\n```bash\nnpm test --coverage\n```\n\nto create a build with only default projections (latlon and Mercator) run\n\n```bash\nnode_modules/.bin/grunt build\n```\n\nto create a build with only custom projections include a comma separated list of projections codes (the file name in 'lib/projections' without the '.js') after a colon, e.g.\n\n```bash\nnode_modules/.bin/grunt build:tmerc\n#includes transverse Mercator\nnode_modules/.bin/grunt build:lcc\n#includes lambert conformal conic\nnode_modules/.bin/grunt build:omerc,moll\n#includes oblique Mercator and Mollweide\n```\n",
-		"readmeFilename": "README.md",
-		"bugs": {
-			"url": "https://github.com/proj4js/proj4js/issues"
+		"dependencies": {
+			"mgrs": "~0.0.2"
 		},
-		"_id": "proj4@2.3.14",
+		"description": "Proj4js is a JavaScript library to transform point coordinates from one coordinate system to another, including datum transformations.",
+		"devDependencies": {
+			"browserify": "~12.0.1",
+			"chai": "~1.8.1",
+			"curl": "git://github.com/cujojs/curl.git",
+			"grunt": "~0.4.2",
+			"grunt-browserify": "~4.0.1",
+			"grunt-cli": "~0.1.13",
+			"grunt-contrib-connect": "~0.6.0",
+			"grunt-contrib-jshint": "~0.8.0",
+			"grunt-contrib-uglify": "~0.11.1",
+			"grunt-mocha-phantomjs": "~0.4.0",
+			"istanbul": "~0.2.4",
+			"mocha": "~1.17.1",
+			"tin": "~0.4.0"
+		},
+		"directories": {
+			"doc": "docs",
+			"test": "test"
+		},
 		"dist": {
-			"shasum": "15f019a3e8bdeeae90f7fcb0247f667514b4d499"
+			"shasum": "928906144388980c914c5a357fc493aba59a747a",
+			"tarball": "http://registry.npmjs.org/proj4/-/proj4-2.3.14.tgz"
 		},
-		"_from": "proj4@^2.3.14",
-		"_resolved": "https://registry.npmjs.org/proj4/-/proj4-2.3.14.tgz"
+		"gitHead": "7619c8a63df1eae5bad0b9ad31ca1d87b0549243",
+		"homepage": "https://github.com/proj4js/proj4js#readme",
+		"jam": {
+			"include": [
+				"dist/proj4.js",
+				"README.md",
+				"AUTHORS",
+				"LICENSE.md"
+			],
+			"main": "dist/proj4.js"
+		},
+		"license": "MIT",
+		"main": "lib/index.js",
+		"maintainers": [
+			{
+				"email": "calvin.metcalf@gmail.com",
+				"name": "cwmma"
+			},
+			{
+				"email": "andreas.hocevar@gmail.com",
+				"name": "ahocevar"
+			}
+		],
+		"name": "proj4",
+		"optionalDependencies": {},
+		"readme": "ERROR: No README data found!",
+		"repository": {
+			"type": "git",
+			"url": "git://github.com/proj4js/proj4js.git"
+		},
+		"scripts": {
+			"test": "./node_modules/istanbul/lib/cli.js test ./node_modules/mocha/bin/_mocha test/test.js"
+		},
+		"version": "2.3.14"
 	};
 
 /***/ },
@@ -36556,7 +36604,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = ("0.8.0");
+	module.exports = ("0.9.0");
 
 
 /***/ },
