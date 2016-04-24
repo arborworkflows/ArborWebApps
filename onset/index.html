@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>OnSet for Arbor</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="header">
+            <h2>OnSet for Arbor</h2>
+        </div>
+        <div id="content">
+          <ul id="arbor-access">
+                <li id="infolabel">
+                    Arbor Access
+                </li>
+                <!--
+                <li id="arbor" class="arbor-zone">
+                    <img style="width: 220px;height: 90px; padding-top: 10px" id="arbor-img" src="img/Arbor.png" />
+                    <p>Arbor</p>
+                </li>
+                -->
+                <li id="arbor-selector-element" class="arbor-selector-class">
+                    <input id="arbor-input-name" style="width: 500px;height: 30px; padding-left: 5px; padding-top: 5px" ></select>
+                </li>
+                <li id="arbor-load-container" class="arbor-load-zone">
+                    <img style="width: 50px;height: 50px; padding-top: 20px" id="arbor-load" src="img/open.png" />
+                    <p>Load</p>
+                </li>
+          </ul>
+          <div id="linebreak">
+
+
+            <ul id="templates">
+                <li id="infolabel">
+                    Template data
+                </li>
+                <li id="whaleshark" class="click-zone">
+                    <img style="width: 75px;height: 75px; padding-top: 20px" src="img/whaleshark.png" />
+                    <p>Whaleshark</p>
+                </li>
+                <li id="senate" class="click-zone">
+                    <img style="width: 75px;height: 75px; padding-top: 20px" id="upload-img" src="img/calendar.png" />
+                    <p>Senate</p>
+                </li>
+                <!-- <li id="calendar" class="click-zone">
+          <img style="width: 75px;height: 75px; padding-top: 20px" id="upload-img" src="img/calendar.png" />
+          <p>Calendar</p>
+        </li> -->
+            </ul>
+            <div id="linebreak">
+            </div>
+            <ul id="custom-data">
+                <li id="infolabel">
+                    Custom data
+                </li>
+                <li id="upload-data" class="click-zone">
+                    <label>
+                        <img class="click-img" src="img/add.png" />
+                        <p>Upload csv file</p>
+                    </label>
+
+                </li>
+                <li id="drag-data">
+                    <img class="click-img" src="img/drop.png" />
+                    <p>Or, drag and drop csv file</p>
+                </li>
+            </ul>
+            <div id="tutorial">
+                <p>To view an example of a formatted dataset, please download <a href="data/OnSet_sample_data.csv">this</a> file.</p>
+
+            </div>
+        </div>
+        <div id="footer">
+            Icons courtesy <a href="http://www.thenounproject.com">thenounproject.com</a>
+        </div>
+        <div id="progress-buttons" style="display:none;">
+            <ul style="width: 700px;margin: 30px auto;">
+                <li id="back" class="click-zone" style="text-align: center;">
+                    <img class="click-img" src="img/back.png" style="float: left;" />
+                    <p>Go Back</p>
+                </li>
+                <li id="open-vis" class="click-zone" style="text-align: center;float: right;">
+                    <img class="click-img" src="img/open.png" style="float: right;" />
+                    <p>Open Vis</p>
+                </li>
+            </ul>
+        </div>
+        <div id="drop-feedback" style="display:none;">
+            <h2 style="color:white;padding-top:200px; ">Drop here</h2>
+        </div>
+        <input id="loadfile" type="file" style="display:none;" />
+        <script src="js/vendor/d3.v3.min.js"></script>
+        <script src="js/vendor/d3textwrap.js"></script>
+        <script src="js/vendor/dnd.min.js"></script>
+        <script src="js/index.js"></script>
+        <script type="text/javascript">
+            onLoad();
+        </script>
+</body>
+
+</html>

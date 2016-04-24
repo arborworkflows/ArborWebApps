@@ -1,0 +1,19 @@
+# humanstxt.org/
+# The humans responsible & technology colophon
+
+# TEAM
+
+    John Stasko -- Georgia Institute of Technology
+    Ramik Sadana -- Georgia Institute of Technology
+    Timothy Major -- Georgia Institute of Technology
+    Timothy Dwyer -- 
+    Alistair Dove -- Georgia Aquarium
+    
+# THANKS
+
+    <name>
+
+# TECHNOLOGY COLOPHON
+
+    HTML5, CSS3
+    Normalize.css, jQuery, Modernizr, d3.js

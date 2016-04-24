@@ -1,0 +1,820 @@
+/*! HTML5 Boilerplate v4.3.0 | MIT License | http://h5bp.com/ */
+
+/*
+ * What follows is the result of much research on cross-browser styling.
+ * Credit left inline and big thanks to Nicolas Gallagher, Jonathan Neal,
+ * Kroc Camen, and the H5BP dev community and team.
+ */
+
+/* ==========================================================================
+   Base styles: opinionated defaults
+   ========================================================================== */
+
+html,
+button,
+input,
+select,
+textarea {
+    color: #222;
+}
+
+html {
+    font-size: 1em;
+    line-height: 1.4;
+}
+
+/*
+ * Remove text-shadow in selection highlight: h5bp.com/i
+ * These selection rule sets have to be separate.
+ * Customize the background color to match your design.
+ */
+
+::-moz-selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+::selection {
+    background: #b3d4fc;
+    text-shadow: none;
+}
+
+/*
+ * A better looking default horizontal rule
+ */
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+/*
+ * Remove the gap between images, videos, audio and canvas and the bottom of
+ * their containers: h5bp.com/i/440
+ */
+
+audio,
+canvas,
+img,
+video {
+    vertical-align: middle;
+}
+
+/*
+ * Remove default fieldset styles.
+ */
+
+fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/*
+ * Allow only vertical resizing of textareas.
+ */
+
+textarea {
+    resize: vertical;
+}
+
+/* ==========================================================================
+   Browse Happy prompt
+   ========================================================================== */
+
+.browsehappy {
+    margin: 0.2em 0;
+    background: #ccc;
+    color: #000;
+    padding: 0.2em 0;
+}
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+html, body {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+/* Removes text selection */
+.no-selection {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#wrapper {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    padding-top: 60px;
+}
+
+#header {
+    width: 100%;
+    height: 60px;
+    margin-top: -60px;
+    color: #fff;
+    background-color: #222;
+}
+
+#header h2 {
+    float: left;
+    width: 240px;
+    margin: 0 10px;
+    padding: 0;
+    line-height: 60px;
+    font-weight: normal;
+}
+
+#info {
+    width: 100%;
+    margin-left: -250px;
+    text-align: center;
+    line-height: 40px;
+}
+
+#element-label{
+    height: 40px;
+    line-height: 45px;
+}
+
+#class-label{
+    height: 20px;
+    line-height: 5px;
+    font-size: .8em;
+    color: #fff8bf;
+}
+
+#content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+}
+
+#trash {
+    width: 84px;
+    margin: auto;
+    padding: 10px;
+    font-size: .8em;
+    text-align: center;
+    color: #fff;
+}
+
+#trash div {
+    float: left;
+    line-height: 25px;
+    vertical-align: middle;
+}
+
+#trash div.icon{
+    width: 25px;
+    height: 25px;
+    margin-right: 8px;
+    background-image: url('../img/trash.png');
+    background-size: 25px 25px;
+}
+
+#trash.hover {
+    background-color: #fff;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#trash.hover div {
+    color: #222;
+}
+
+#trash.hover div.icon{
+    background-image: url('../img/trash-hover.png');
+}
+
+#controls {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+
+/* Overrides the default OS X (Lion and later) scrollbar behavior to force the 
+scrollbar to always show */
+#controls ::-webkit-scrollbar{
+    -webkit-appearance: none;
+    width: 7px;
+}
+#controls ::-webkit-scrollbar-thumb{
+    border-radius: 4px;
+    background-color: rgba(0,0,0,.5);
+    -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
+/* Overrides the "halo" border around a button that has been clicked */
+#controls button:focus {
+    outline:none;
+} 
+
+#controls button::-moz-focus-inner {
+    border:0;
+}
+
+#controls button {
+    position: relative;
+    padding: 0;
+    margin: 0;
+    font-size: 0.8em;
+    background: rgb(243,243,243); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(243,243,243,1) 0%, rgba(214,214,214,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(243,243,243,1)), color-stop(100%,rgba(214,214,214,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(243,243,243,1) 0%,rgba(214,214,214,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(243,243,243,1) 0%,rgba(214,214,214,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(243,243,243,1) 0%,rgba(214,214,214,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(243,243,243,1) 0%,rgba(214,214,214,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f3f3f3', endColorstr='#d6d6d6',GradientType=0 ); /* IE6-9 */
+    border: 1px solid #9d9d9d;
+}
+
+#controls button:hover {
+    background: rgb(199,199,199); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(199,199,199,1) 0%, rgba(175,175,175,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(199,199,199,1)), color-stop(100%,rgba(175,175,175,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(199,199,199,1) 0%,rgba(175,175,175,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(199,199,199,1) 0%,rgba(175,175,175,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(199,199,199,1) 0%,rgba(175,175,175,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(199,199,199,1) 0%,rgba(175,175,175,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c7c7c7', endColorstr='#afafaf',GradientType=0 ); /* IE6-9 */
+    border: 1px solid #5d5d5d;
+}
+
+#controls button:active{
+    background: rgb(157,157,157); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(157,157,157,1) 0%, rgba(176,176,176,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(157,157,157,1)), color-stop(100%,rgba(176,176,176,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(157,157,157,1) 0%,rgba(176,176,176,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(157,157,157,1) 0%,rgba(176,176,176,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(157,157,157,1) 0%,rgba(176,176,176,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(157,157,157,1) 0%,rgba(176,176,176,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9d9d9d', endColorstr='#b0b0b0',GradientType=0 ); /* IE6-9 */
+}
+
+#controls button.sort.asc .fade,
+#controls button.sort.desc .fade {
+    opacity: 0.3;
+}
+
+#controls button.sort.asc,
+#controls button.sort.desc {
+    background: none;
+    background-color: #7c7c7c;
+    border: none;
+}
+
+#controls button.sort.desc:hover,
+#controls button.sort.asc:hover {
+    border: 1px solid #5d5d5d;
+}
+
+#controls button.sort.desc:active,
+#controls button.sort.asc:active {
+    border: 1px solid #bbb;
+}
+
+
+/* Adds a little triangle marker indicating sort direction using a CSS :after
+psuedo-selector trick */
+#controls button.sort.asc:after{
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #fff;
+    content: "";
+}
+
+#controls button.sort.desc:after{
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 5px solid #fff;
+    content: "";
+}
+
+#controls .search-list {
+    width: 190px;
+}
+
+#controls .search-list input.search{
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 3px 4px 3px 4px;
+    font-size: .8em;
+}
+
+#controls .search-list .list-container {
+    width: 100%;
+    height: 456px;
+    overflow-y: scroll;
+    background-color: #fff;
+    font-size: .75em;
+}
+
+#controls .search-list ul.list {
+    margin: 0;
+    padding: 0;
+}
+
+#controls .search-list li {
+    position: relative;
+    padding: 3px 4px 3px 4px;
+    list-style-type: none;
+    cursor: default;
+}
+
+#samples-btn {
+    position: fixed !important;
+    top: 10px;
+    right: 90px;
+}
+
+#elements-btn {
+    position: fixed !important;
+    top: 10px;
+    right: 0px;
+}
+
+#lists{
+    position: fixed !important;
+    right: 0px;
+}
+
+
+#samples-filters,
+#samples-footer {
+    background-color: #9c9c9c;
+}
+
+#samples-filters button {
+    float: left;
+    width: 57px;
+    height: 30px;
+    margin: 4px 3px 4px 3px;
+}
+
+#samples-filters button.sort img {
+    position: relative;
+    left: -1px;
+    top: -1px;
+    width: 50px;
+    height: 30px;
+}
+
+#samples-filters button.sort.asc img,
+#samples-filters button.sort.desc img {
+    left: -1px;
+    top: 0px;
+}
+
+#samples-filters button.sort.asc:hover img,
+#samples-filters button.sort.desc:hover img {
+    left: -1px;
+    top: -1px;
+}
+
+#samples-filters button.sort:after {
+    top: 13px;
+    left: 23px;
+}
+
+#samples-filters button.sort:hover:after {
+    top: 12px;
+    left: 22px;
+}
+
+#samples-footer button {
+    float: right;
+    width: 80px;
+    height: 30px;
+    margin: 4px 3px 4px 3px;
+}
+
+#sample-count {
+    width: 80px;
+    margin: 0px 4px 0px 4px;
+    line-height: 38px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: .75em;
+}
+
+#samples .list li {
+    padding: 3px 4px 5px 4px;
+}
+
+#samples .list li div.bar {
+    position: absolute; 
+    bottom: 0px;
+    left: -4px;
+    height: 4px;
+    background-color: #d95101;
+}
+
+#samples .list li button {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    width: 25px;
+    height: 20px;
+    font-size: 1em;
+    visibility: hidden;
+}
+
+#samples .list li button:hover,
+#samples-footer #add-all-btn:hover{
+    background: rgb(167,199,220); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(167,199,220,1) 0%, rgba(133,178,211,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(167,199,220,1)), color-stop(100%,rgba(133,178,211,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(167,199,220,1) 0%,rgba(133,178,211,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(167,199,220,1) 0%,rgba(133,178,211,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(167,199,220,1) 0%,rgba(133,178,211,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(167,199,220,1) 0%,rgba(133,178,211,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a7c7dc', endColorstr='#85b2d3',GradientType=0 ); /* IE6-9 */
+    border: 1px solid #7d7d7d;
+}
+
+#samples .list li button:active,
+#samples-footer #add-all-btn:active {
+    background: rgb(119,160,189); /* Old browsers */
+    background: -moz-linear-gradient(top,  rgba(119,160,189,1) 0%, rgba(146,179,202,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(119,160,189,1)), color-stop(100%,rgba(146,179,202,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(119,160,189,1) 0%,rgba(146,179,202,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(119,160,189,1) 0%,rgba(146,179,202,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(119,160,189,1) 0%,rgba(146,179,202,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(119,160,189,1) 0%,rgba(146,179,202,1) 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#77a0bd', endColorstr='#92b3ca',GradientType=0 ); /* IE6-9 */
+}
+
+#samples .list li:hover button{
+    visibility: visible;
+}
+
+#controls .search-list li:nth-child(odd) {
+    background-color: #eee;
+}
+
+#controls .search-list li:hover {
+    background-color: #c3d2ec;
+}
+
+#list-btns, #lists {
+    float: right;
+}
+
+#list-btns button{
+    display: block;
+    width: 80px;
+    height: 40px;
+    margin: 0 10px;
+    margin-bottom: 10px;
+}
+
+#list-btns label {
+    font-size: .8em;
+    color: white;
+}
+
+#bands {
+    position: fixed !important;
+    width: 92px;
+    top: 60px;
+    right: 0px;
+    padding-right: 9px;
+    padding-bottom: 2px;
+    background-color: #222;
+}
+
+#bands label,
+#metric label {
+    margin-left: 11px;
+}
+
+#bands-cb {
+    margin-left: 8px;
+}
+
+#metric {
+    position: fixed !important;
+    top: 84px;
+    right: 0px;
+    padding-right: 15px;
+    padding-bottom: 0px;
+    height: 0px;
+    background-color: #333;
+}
+
+#metric select{
+    width: 70px;
+    margin-left: 16px;
+    font-size: 0.8em;
+}
+
+#zoom {
+    position: fixed;
+    top: 85px;
+    right: 0px;
+    width: 101px;
+    height: 20px;
+    background-color: #222;
+    color: #eee; 
+    line-height: 21px; 
+    vertical-align: middle;
+    text-align: center;
+}
+
+#zoom-out-btn {
+    float: left;
+    width: 19px;
+    height: 100%;
+    border-right: 1px solid black;
+    background-color: #333;
+}
+
+#zoom-out-btn.disabled,
+#zoom-in-btn.disabled {
+    background-color: #222 !important;
+}
+
+#zoom-out-btn:hover,
+#zoom-in-btn:hover {
+    cursor: pointer;
+    background-color: #555;
+}
+
+#zoom-out-btn:active,
+#zoom-in-btn:active {
+    background-color: #333;
+}
+
+#zoom-level {
+    float: left;
+    width: 59px;
+    height: 100%;
+    border-right: 1px solid black;
+    font-size: .7em; 
+}
+
+#zoom-in-btn {
+    float: left; 
+    width: 20px; 
+    height: 100%; 
+    background-color: #333;
+}
+
+
+#canvas {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+#canvas text{
+    font-size: .8em;
+    font-family: serif;
+}
+
+#canvas text:hover{
+    cursor: default;
+}
+
+#class-label.similar{
+    color: #d6e6f8 !important;
+}
+rect.pixel.similar{
+    fill: #d6e6f8 !important;
+}
+
+rect.pixel.hover{
+    fill: rgb(255,255,255) !important;
+}
+
+rect.pixel.empty{
+    fill-opacity: 0.25;
+    fill: white !important;
+}
+
+rect.pixel.null{
+    fill-opacity: 0;
+    fill: black;
+}
+
+
+path.band.hover{
+/*    stroke: rgb(255,255,255) !important;*/
+}
+
+
+/* ==========================================================================
+   Helper classes
+   ========================================================================== */
+
+/*
+ * Image replacement
+ */
+
+.ir {
+    background-color: transparent;
+    border: 0;
+    overflow: hidden;
+    /* IE 6/7 fallback */
+    *text-indent: -9999px;
+}
+
+.ir:before {
+    content: "";
+    display: block;
+    width: 0;
+    height: 150%;
+}
+
+/*
+ * Hide from both screenreaders and browsers: h5bp.com/u
+ */
+
+.hidden {
+    display: none !important;
+    visibility: hidden;
+}
+
+/*
+ * Hide only visually, but have it available for screenreaders: h5bp.com/v
+ */
+
+.visuallyhidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/*
+ * Extends the .visuallyhidden class to allow the element to be focusable
+ * when navigated to via the keyboard: h5bp.com/p
+ */
+
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+    clip: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    position: static;
+    width: auto;
+}
+
+/*
+ * Hide visually and from screenreaders, but maintain layout
+ */
+
+.invisible {
+    visibility: hidden;
+}
+
+/*
+ * Clearfix: contain floats
+ *
+ * For modern browsers
+ * 1. The space content is one way to avoid an Opera bug when the
+ *    `contenteditable` attribute is included anywhere else in the document.
+ *    Otherwise it causes space to appear at the top and bottom of elements
+ *    that receive the `clearfix` class.
+ * 2. The use of `table` rather than `block` is only necessary if using
+ *    `:before` to contain the top-margins of child elements.
+ */
+
+.clearfix:before,
+.clearfix:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+/*
+ * For IE 6/7 only
+ * Include this rule to trigger hasLayout and contain floats.
+ */
+
+.clearfix {
+    *zoom: 1;
+}
+
+/* ==========================================================================
+   EXAMPLE Media Queries for Responsive Design.
+   These examples override the primary ('mobile first') styles.
+   Modify as content requires.
+   ========================================================================== */
+
+@media only screen and (min-width: 35em) {
+    /* Style adjustments for viewports that meet the condition */
+}
+
+@media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+    /* Style adjustments for high resolution devices */
+}
+
+/* ==========================================================================
+   Print styles.
+   Inlined to avoid required HTTP connection: h5bp.com/r
+   ========================================================================== */
+
+@media print {
+    * {
+        background: transparent !important;
+        color: #000 !important; /* Black prints faster: h5bp.com/s */
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+
+    a[href]:after {
+        content: " (" attr(href) ")";
+    }
+
+    abbr[title]:after {
+        content: " (" attr(title) ")";
+    }
+
+    /*
+     * Don't show links for images, or javascript/internal links
+     */
+
+    .ir a:after,
+    a[href^="javascript:"]:after,
+    a[href^="#"]:after {
+        content: "";
+    }
+
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    thead {
+        display: table-header-group; /* h5bp.com/t */
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+
+    @page {
+        margin: 0.5cm;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+}
