@@ -72,7 +72,7 @@
 
         app.correlation="BM";
         // override upload function for simple mode
-        app.datasetsView.upload = function (file) {
+        flow.DatasetManagementView.prototype.upload= function (file) {
             var reader = new FileReader();
 
             reader.onload = _.bind(function (e) {
@@ -80,17 +80,21 @@
                         name: file.name,
                         data: e.target.result
                     },
-                    extension = file.name.split('.');
+                    extension = file.name.split('.'),
+                    typeFormat;
 
                 extension = extension[extension.length - 1];
-                _.extend(dataset, flow.extensionToType[extension]);
+                // new type system
+                typeFormat = flow.getTypeFormatsFromExtension(extension)[0];
+                typeFormat = {type: typeFormat.type, format: typeFormat.format};
+                _.extend(dataset, typeFormat);
                 dataset = new Backbone.Model(dataset);
 
                 // modifications for simple app begin here
                 // if its a table, get the column names
-                if (flow.extensionToType[extension].type == "table") {
+                if (typeFormat.type == "table") {
                     app.table = dataset.get('data');
-                    app.tableFormat = flow.extensionToType[extension].format;
+                    app.tableFormat = typeFormat.format;
                     d3.select("#table-name").html('Table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                     $("#column-input-y").text("Parsing column names...");
                     $("#column-names").empty();
@@ -119,7 +123,7 @@
 
                 }
 
-                else if (flow.extensionToType[extension].type == "tree") {
+                else if (typeFormat.type == "tree") {
                     app.tree = dataset.get('data');
                     d3.select("#tree-name").html('Tree: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                 }
