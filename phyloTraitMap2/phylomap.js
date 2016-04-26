@@ -36,7 +36,7 @@ function clearLocations() {
 	// clear occurrence compilation list
 	phylomap.selectedOccurrences = []
 	//updateTableDisplay(phylomap.selectedOccurrences)
-	updateGeoJSDisplay()
+	//updateGeoJSDisplay()
 }
 
 // Can create serious problems as it doesn't delete markerIndex references!
@@ -196,8 +196,8 @@ function searchLocationsNearCircle(lat,lon,radius) {
 		}
 	}
 	//updateTableDisplay(phylomap.selectedOccurrences)
-	geomap = updateGeoJSDisplay()
-	geomap.pan({x:0.01,y:0.01})
+	//geomap = updateGeoJSDisplay()
+	//geomap.pan({x:0.01,y:0.01})
 }
 
 
@@ -304,7 +304,7 @@ function searchLocationsNearClade(selectedNode, callback) {
 	var icon = getIcon(selectedNodeID);
 	mapAllNodesInClade(rootOfClade, rootOfClade, icon, selectedNodeID)
 	//updateTableDisplay(phylomap.selectedOccurrences)
-	updateGeoJSDisplay()
+	//updateGeoJSDisplay()
 	// run the callback if one was passed.  Use for setting and clearing processing badge
 	if (callback != null) callback();
 }
@@ -561,6 +561,7 @@ function returnDataAsText(p) {
 // #bb5a00 - reddish/brows for low values
 // #ffffff  - white for top values
 
+
 function geojs_addVectorLayer(points) {
     //console.log(points,"\n");
 
@@ -587,11 +588,10 @@ function geojs_addVectorLayer(points) {
         		phylomap.geojsmap.map.center({x: evt.data.x, y: evt.data.y});
       		})
 			.geoOn(geo.event.feature.mouseover, function (evt) {
-        		//evt.data.opacity = 1;
-        		//evt.data.strokeOpacity = 1;
         		this.modified();
         		markers.map().draw();
-        		tooltip.position({x: evt.data.x+0.015, y: evt.data.y+0.015});
+        		//tooltip.position({x: evt.data.x+0.015, y: evt.data.y+0.015});
+        		tooltip.position({x: evt.data.x+0.0015, y: evt.data.y+0.0015});
         		tooltipElem.text(' '+evt.data.text);
        			tooltipElem.removeClass('hidden');
       		})
@@ -658,6 +658,9 @@ function geojs_resize() {
 function geojs_addBaseLayer() {
     var map;
 
+    // clear out the old map
+    $('#geojs_map_canvas').empty()
+
     map = geo.map({
         node: '#geojs_map_canvas',
         zoom: 2
@@ -675,6 +678,7 @@ function updateGeoJSDisplay() {
 
 	phylomap.geojsmap.map = null
 	phylomap.geojsmap.markers = null
+	phylomap.geojsmap.previouscolor = null
 
 	//Proj4js.defs["EPSG:4326"] = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
 	//Proj4js.defs["EPSG:3031"] = "+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";

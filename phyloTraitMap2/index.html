@@ -191,12 +191,12 @@ circle.hidden {
         <label class="hidden" id="name" href="#"></label>
         <button class="btn btn-link hidden" id="logout" href="#">Logout</button>
         <div class="modal fade" id="dialog-container"></div>
-
+        <hr>
         Arbor Collection: 
-        <select  id="project" class="input" style="margin-top:10px;">
+        <select  id="project" class="form-control" style="margin-top:10px;">
         </select>
-        Dataset
-        <select id="data" class="input" style="margin-top:10px;" >
+        Dataset:
+        <select id="data" class="form-control" style="margin-top:10px;" >
         </select>
       <!--  <button type="button" onclick="initDatasetFromArbor();">Open Dataset</button>  -->
 </div>
@@ -221,6 +221,8 @@ circle.hidden {
             <div class=col-md-6 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; border-style:solid; overflow:hidden; border-width:medium"></div>
             <div class=col-md-5 id="map_canvas" style="  margin-left: 40px; margin-right:20px; height:800px; float-right; border-style:solid; border-width:medium"></div>
         </div>
+          <button type="button" onclick="updateGeoJSDisplay();" style="margin-top:25px; margin-left:25px;">Render Color by Attribute Map</button>
+
          <div class=row style="margin-left:40px">
             Attribute to Color By:
             <select  class=md-col-6 id='geojs_attribute' class='form-control' style="margin-left:40px;  margin-top:40px; margin-bottom:40px;width=40%"> </div>
