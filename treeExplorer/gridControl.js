@@ -290,10 +290,10 @@ function renderScatterPlot(studyList) {
 }
 
 
-// Run Romanesco Step
+// Run Flow Step
 //
 // this function runs an aggregation analysis stored in Arbor on the currently selected map entries. Since 
-// the romanesco step could take awhile, a checkQueryResult() routine is called after a 1/2 second.  
+// the flow step could take awhile, a checkQueryResult() routine is called after a 1/2 second.  
 
 function updateDrillDownDataDisplay() {
 
@@ -313,7 +313,7 @@ function updateDrillDownDataDisplay() {
   tableForProcessing['fields'] = fields
   tableForProcessing['rows'] = phylomap.selectedOccurrences
 
-  // now format the input and output "deck" for the Romanesco job and call it
+  // now format the input and output "deck" for the Flow job and call it
   var inputs = {
                 table:  {type: "table",  format: "rows",   data: tableForProcessing},
                 column: {type: "string", format: "text",    data: "species"}
@@ -331,16 +331,16 @@ function updateDrillDownDataDisplay() {
 }
 
 
-// this checks the status of a running Romanesco job.  The status value returned is examined and action is taken
+// this checks the status of a running Flow job.  The status value returned is examined and action is taken
 // to render the result, print out a failure console message, or wait another period and re-request status. 
 
 checkQueryResult = function () {
-    var check_url = '/item/' + phylomap.aggregateAnalysis + '/romanesco/' + phylomap.taskId + '/status'
+    var check_url = '/item/' + phylomap.aggregateAnalysis + '/flow/' + phylomap.taskId + '/status'
     girder.restRequest({path: check_url}).done(_.bind(function (result) {
         console.log(result.status);
         if (result.status === 'SUCCESS') {
             // get result data
-            var result_url = '/item/' + phylomap.aggregateAnalysis  + '/romanesco/' + phylomap.taskId  + '/result'
+            var result_url = '/item/' + phylomap.aggregateAnalysis  + '/flow/' + phylomap.taskId  + '/result'
             girder.restRequest({path: result_url}).done(_.bind(function (data) {
             // once the result is back, render it back in the table
             updateTableDisplay(data.result.output.data.rows);

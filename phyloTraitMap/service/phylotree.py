@@ -58,7 +58,7 @@ def run(collectionName, itemName):
 
     # request the tree content in its json.nested for
 	try:
-		treeresp = requests.get(girderlocation+'/api/v1/item/'+itemId+'/romanesco/tree/nested/nested');
+		treeresp = requests.get(girderlocation+'/api/v1/item/'+itemId+'/flow/tree/nested/nested');
 		return treeresp.json()['data']
 	except ValueError:
 		response['error'] = "Search for tree unsuccessful"

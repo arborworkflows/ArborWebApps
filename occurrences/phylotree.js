@@ -177,7 +177,7 @@ function findSelectedOccurrences(projectName,datasetName) {
 		});
 	});
 
-	// http://localhost:9080/girder/api/v1/item/543b374956c02c04bd338496/romanesco/tree/newick/nested
+	// http://localhost:9080/girder/api/v1/item/543b374956c02c04bd338496/flow/tree/newick/nested
 }
 
 
@@ -185,7 +185,7 @@ function loadTableFromArbor() {
 	var itemId = phylomap.currentDatasetArchiveId 
 	if (itemId != null) {
 		clearLocations()
-		var table_return_url = 'item/'+itemId+'/romanesco/table/csv/rows'
+		var table_return_url = 'item/'+itemId+'/flow/table/csv/rows'
 		girder.restRequest({path: table_return_url})
 			.done(_.bind(function (result) {
 				//console.log('girder response:',result)
@@ -645,7 +645,7 @@ function updateJSON(options) {
 		// on loading the data change the circle color to red
 		d3.select(node.childNodes[0]).style("fill", "red");
 	}
-	var tree_return_url = 'item/'+phylomap.currentDatasetArchiveId+'/romanesco/tree/nested/nested'
+	var tree_return_url = 'item/'+phylomap.currentDatasetArchiveId+'/flow/tree/nested/nested'
 	girder.restRequest({path: tree_return_url})
 		.done(_.bind(function (result) {
 		console.log('json:',result)
