@@ -29,7 +29,7 @@ phylomap.selectedOccurrences = []
 
 phylomap.girder_API_root = '../girder/api/v1'
 
-// declare a spot for the analysis used by flow to filter a girder item. 
+// declare a spot for the analysis used by romanesco to filter a girder item. 
 phylomap.aggregateAnalysisName = "Aggregate table by average"
 phylomap.aggregateAnalysis = null
 
@@ -160,70 +160,35 @@ function drawSelectedTree_orig(projectName,datasetName) {
 }
 
 
-function drawSelectedTree(projectName,datasetName) {
-	// use the girder API to extract the tree.  We used to use a tangelo service, which 
-	// isn't included in TangeloHuvb anymore, so use the Girder API to find the collection, the
-	// "Data" directory, and then the item from inside the Data folder by name
+function drawSelectedTree(projectName, datasetName) {
+    girder.restRequest({
+	path: 'resource/lookup',
+	data: {
+	    path: '/collection/' + projectName + '/Data/' + datasetName
+	}
+    }).done(function (response) {
+	 phylomap.currentDatasetArchiveId = response['_id'];
 
+        girder.restRequest({
+            path: 'item/' + response['_id'] + '/flow/tree/nested/nested'
+        }).done(function (result) {
+            // added with new Arbor datastore as more processing is in javascript
+            phylomap.currentTree = JSON.parse(result.data);
+            root = phylomap.currentTree;
+            root.x0 = height / 2;
+            root.y0 = 0;
 
-    // retrieve collection ID from the name
-    var collectionId = null
-    d3.json(phylomap.girder_API_root+"/collection?text="+projectName, function (error, collectionList) {
-		collectionId =  collectionList[0]["_id"]
-		//console.log('collectionID=',collectionId);
+            // this builds a list of the taxa nodes with their locations for
+            // faster searching and also a list of all nodes for finding nodes by id
+            processTreeForMapLocations()
 
-     	// build the query url for girder to list the contents of the selected Data folder in the collection
-    	// ex. http://localhost:9000/api/v1/folder?parentType=collection&parentId=5420814456c02c06f389739d&text=Data
-    	var data_folder_url = phylomap.girder_API_root+'/folder?parentType=collection&parentId='+collectionId+'&text=Data'
-    	var dataFolderId = null
-    	d3.json(data_folder_url, function (error, datasetFolderList) {
-    		dataFolderId = datasetFolderList[0]["_id"]
-			//console.log('dataFolderID=',dataFolderId)	
-
-			// now we can look up the items in the collection's Data Folder
-    		var itemlist_url = phylomap.girder_API_root+'/item?folderId='+dataFolderId
-    		d3.json(itemlist_url, function (error, itemList) {
-				var itemId = null
-				console.log('item list: ',itemList)
-				for (var i = itemList.length - 1; i >= 0; i--) {
-					if (itemList[i]["name"]== datasetName) {
-						itemId = itemList[i]["_id"]
-					}
-				};
-				if (itemId != null) {
-					console.log('found item number ',itemId)
-					phylomap.currentDatasetArchiveId = itemId
-
-					// item/54a01a4456c02c0551c04d40/flow/tree/nested/nested
-		    		var tree_return_url = 'item/'+itemId+'/flow/tree/nested/nested'
-					girder.restRequest({path: tree_return_url})
-		    			.done(_.bind(function (result) {
-
-							//console.log('girder response:',result)
-							// added with new Arbor datastore as more processing is in javascript
-							phylomap.currentTree = JSON.parse(result.data);
-							root = phylomap.currentTree;
-							//console.log("tree returned:",root)
-							root.x0 = height / 2;
-							root.y0 = 0;
-
-							// this builds a list of the taxa nodes with their locations for 
-					        // faster searching and also a list of all nodes for finding nodes by id
-					        processTreeForMapLocations()
-
-							// initialize the display to show children nodes
-							root.children.forEach(toggleAll);
-							update(root);
-		    			}))
-				}
-			});
-		});
-	});
-
-	// http://localhost:9080/girder/api/v1/item/543b374956c02c04bd338496/flow/tree/newick/nested
-
-	
+            // initialize the display to show children nodes
+            root.children.forEach(toggleAll);
+            update(root);
+	}).error(console.error);
+    }).error(console.error);
 }
+
 
 // initialize the Arbor collection and item viewers according to the dataset information
 // that comes back from the Arbor instance
@@ -299,6 +264,9 @@ function initializeDataSelection(initialProject, initialData) {
 				}));
 			}));  // girder collectionID
 		});
+	      // Because of the way datasets are loaded on projects, we need to trigger a change on the first
+	      // project to load the correct datasets.
+	      performEvent(document.getElementById('project'), 'change');
 	}));  // end of girder projects
 }
 

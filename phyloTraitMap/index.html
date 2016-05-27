@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
-	<head>
-	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
                 <link rel="shortcut icon" href=/img/tangelo.ico>
-	   <title>Arbor Tree and Distribution Browser</title>
+           <title>Arbor Tree and Distribution Browser</title>
 
 <script src=https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false></script>
 <script src=//code.jquery.com/jquery-2.1.0.min.js></script>
@@ -55,7 +55,6 @@
 
 
 
-<!-- used for girder, so we can authenticate -->
 <!-- these declaraations have to be just right, or flow and window.flow aren't defined -->
 <script src="../static/built/plugins/flow/libs.min.js" charset="utf-8"></script>
 <script src="../static/built/plugins/flow/ace.min.js" charset="utf-8"></script>
@@ -185,7 +184,7 @@ circle.hidden {
         <button class="btn btn-link hidden" id="logout" href="#">Logout</button>
         <div class="modal fade" id="dialog-container"></div>
 
-        Arbor Collection: 
+        Arbor Collection:
         <select  id="project" class="input" style="margin-top:10px;">
         </select>
         Dataset
@@ -200,11 +199,11 @@ circle.hidden {
                 <button type="button" onclick="onAllAndLoad(root);">Full Tree</button>
                 <input type="checkbox" id="nodeNames" onchange="toggleText(this);" checked> Show Names
                 <input type="checkbox" id="cladeSelect" onchange="toggleCladeSelect(this);" checked> Enable Clade Selection
-                <input type="checkbox" id="scatterplotSelect" onchange="toggleScatterplot(this);" unchecked> Enable Trait Scatterplot               
+                <input type="checkbox" id="scatterplotSelect" onchange="toggleScatterplot(this);" unchecked> Enable Trait Scatterplot
                 <button type="button" onclick="increaseWidth(40);">Increase Depth</button>
                 <button type="button" onclick="increaseWidth(-40);">Decrease Depth</button>
                 <button type="button" onclick="increaseHeight(80);">Increase Height</button>
-                <button type="button" onclick="increaseHeight(-80);">Decrease Height</button>        
+                <button type="button" onclick="increaseHeight(-80);">Decrease Height</button>
                 <button type="button" onclick="clearAllHighlights();">Clear Highlights</button>
                 <button type="button" onclick="clearLocations();">Clear Map Markers</button>
             </div>
