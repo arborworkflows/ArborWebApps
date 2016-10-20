@@ -29,7 +29,7 @@ phylomap.selectedOccurrences = []
 
 phylomap.girder_API_root = '../girder/api/v1'
 
-// declare a spot for the analysis used by romanesco to filter a girder item. 
+// declare a spot for the analysis used by flow to filter a girder item. 
 phylomap.aggregateAnalysisName = "Aggregate table by average"
 phylomap.aggregateAnalysis = null
 
@@ -348,8 +348,8 @@ function drawSelectedTree(projectName,datasetName) {
 					console.log('found item number ',itemId)
 					phylomap.currentDatasetArchiveId = itemId
 
-					// item/54a01a4456c02c0551c04d40/romanesco/tree/nested/nested
-		    		var tree_return_url = 'item/'+itemId+'/romanesco/tree/newick/newick'
+					// item/54a01a4456c02c0551c04d40/flow/tree/nested/nested
+		    		var tree_return_url = 'item/'+itemId+'/flow/tree/newick/newick'
 					girder.restRequest({path: tree_return_url})
 		    			.done(_.bind(function (result) {
 
@@ -366,7 +366,7 @@ function drawSelectedTree(projectName,datasetName) {
 		});
 	});
 
-	// http://localhost:9080/girder/api/v1/item/543b374956c02c04bd338496/romanesco/tree/newick/nested
+	// http://localhost:9080/girder/api/v1/item/543b374956c02c04bd338496/flow/tree/newick/nested
 	
 }
 

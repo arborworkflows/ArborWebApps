@@ -244,10 +244,10 @@ function drawSelectedTable(collection,dataset) {
                     console.log('found item number ',itemId)
                     tableExplorer.currentDatasetArchiveId = itemId
 
-                    // item/54a01a4456c02c0551c04d40/romanesco/tree/nested/nested
+                    // item/54a01a4456c02c0551c04d40/flow/tree/nested/nested
                     // *** TODO.  add logic here to check the file extension and call the right
-                    // romanesco conversion, based on csv, rows, etc.
-                    var table_return_url = 'item/'+itemId+'/romanesco/table/csv/tsv'
+                    // flow conversion, based on csv, rows, etc.
+                    var table_return_url = 'item/'+itemId+'/flow/table/csv/tsv'
                     var full_url = tableExplorer.girder_API_root+'/'+table_return_url
     
    			$('#heatmap').heatmap(

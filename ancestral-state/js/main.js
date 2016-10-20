@@ -164,12 +164,12 @@
                 }, app));
 
         app.checkASRResult = function () {
-            var check_url = '/item/' + this.ASRId + '/romanesco/' + this.taskId + '/status'
+            var check_url = '/item/' + this.ASRId + '/flow/' + this.taskId + '/status'
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
                 if (result.status === 'SUCCESS') {
                     // get result data
-                    var result_url = '/item/' + this.ASRId + '/romanesco/' + this.taskId + '/result'
+                    var result_url = '/item/' + this.ASRId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.treePlot = data.result.treePlot.data;
 

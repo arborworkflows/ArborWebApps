@@ -307,12 +307,12 @@
                 }, app));
 
         app.checkResult = function () {
-            var check_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/status'
+            var check_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/status'
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
                 if (result.status === 'SUCCESS') {
                     // get result data
-                    var result_url = '/item/' + this.analysisId + '/romanesco/' + this.taskId + '/result'
+                    var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.coefficients = data.result.coefficients.data;
                         app.modelfit_summary = data.result.modelfit_summary.data;

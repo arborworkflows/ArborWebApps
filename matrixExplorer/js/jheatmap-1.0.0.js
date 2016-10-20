@@ -618,7 +618,7 @@ jheatmap.readers.TableHeatmapReader.prototype.read = function (heatmap, initiali
 
         success: function loadCells(file) {
 
-	        // CRL changed file to file.data to match return from Romanesco
+	        // CRL changed file to file.data to match return from Flow
 	        var file_cleaned = file.substring(10,file.length-21)
             var f2 = file_cleaned.replace('\\r', '')
             var lines = f2.split('\\n');
