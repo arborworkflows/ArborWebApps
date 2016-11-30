@@ -27,5 +27,5 @@ which will be exposed on your host machine. ::
     ln -s ../ArborWebApps/ancestral-state  .
 
 Now you will also need to import the "Phylogenetic signal" and "Ancestral state" analyses from
-the public Arbor at `https://arbor.kitware.com <https://arbor.kitware.com>`_ by selecting the analysis
+the public Arbor at `https://arborclassic.arborworkflows.com <https://arborclassic.arborworkflows.com>`_ by selecting the analysis
 and clicking Download, then uploading them on your instance with the Upload button.
