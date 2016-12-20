@@ -5,7 +5,9 @@
 
     $(document).ready(function () {
         girder.apiRoot = '/girder/api/v1';
-        var app = new flow.App();
+        var app = new flow.App({
+            el: 'body'
+        });
 
         // Lookup the ID of the analysis that we wish to perform.
         app.analysisName = "aceArbor";
