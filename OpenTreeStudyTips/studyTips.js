@@ -16,8 +16,17 @@ app = 0
 treetips.studyAnalysisName = "Explore Study Trees from Taxon Name v2";
 treetips.studyAnalysisId = 0
 
+treetips.enumerateAnalysisName = "OpenTree Enumerate Trees from Study List";
+treetips.enumerateAnalysisId = 0
+
+treetips.extractTipsAnalysisName = "Loop - Accumulate Tree Tips from Study Tree Table";
+treetips.extractTipsAnalysisId = 0
+
+// Lookup the IDs of the analyses that we wish to perform.
+
 function findAllAnalyses() {
-   // Lookup the IDs of the analyses that we wish to perform.
+
+    // analysis for returning study table   
     girder.restRequest({
         path: 'resource/search',
         data: {
@@ -28,8 +37,34 @@ function findAllAnalyses() {
         treetips.studyAnalysisId = results["item"][0]._id;
         console.log('found study analysis:',treetips.studyAnalysisName)
         console.log('id=',treetips.studyAnalysisId)
-        //treetips.readyToAnalyze();
     });
+
+    // analysis to enumerate trees from the study table
+    girder.restRequest({
+        path: 'resource/search',
+        data: {
+            q: treetips.enumerateAnalysisName,
+            types: JSON.stringify(["item"])
+        }
+    }).done(function (results) {
+        treetips.enumerateAnalysisId = results["item"][0]._id;
+        console.log('found enumeration analysis:',treetips.enumerateAnalysisName)
+        console.log('id=',treetips.enumerateAnalysisId)
+    });
+
+ // analysis to enumerate trees from the study table
+    girder.restRequest({
+        path: 'resource/search',
+        data: {
+            q: treetips.extractTipsAnalysisName,
+            types: JSON.stringify(["item"])
+        }
+    }).done(function (results) {
+        treetips.extractTipsAnalysisId = results["item"][0]._id;
+        console.log('found enumeration analysis:',treetips.extractTipsAnalysisName)
+        console.log('id=',treetips.extractTipsAnalysisId)
+    });
+
   }
 
 
@@ -93,7 +128,7 @@ function getMatchingStudiesFromOpenTree() {
                     var result_url = '/item/' + treetips.studyAnalysisId + '/flow/' +  treetips.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         treetips.result = data.result.returnedStudies.data;
-                        console.log(treetips.result.rows[0])
+                        //console.log(treetips.result.rows[0])
                         updateTableDisplay(treetips.result.rows)
 
                         // render results
@@ -128,58 +163,126 @@ function findStudies() {
      //writeOutput()
 }
 
-function writeAllToDatabase() {
-  for (var i = 0; i < treetips.processedStudyList.length ; i++) {
-    console.log(treetips.processedStudyList[i])
-    writeSingleStudyToDatabase(treetips.processedStudyList[i])
-  }
-}
 
-// this can process multiple studies at once.  The summary results are accumulated in data structures initialized here 
-function prepareAccumulationStructures() {
- while(treetips.processedStudyList.length >0) {
-    treetips.processedStudyList.pop()
- }
-}
 
-  function writeSingleStudyToDatabase(singleStudy) {
+// this method takes the list of studies, on which the user may have unselected some rows,
+// and uses the modified table to invoke a method in Arbor to extract the tree tips
 
-   serviceUrl = "service/writestudytodatastore"
-        $.ajax({
-        type: 'PUT',
-        url: serviceUrl,
-        data: {
-           study: JSON.stringify(singleStudy)
-           },
-        dataType: "json",
-        success: function (response) {
-            // If the value could not be retrieved, set it to null and print
-            // an error message on the console.
-            if (response.error || response.result.length === 0) {
-                max = null;
+function enumerateTreesFromSelectedStudies() {
+    console.log('enumerating trees from selected studies')
+    // loop through the displayed study grid and build a table of selected studies.
+    // the output is formated as a table:rows dataset for upload to the Arbor method
+    var selectedStudies = {}
+    selectedStudies['fields'] = ['ot:studyId']
+    selectedStudies['rows'] = []
 
-                if (response.error) {
-                    tangelo.fatalError("something bad happened");
+    for (row in grid_data) {
+      var outrow = {}
+      if (grid_data[row]['selected'] == true) {
+        outrow['ot:studyId'] = grid_data[row]['ot:studyId']
+        selectedStudies['rows'].push(outrow)
+      }
+    }
+    //console.log('selectedStudies:',selectedStudies)
+
+    // Now we will run the method that extracts the trees from the studies. First prepare
+    // the input and output specifications for the method
+      var inputs = {
+          studyTable:  {type: "table",  format: "rows",    data: selectedStudies}
+      };
+
+      var outputs = {
+                treeTable: {type: "table", format: "rows"}
+            };
+
+      //  execute the method on the input data
+      flow.performAnalysis(treetips.enumerateAnalysisId, inputs, outputs,
+          _.bind(function (error, result) {
+              treetips.taskId = result._id;
+              setTimeout(_.bind(treetips.checkResult, window.app), 1000);
+          }, window.app));
+
+        // this is called repeately, once per second, to see if the computation result is done
+        treetips.checkResult = function () {
+            var check_url = '/item/' + treetips.enumerateAnalysisId + '/flow/' +  treetips.taskId + '/status'
+            girder.restRequest({path: check_url}).done(_.bind(function (result) {
+                console.log(result.status);
+                if (result.status === 'SUCCESS') {
+                    // get result data
+                    var result_url = '/item/' + treetips.enumerateAnalysisId + '/flow/' +  treetips.taskId + '/result'
+                    girder.restRequest({path: result_url}).done(_.bind(function (data) {
+                        treetips.result = data.result.treeTable.data;
+                        console.log('tree enumeration result:')
+                        console.log(treetips.result)
+                        $("#treestatus").text("Number of matching trees being extracted: " + treetips.result.rows.length.toString());
+                        extractTipsFromTreeList(treetips.result)
+
+                    }, this));
+
+                } else if (result.status === 'FAILURE') {
+                    $("#analyze").removeAttr("disabled");
+                    $("#notice").text("Analysis failed. " + result.message);
+                } else {
+                    setTimeout(_.bind(treetips.checkResult, this), 1000);
                 }
-            } else {
-                console.log("received json response:",response)
-                // we know the operation is complete now, so update the UI
-                updateDisplayAfterDataStore()
-            }
-        }
-        });
+            }, this));
+        };
 
-  }
+}
 
-// called after a successful store of a study in the database 
-function updateDisplayAfterDataStore()  {
+
+function extractTipsFromTreeList(treeEnumerationTable) {
+    console.log('extracting trees from selected studies')
+   
+
+    // Now we will run the method that extracts the trees from the studies. First prepare
+    // the input and output specifications for the method
+      var inputs = {
+          table:  {type: "table",  format: "rows",    data: treeEnumerationTable}
+      };
+
+      var outputs = {
+                accumulatedTips: {type: "table", format: "rows"}
+            };
+
+      //  execute the method on the input data
+      flow.performAnalysis(treetips.extractTipsAnalysisId, inputs, outputs,
+          _.bind(function (error, result) {
+              treetips.taskId = result._id;
+              setTimeout(_.bind(treetips.checkResult, window.app), 1000);
+          }, window.app));
+
+        // this is called repeately, once per second, to see if the computation result is done
+        treetips.checkResult = function () {
+            var check_url = '/item/' + treetips.extractTipsAnalysisId + '/flow/' +  treetips.taskId + '/status'
+            girder.restRequest({path: check_url}).done(_.bind(function (result) {
+                console.log(result.status);
+                if (result.status === 'SUCCESS') {
+                    // get result data
+                    var result_url = '/item/' + treetips.extractTipsAnalysisId + '/flow/' +  treetips.taskId + '/result'
+                    girder.restRequest({path: result_url}).done(_.bind(function (data) {
+                        treetips.result = data.result.accumulatedTips.data;
+                        console.log('tree enumeration result:')
+                        console.log(treetips.result)
+                        $("#treestatus").text("Number of tips extracted: " + treetips.result.rows.length.toString());
+                        writeOutput(treetips.result.rows)
+
+                    }, this));
+
+                } else if (result.status === 'FAILURE') {
+                    $("#analyze").removeAttr("disabled");
+                    $("#notice").text("Analysis failed. " + result.message);
+                } else {
+                    setTimeout(_.bind(treetips.checkResult, this), 1000);
+                }
+            }, this));
+        };
 
 }
 
 
 
-function writeOutput() {
-    var content = treetips.fileArr;
+function writeOutput(content) {
 
      // write in the row names as the new first column
     for (var i = 0; i < treetips.reference.length; i++) {
@@ -285,7 +388,7 @@ function writeOutput() {
 
     d3.select("#processbutton")
        .on("click", findStudies);
-    d3.select("#databasebutton")
-       .on("click", writeAllToDatabase);
+    d3.select("#extractbutton")
+       .on("click", enumerateTreesFromSelectedStudies);
   });
 }(window.flow, window.$, window.girder));

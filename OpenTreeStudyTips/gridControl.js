@@ -15,7 +15,7 @@ function updateTableDisplay(studyList) {
     grid_columns.push( {id: attribsToRender[attrib], 
       name: attribsToRender[attrib], field: attribsToRender[attrib]} )  
   }
-  console.log('grid_columns:',grid_columns)
+  //console.log('grid_columns:',grid_columns)
 
   // global options for SlickGrid
   // *** added editable, autoEdit to allow checkmark to be editable. Two editing lines are not needed for display
@@ -34,7 +34,7 @@ function updateTableDisplay(studyList) {
     var row = $.extend(studyList[index],{'selected':true})
     grid_data.push(row)
   }
-  console.log(grid_data)
+  //console.log(grid_data)
  
    // define the table the first time through, after this just update its values
    if  (grid === undefined) {
@@ -42,7 +42,7 @@ function updateTableDisplay(studyList) {
    } else {
     console.log("attempting to redraw the grid")
     grid.invalidate()
-    grid = new Slick.Grid("#tablecontent", studyList, grid_columns, grid_options);
+    grid = new Slick.Grid("#tablecontent", grid_data, grid_columns, grid_options);
    }
 }
 

@@ -94,7 +94,7 @@
    <div class=row>
         <div class=col-md-8>
             <h3 style="margin-left:30px">Enter Taxon Concept Here</h4>
-             <p style="margin-left:30px; margin-right:20px">Enter a name of a high level taxonomic concept or a clade underwhich you want Arbor to extract all studies related to this search term.</p>
+             <p style="margin-left:30px; margin-right:20px">Enter a name of a clade for which you want Arbor to extract all studies related to this search term. The search will be performed by OpenTree and related studies will be displayed in the table below. </p>
             <input id="taxon_name" style="margin-left:30px; margin-top:20px; width:250px; height:40px; background-color:darkseagreen"><h>Enter Taxon name</h></input>
             <!-- <output id="list" ></output>  -->
             <br>
@@ -107,13 +107,15 @@
      
         <!-- place for the compilation table with a row for each group of CSVs, after they have been combined -->
         <div class=col-md-8>
-          <p style="margin-right:20px;margin-left:20px; margin-top:10px;">Please look at these entries and enable only the study threes that should be used in this comparison.  Sometimes a query term will return clades that should not be included, so please review this list carefully
+          <p style="margin-right:20px;margin-left:20px; margin-top:10px;">Please look at these entries and enable only the study trees that should be used in this comparison.  Sometimes a query term will return clades that should not be included, so please review this list carefully.  To unselect a study, just click the checkmark to activate the editor. The checkmark will change to blue in color. Click the blue checkmark to disable selection and click out of the cell to force an update of cell state.  Similarly, to re-select a cell, click inside the cell, click the empty square to re-select the study, and finally click outside the cell to force the update. 
              </p>  
-             <div id="tablecontent" style="margin-top:20px; width:700px; height:500px;"></div>
+             <div id="tablecontent" style="margin-top:20px; width:900px; height:500px;"></div>
               <h4 style="margin-top:20px; margin-left:20px">Analyze Tree Tips </h4>
                     <p style="margin-right:20px; margin-left:20px">When the list of studies above looks correct, press the extract tips button below to retrieve the trees from OpenTree and find which tips match tips in the synthetic tree</p>
 
                 <div id=extractbutton class="btn btn-success " style="margin-top:20px;margin-left:20px">Extract and Compare Tips</div>
+                <br>
+                <text id=treestatus style='margin-top: 20px; margin-left: 20px'></text>
         </div>
     </div>
 
