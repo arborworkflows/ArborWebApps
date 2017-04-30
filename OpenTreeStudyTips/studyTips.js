@@ -21,6 +21,10 @@ treetips.enumerateAnalysisId = 0
 
 treetips.extractTipsAnalysisName = "Loop - Accumulate Tree Tips from Study Tree Table";
 treetips.extractTipsAnalysisId = 0
+//treetips.extractTipsAnalysisName = "table-pass-through";
+
+treetips.wfTreeTipsFromStudyTreeName = "WF Tree Tips from Study Tree"
+treetips.wfTreeTipsFromStudyTreeId = 0
 
 // Lookup the IDs of the analyses that we wish to perform.
 
@@ -63,6 +67,19 @@ function findAllAnalyses() {
         treetips.extractTipsAnalysisId = results["item"][0]._id;
         console.log('found enumeration analysis:',treetips.extractTipsAnalysisName)
         console.log('id=',treetips.extractTipsAnalysisId)
+    });
+
+     // analysis to enumerate trees from the study table
+    girder.restRequest({
+        path: 'resource/search',
+        data: {
+            q: treetips.wfTreeTipsFromStudyTreeName,
+            types: JSON.stringify(["item"])
+        }
+    }).done(function (results) {
+        treetips.wfTreeTipsFromStudyTreeId = results["item"][0]._id;
+        console.log('found enumeration analysis:',treetips.wfTreeTipsFromStudyTreeName)
+        console.log('id=',treetips.wfTreeTipsFromStudyTreeId)
     });
 
   }
@@ -199,11 +216,11 @@ function enumerateTreesFromSelectedStudies() {
       flow.performAnalysis(treetips.enumerateAnalysisId, inputs, outputs,
           _.bind(function (error, result) {
               treetips.taskId = result._id;
-              setTimeout(_.bind(treetips.checkResult, window.app), 1000);
+              setTimeout(_.bind(treetips.enumerateCheckResult, window.app), 1000);
           }, window.app));
 
         // this is called repeately, once per second, to see if the computation result is done
-        treetips.checkResult = function () {
+        treetips.enumerateCheckResult = function () {
             var check_url = '/item/' + treetips.enumerateAnalysisId + '/flow/' +  treetips.taskId + '/status'
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
@@ -223,7 +240,7 @@ function enumerateTreesFromSelectedStudies() {
                     $("#analyze").removeAttr("disabled");
                     $("#notice").text("Analysis failed. " + result.message);
                 } else {
-                    setTimeout(_.bind(treetips.checkResult, this), 1000);
+                    setTimeout(_.bind(treetips.enumerateCheckResult, this), 1000);
                 }
             }, this));
         };
@@ -233,27 +250,29 @@ function enumerateTreesFromSelectedStudies() {
 
 function extractTipsFromTreeList(treeEnumerationTable) {
     console.log('extracting trees from selected studies')
+    console.log('enumerationTable:',treeEnumerationTable)
    
 
     // Now we will run the method that extracts the trees from the studies. First prepare
     // the input and output specifications for the method
       var inputs = {
-          table:  {type: "table",  format: "rows",    data: treeEnumerationTable}
+          "intable" :  {type: "table",  format: "rows",   data: treeEnumerationTable},
+          "analysis" : {type: "string",  format: "text",   data: treetips.wfTreeTipsFromStudyTreeId}
       };
 
       var outputs = {
-                accumulatedTips: {type: "table", format: "rows"}
+                "accumulatedTips": {type: "table", format: "rows"}
             };
 
       //  execute the method on the input data
       flow.performAnalysis(treetips.extractTipsAnalysisId, inputs, outputs,
           _.bind(function (error, result) {
               treetips.taskId = result._id;
-              setTimeout(_.bind(treetips.checkResult, window.app), 1000);
+              setTimeout(_.bind(treetips.extractCheckResult, window.app), 1000);
           }, window.app));
 
         // this is called repeately, once per second, to see if the computation result is done
-        treetips.checkResult = function () {
+        treetips.extractCheckResult = function () {
             var check_url = '/item/' + treetips.extractTipsAnalysisId + '/flow/' +  treetips.taskId + '/status'
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
@@ -264,16 +283,15 @@ function extractTipsFromTreeList(treeEnumerationTable) {
                         treetips.result = data.result.accumulatedTips.data;
                         console.log('tree enumeration result:')
                         console.log(treetips.result)
-                        $("#treestatus").text("Number of tips extracted: " + treetips.result.rows.length.toString());
-                        writeOutput(treetips.result.rows)
+                        $("#tipstatus").text("Number of tips extracted: " + treetips.result.rows.length.toString());
+                        //writeOutput(treetips.result.rows)
 
                     }, this));
 
                 } else if (result.status === 'FAILURE') {
-                    $("#analyze").removeAttr("disabled");
-                    $("#notice").text("Analysis failed. " + result.message);
+                    $("#tipstatus").text("Analysis failed. " + result.message);
                 } else {
-                    setTimeout(_.bind(treetips.checkResult, this), 1000);
+                    setTimeout(_.bind(treetips.extractCheckResult, this), 1000);
                 }
             }, this));
         };
