@@ -256,8 +256,7 @@ function extractTipsFromTreeList(treeEnumerationTable) {
     // Now we will run the method that extracts the trees from the studies. First prepare
     // the input and output specifications for the method
       var inputs = {
-          "intable" :  {type: "table",  format: "rows",   data: treeEnumerationTable},
-          "analysis" : {type: "string",  format: "text",   data: treetips.wfTreeTipsFromStudyTreeId}
+          "table" :  {type: "table",  format: "rows",   data: treeEnumerationTable}
       };
 
       var outputs = {
