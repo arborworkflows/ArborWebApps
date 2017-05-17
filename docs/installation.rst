@@ -2,11 +2,11 @@
     Installation
 ====================
 
-TangeloHub Installation
------------------------
+Flow Installation
+-----------------
 
 Arbor Workflows uses `Flow <https://github.com/Kitware/flow/>`_, developed by Kitware, as its main interface.
-Follow the `Flow Vagrant install instructions <http://tangelohub.readthedocs.org/en/latest/installation.html#vagrant-install>`_
+Follow the `Flow Vagrant install instructions <http://resonant-flow.readthedocs.org/en/latest/installation.html#vagrant-install>`_
 with the Ansible ``arbor`` setting set to ``true`` (the default) to spin up your own instance.
 
 Easy Mode App Installation
