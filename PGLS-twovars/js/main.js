@@ -108,7 +108,7 @@
         $("#column-input-y").droppable({
             drop: function( event, ui ) {
                 var COI = ui.draggable.text();
-                app.column_x = COI;
+                app.column_y = COI;
                 d3.select("#column-input-y")
                     .classed('btn-primary', true)
                     .classed('btn-success', false)
@@ -131,7 +131,7 @@
             $("#column-input-x").droppable({
                 drop: function( event, ui ) {
                     var COI = ui.draggable.text();
-                    app.column_y = COI;
+                    app.column_x = COI;
                     d3.select("#column-input-x")
                         .classed('btn-primary', true)
                         .classed('btn-success', false)
@@ -159,8 +159,8 @@
             var inputs = {
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
-                dep_variable: {type: "string", format: "text",             data: app.column_x},
-                ind_variable: {type: "string", format: "text",             data: app.column_y},
+                dep_variable: {type: "string", format: "text",             data: app.column_y},
+                ind_variable: {type: "string", format: "text",             data: app.column_x},
                 correlation: {type: "string", format: "text",             data: "BM"}
             };
 
@@ -193,18 +193,19 @@
                           scrollTop: $("#model-plot").offset().top
                       }, 1000);
 
-                      // get model coefficients
-                      var rowData = data.result.coefficients.data;
-                      console.log(rowData)
-                      d3.select("#output-table-vis-container").classed('hidden', false);
-                      $("#output-table-vis").table({ data: rowData });
+                      var coeffTable = data.result.coefficients.data.rows;
+                      var modelTable = data.result.modelfit_summary.data.rows;
+                      console.log(modelTable);
 
-                      // get model summary
-                      var rowData = data.result.modelfit_summary.data;
-                      console.log(rowData)
-                      d3.select("#output-table2-vis-container").classed('hidden', false);
-                      $("#output-table2-vis").table({ data: rowData });
-                      
+                      // pretty results
+                      $("#result").append("<h2>Results:<\h2>");
+                      $("#result").append("<b>Equation fit: <b><br>");
+                      $("#result").append(app.column_y," = ", app.column_x, "<br><br>");
+                      $("#result").append("<h3>Coeffients:<\h3><br>");
+                      $("#result").append("Intercept =  ", coeffTable[0]["parameter"], ", P = ", coeffTable[0]["p-value"], "<br>");
+                      $("#result").append("Slope =  ", coeffTable[1]["parameter"], ", P = ", coeffTable[1]["p-value"], "<br>");
+                      $("#result").append("AIC for model = ", modelTable[0]["AIC"], "<br>");
+                      $("#result").append("lnL = ", modelTable[0]["loglik"], "<br>");
                   }, this));
 
                 } else if (result.status === 'FAILURE') {
