@@ -89,6 +89,8 @@
                       rowData.rows = rowData.rows.slice(0, 3);
                       d3.select("#input-table-vis-container").classed('hidden', false);
                       $("#input-table-vis").table({ data: rowData });
+                      d3.select("#column-input-y").html('Drag response variable (Y) here <span class="glyphicon glyphicon-exclamation-sign"></span>');
+                      d3.select("#column-input-x").html('Drag predictor variable (X) here <span class="glyphicon glyphicon-exclamation-sign"></span>');
                     }, this));
 
                 }
@@ -113,7 +115,7 @@
                     .classed('btn-primary', true)
                     .classed('btn-success', false)
                     .classed('bg-warning', false)
-                    .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                    .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>' + " (Y) ~");
                 app.readyToAnalyze();
             },
             over: function (event, ui) {
@@ -136,7 +138,7 @@
                         .classed('btn-primary', true)
                         .classed('btn-success', false)
                         .classed('bg-warning', false)
-                        .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                        .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>' + " (X)");
                     app.readyToAnalyze();
                 },
                 over: function (event, ui) {
@@ -151,17 +153,35 @@
                 }
                 });
 
+        function toggleCorrelationModel() {
+
+                  if(document.getElementById("first_toggle").checked)
+                  {
+                    app.correlation="BM";
+                  }
+                  if(document.getElementById("second_toggle").checked)
+                  {
+                    app.correlation="OU";
+                  }
+                  if(document.getElementById("third_toggle").checked)
+                  {
+                    app.correlation="lambda";
+                  }
+        }
+
         $("#analyze").click(function() {
             $("#analyze").attr("disabled", "disabled");
             $("#analyze").text("Re-run");
             $("#notice").text("Performing analysis...");
+
+            toggleCorrelationModel();
 
             var inputs = {
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
                 dep_variable: {type: "string", format: "text",             data: app.column_y},
                 ind_variable: {type: "string", format: "text",             data: app.column_x},
-                correlation: {type: "string", format: "text",             data: "BM"}
+                correlation: {type: "string", format: "text",             data: app.correlation}
             };
 
             var outputs = {
@@ -201,6 +221,7 @@
                       $("#result").append("<h2>Results:<\h2>");
                       $("#result").append("<b>Equation fit: <b><br>");
                       $("#result").append(app.column_y," = ", app.column_x, "<br><br>");
+                      $("#result").append("Model for residuals: ", app.correlation, "<br><br>");
                       $("#result").append("<h3>Coeffients:<\h3><br>");
                       $("#result").append("Intercept =  ", coeffTable[0]["parameter"], ", P = ", coeffTable[0]["p-value"], "<br>");
                       $("#result").append("Slope =  ", coeffTable[1]["parameter"], ", P = ", coeffTable[1]["p-value"], "<br>");

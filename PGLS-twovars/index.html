@@ -2,12 +2,14 @@
 <html>
     <head>
         <title>PGLS for two variables (X versus Y)</title>
+        <link href=//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css rel=stylesheet>
         <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
         <link rel="stylesheet" href="../static/built/fontello/css/fontello.css">
         <link rel="stylesheet" href="../static/built/girder.ext.min.css">
         <link rel="stylesheet" href="../static/built/fontello/css/fontello.css">
         <link rel="stylesheet" href="../static/built/app.min.css">
         <link rel="stylesheet" href="../static/built/plugins/flow/flow.ext.min.css">
+        <link rel="stylesheet" href="css/arbortools.css">
         <style>
 
 html, body {
@@ -91,10 +93,24 @@ html, body {
                                 <span class="glyphicon glyphicon-exclamation-sign"></span>
                             </p>
                         </div>
-                        <div id="column-input-x" class="bg-warning btn spacer full-width">
+
+                        <div class="spacer text-center">
+                          <b>Model for residuals:</b>
+                        </div>
+                        <div class="toggle_radio" id="model-select">
+                            <input type="radio" class="toggle_option" id="first_toggle" name="toggle_option">
+                            <input type="radio" checked class="toggle_option" id="second_toggle" name="toggle_option">
+                            <input type="radio" class="toggle_option" id="third_toggle" name="toggle_option">
+                            <label for="first_toggle"><p>BM</p></label>
+                            <label for="second_toggle"><p>OU</p></label>
+                            <label for="third_toggle"><p>Lambda</p></label>
+                            <div class="toggle_option_slider">
+                            </div>
+                        </div>
+                        <div id="column-input-y" class="bg-warning btn spacer">
                             Load data above to proceed
                         </div>
-                        <div id="column-input-y" class="bg-warning btn spacer full-width">
+                        <div id="column-input-x" class="bg-warning btn spacer">
                             ...
                         </div>
                         <div id="analyze" class="btn btn-success spacer disabled full-width">
