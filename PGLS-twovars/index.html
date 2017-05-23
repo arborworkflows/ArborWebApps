@@ -65,6 +65,34 @@ html, body {
             </div>
         </nav>
 
+        <div class="panel-group">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a data-toggle="collapse" href="#collapse1">More information about PGLS method and assumptions</a>
+              </h4>
+            </div>
+            <div id="collapse1" class="panel-collapse collapse">
+              <div class="panel-body">
+                PGLS (Phylogenetic generalized least squares) is a method for testing for correlations of
+                two continuously distributed characters that vary across species. For example, one might be interested in
+                the correlation between body size (X) and metabolic rate (Y).<br><br>
+                The phylogenetic tree is used to account for the fact that species are not independent data points. In this
+                case, the tree is used to explain correlations in the residuals from the regression line of Y against X.<br><br>
+                In this app, you can model the residuals under three models: Brownian motion (BM), a random-walk model common
+                for comparative methods; Ornstein-Uhlenbeck (OU), a model where divergence is constrained away from some optimal value,
+                in this case the regression line itself; and Pagel's lambda, a model that rescales the tree to effectively
+                change the rate of divergence through time.<br><br>
+                When you carry out this analysis, you are assuming that both the species values and the tree are known without error,
+                that the relationship between X and Y can be described with a straight line, and that the model you select is a
+                reasonable description of how residuals from that line change through time.<br>
+
+              </div>
+              <div class="panel-footer">Phylogenetic compatative methods <a href = "http://phylogeneticcomparativemethods.com">textbook</a></div>
+            </div>
+          </div>
+        </div>
+
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-3">
