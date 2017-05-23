@@ -222,11 +222,13 @@
                       $("#result").append("<b>Equation fit: <b><br>");
                       $("#result").append(app.column_y," = ", app.column_x, "<br><br>");
                       $("#result").append("Model for residuals: ", app.correlation, "<br><br>");
+                      if(app.correlation == "OU")
+                        $("#result").append("alpha = ", coeffTable[2]["Value"].toFixed(3));
                       $("#result").append("<h3>Coeffients:<\h3><br>");
-                      $("#result").append("Intercept =  ", coeffTable[0]["parameter"], ", P = ", coeffTable[0]["p-value"], "<br>");
-                      $("#result").append("Slope =  ", coeffTable[1]["parameter"], ", P = ", coeffTable[1]["p-value"], "<br>");
-                      $("#result").append("AIC for model = ", modelTable[0]["AIC"], "<br>");
-                      $("#result").append("lnL = ", modelTable[0]["loglik"], "<br>");
+                      $("#result").append("Intercept =  ", coeffTable[0]["Value"].toFixed(3), ", P = ", coeffTable[0]["p-value"].toFixed(3), "<br>");
+                      $("#result").append("Slope =  ", coeffTable[1]["Value"].toFixed(3), ", P = ", coeffTable[1]["p-value"].toFixed(3), "<br>");
+                      $("#result").append("AIC for model = ", modelTable[0]["AIC"].toFixed(3), "<br>");
+                      $("#result").append("lnL = ", modelTable[0]["loglik"].toFixed(3), "<br>");
                   }, this));
 
                 } else if (result.status === 'FAILURE') {
