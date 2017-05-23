@@ -16,15 +16,15 @@ app = 0
 treetips.studyAnalysisName = "Explore Study Trees from Taxon Name v2";
 treetips.studyAnalysisId = 0
 
-treetips.enumerateAnalysisName = "OpenTree Enumerate Trees from Study List";
+treetips.enumerateAnalysisName = "Loop Accumulate WF Clade One";
 treetips.enumerateAnalysisId = 0
 
-treetips.extractTipsAnalysisName = "Loop Accumulate Unique Tree Tips from Study Tree Table";
-treetips.extractTipsAnalysisId = 0
-//treetips.extractTipsAnalysisName = "table-pass-through";
+//treetips.extractTipsAnalysisName = "Loop Accumulate WF Clade One";
+treetips.extractTipsAnalysisContents = ''
+treetips.extractTipsAnalysisName = "return random results";
 
-treetips.wfTreeTipsFromStudyTreeName = "WF Tree Tips from Study Tree"
-treetips.wfTreeTipsFromStudyTreeId = 0
+//treetips.wfTreeTipsFromStudyTreeName = "WF Tree Tips from Study Tree"
+//treetips.wfTreeTipsFromStudyTreeId = 0
 
 // Lookup the IDs of the analyses that we wish to perform.
 
@@ -64,11 +64,12 @@ function findAllAnalyses() {
             types: JSON.stringify(["item"])
         }
     }).done(function (results) {
-        treetips.extractTipsAnalysisId = results["item"][0]._id;
+        treetips.extractTipsAnalysisContents = results["item"][0]['meta']['analysis'];
         console.log('found enumeration analysis:',treetips.extractTipsAnalysisName)
-        console.log('id=',treetips.extractTipsAnalysisId)
+        console.log('contents=',treetips.extractTipsAnalysisContents)
     });
 
+/**
      // analysis to enumerate trees from the study table
     girder.restRequest({
         path: 'resource/search',
@@ -81,37 +82,11 @@ function findAllAnalyses() {
         console.log('found enumeration analysis:',treetips.wfTreeTipsFromStudyTreeName)
         console.log('id=',treetips.wfTreeTipsFromStudyTreeId)
     });
+    **/
 
   }
 
 
-// this is automatically called when a file is dropped onto the file drop zone.   The text for the CSV files
-// and the corresponding name are stored in the treetips.fileArray data structure.  This lets the user minimally edit
-// the list before creating an output. 
-
-function load(file) {
-var xmlfilecontent = []
-if (file==null)
-  xmlfilecontent = "<header> <a>sometext</a> </header>"
-  else {
-  var reader = new FileReader();
-
-  reader.onload = function(e) {
-        // store the resulting file in browser local storage
-        var fileDict = {}
-        fileDict['name'] = file.name
-        fileDict['contents'] = e.target.result
-        treetips.fileArray.push(fileDict)
-        treetips.fileCount = treetips.fileCount*1 + 1
-        console.log('treetips file count now: ',treetips.fileCount)
-        console.log(treetips.fileArray)
-        // update the display lists on the web page and the delete selector (in case it is needed)
-        initializeDatasetSelector();
-  }
-  reader.readAsText(file);
-  //console.log(reader);
-  }
-}
 
 // find the taxon name that has been entered in the interface and do a query of the OTL API
 // to see what matching studies are returned
@@ -177,6 +152,7 @@ function findStudies() {
     getMatchingStudiesFromOpenTree()
 
     //updateTableDisplay(treetips.processedStudyList)
+     //writeOutput()
 }
 
 
@@ -189,27 +165,31 @@ function enumerateTreesFromSelectedStudies() {
     // loop through the displayed study grid and build a table of selected studies.
     // the output is formated as a table:rows dataset for upload to the Arbor method
     var selectedStudies = {}
-    selectedStudies['fields'] = ['ot:studyId']
+    selectedStudies['fields'] = ['ot:studyId','ot:focalCladeOTTTaxonName']
     selectedStudies['rows'] = []
 
     for (row in grid_data) {
       var outrow = {}
       if (grid_data[row]['selected'] == true) {
         outrow['ot:studyId'] = grid_data[row]['ot:studyId']
+        outrow['ot:focalCladeOTTTaxonName'] = grid_data[row]['ot:focalCladeOTTTaxonName']
         selectedStudies['rows'].push(outrow)
       }
     }
-    //console.log('selectedStudies:',selectedStudies)
+    console.log('selectedStudies:',selectedStudies)
 
     // Now we will run the method that extracts the trees from the studies. First prepare
     // the input and output specifications for the method
       var inputs = {
-          studyTable:  {type: "table",  format: "rows",    data: selectedStudies}
+          table:  {type: "table",  format: "rows",    data: selectedStudies}
       };
 
       var outputs = {
-                treeTable: {type: "table", format: "rows"}
+                outTable: {type: "table", format: "rows"}
             };
+
+      // update the UI to indicate an analysis is running
+      $('#busy-panel').modal('show')
 
       //  execute the method on the input data
       flow.performAnalysis(treetips.enumerateAnalysisId, inputs, outputs,
@@ -227,11 +207,12 @@ function enumerateTreesFromSelectedStudies() {
                     // get result data
                     var result_url = '/item/' + treetips.enumerateAnalysisId + '/flow/' +  treetips.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        treetips.result = data.result.treeTable.data;
+                        treetips.result = data.result.outTable.data;
                         console.log('tree enumeration result:')
                         console.log(treetips.result)
-                        $("#treestatus").text("Number of matching trees being extracted: " + treetips.result.rows.length.toString());
-                        extractTipsFromTreeList(treetips.result)
+                        $("#treestatus").text("Number of matching studies extracted: " + treetips.result.rows.length.toString());
+                        writeOutput(treetips.result)
+      			$('#busy-panel').modal('hide')
 
                     }, this));
 
@@ -247,6 +228,7 @@ function enumerateTreesFromSelectedStudies() {
 }
 
 
+
 function extractTipsFromTreeList(treeEnumerationTable) {
     console.log('extracting trees from selected studies')
     console.log('enumerationTable:',treeEnumerationTable)
@@ -255,7 +237,8 @@ function extractTipsFromTreeList(treeEnumerationTable) {
     // Now we will run the method that extracts the trees from the studies. First prepare
     // the input and output specifications for the method
       var inputs = {
-          "table" :  {type: "table",  format: "rows",   data: treeEnumerationTable}
+          "intable" :  {type: "table",  format: "rows",   data: treeEnumerationTable},
+          "analysis" : {type: "string",  format: "text",   data: treetips.wfTreeTipsFromStudyTreeId}
       };
 
       var outputs = {
@@ -282,8 +265,7 @@ function extractTipsFromTreeList(treeEnumerationTable) {
                         console.log('tree enumeration result:')
                         console.log(treetips.result)
                         $("#tipstatus").text("Number of tips extracted: " + treetips.result.rows.length.toString());
-
-                        writeOutput(treetips.result.rows)
+                        //writeOutput(treetips.result.rows)
 
                     }, this));
 
@@ -299,21 +281,26 @@ function extractTipsFromTreeList(treeEnumerationTable) {
 
 
 
-function writeOutput(content) {
+function writeOutput(tableContent) {
+
+    var finalVal = 'taxonName,unmappedStudyTips, uniqueOpenTreeTips,CommonTips\n';
 
     // write out arrays in CSV format
-    var finalVal = '';
-    for (var i = 0; i < content.length; i++) {
-        var value = content[i]['name'];
-        var innerValue =  value===null?'':value;
-        var result = innerValue.replace("'", "");
-        finalVal += result + '\n';
-        }
+
+    for (var i = 0; i < tableContent.rows.length; i++) {
+        var value = tableContent.rows[i];
+
+        finalVal += value.taxonName + ','
+        finalVal += value.UnmappedStudyTips + ','
+        finalVal += value.UniqueOpenTreeTips + ','
+        finalVal += value.CommonTips
+        finalVal += '\n';
+    }
 
     console.log(finalVal);
     var pom = document.createElement('a');
     pom.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(finalVal));
-    pom.setAttribute('download', 'treetips.csv');
+    pom.setAttribute('download', 'treetipsStudies.csv');
     pom.click();
 }
 
