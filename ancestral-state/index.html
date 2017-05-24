@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Ancestral State Reconstruction</title>
+        <link href=//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css rel=stylesheet>
         <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
         <link rel="stylesheet" href="../static/built/girder.ext.min.css">
         <link rel="stylesheet" href="../static/built/fontello/css/fontello.css">
@@ -45,16 +46,45 @@ html, body {
     </head>
     <body>
 
-        <nav class="navbar navbar-default navbar-static-top" id="nav" role="navigation">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <a class="navbar-brand" href="#">
-                        <img src="../static/img/Arbor.png" height="24px" alt="Arbor Logo">
-                        Arbor App - Ancestral State Reconstruction
-                    </a>
-                </div>
+      <nav class="navbar navbar-default navbar-static-top" id="nav" role="navigation">
+          <div class="container-fluid">
+              <div class="navbar-header">
+                  <a class="navbar-brand" href="#">
+                      <img src="../static/img/Arbor.png" height="35px" alt="Arbor Logo">
+                  </a>
+                  <a class="navbar-text" href="#">
+                    Arbor App:
+                  </a>
+                  <a class="navbar-text" href="#">
+                   Ancestral states
+                  </a>
+              </div>
+          </div>
+      </nav>
+
+      <div class="panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" href="#collapse1"><b>EXPAND: </b>More information about ancestral state estimation</a>
+            </h4>
+          </div>
+          <div id="collapse1" class="panel-collapse collapse">
+            <div class="panel-body">
+              <b>Ancestral state reconstruction</b> is a method for inferring ancestral character states at the internal nodes
+              of a phylogenetic tree. The method uses the character values at the tips along with the branch lengths and tree topology.
+              Along with a particular model of evolution, this information can be used to reconstruct character states in the
+              history of the clade of interest.<br><br>
+              This method assumes that the model is correct, that both the tree and tip data are known without error, and that the assumed
+              model of character evolution is correct.<br><br>
+              This app uses a <b>Brownian motion</b> model for continuous characters and an <b>equal-rates Mk model</b> for discrete characters.
+
             </div>
-        </nav>
+            <div class="panel-footer">More info <a href = "http://phylogeneticcomparativemethods.com">textbook</a></div>
+          </div>
+        </div>
+      </div>
+
 
         <div class="container-fluid">
             <div class="row">
