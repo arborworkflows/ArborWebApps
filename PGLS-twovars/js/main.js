@@ -10,7 +10,7 @@
         });
 
         // Lookup the ID of the analysis that we wish to perform.
-        app.analysisName = "PGLS_2traits";
+        app.analysisName = "PGLS_2traits-app";
         girder.restRequest({
             path: 'resource/search',
             data: {
