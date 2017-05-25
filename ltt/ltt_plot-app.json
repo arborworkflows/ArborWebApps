@@ -10,7 +10,7 @@
         }
     ],
     "mode": "r",
-    "name": "ltt_plot",
+    "name": "ltt_plot-app",
     "outputs": [
         {
             "description": "LTT plot",
