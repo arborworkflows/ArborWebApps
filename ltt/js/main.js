@@ -50,6 +50,7 @@
                 if (typeFormat.type == "tree") {
                     app.tree = dataset.get('data');
                     d3.select("#tree-name").html('Tree: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                    $("#column-input").text("Click GO! to make plot...");
                 }
                 app.readyToAnalyze();
 
@@ -111,7 +112,7 @@
                         var trace1 = {
                           x: time,
                           y: N,
-                          mode: 'markers',
+                          mode: 'lines',
                           type: 'scatter'
                         };
 
@@ -121,8 +122,19 @@
 
                         var layout = {
                           title:'LTT plot',
-                          xaxis: {title: 'Time before present'},
-                          yaxis: {title: 'Number of reconstructed lineages', type: 'log'},
+                          xaxis: {
+                            title: 'Time before present',
+                            showgrid: false,
+                            zeroline: false,
+                            nticks: 10
+                          },
+                          yaxis: {
+                            title: 'Number of reconstructed lineages',
+                            type: 'log',
+                            showgrid: false,
+                            zeroline: false,
+                            nticks: 4
+                          },
                         };
 
                         Plotly.newPlot('myDiv', data, layout);
