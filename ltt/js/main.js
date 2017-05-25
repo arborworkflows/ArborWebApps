@@ -137,7 +137,7 @@
                           },
                         };
 
-                        Plotly.newPlot('myDiv', data, layout);
+                        Plotly.newPlot('ltt-plot', data, layout);
 
 
                         $("#analyze").removeAttr("disabled");
