@@ -1,0 +1,48 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.apetree",
+            "id": "tree",
+            "name": "tree",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "table",
+            "name": "table",
+            "type": "table"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "id": "lat_column",
+            "name": "lat_column",
+            "type": "string"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "id": "long_column",
+            "name": "long_column",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "phyloToMap-app",
+    "outputs": [
+        {
+            "format": "png.base64",
+            "id": "mapPlot",
+            "name": "mapPlot",
+            "type": "image"
+        }
+    ],
+    "script": "require(ape)\nrequire(cardoonTools)\nrequire(phytools)\n\nlat<-table[,lat_column]\nlong<-table[,long_column]\nnames(lat)<-rownames(table)\nnames(long)<-rownames(table)\n\n\nxx<-phylo.to.map(tree,cbind(lat,long),plot=FALSE)\n\nmap_plot <- function() {\n\tplot(xx,type=\"phylogram\",asp=1.3,mar=c(0.1,0.5,3.1,0.1))\n}\n\nmapPlot = cardoonPlot(expression(map_plot()), width=1000, height=1000, res=100)\nmapPlot = mapPlot$png"
+}
