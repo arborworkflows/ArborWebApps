@@ -71,7 +71,8 @@
             };
 
             var outputs = {
-                lttPlot: {type: "image", format: "png.base64"}
+                lttPlot: {type: "image", format: "png.base64"},
+                data: {type: "table",  format: "rows"}
             };
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
@@ -88,12 +89,44 @@
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        app.lttPlot = data.result.lttPlot.data;
-
+                        app.lttCoords = data.result.data.data;
+                        console.log(app.lttCoords);
 
 
                         // render results
-                        $("#ltt-plot").image({ data: app.lttPlot });
+                        function getCol(matrix, col){
+                            var column = [];
+                            for(var i=0; i<matrix.length; i++){
+                               column.push(matrix[i][col]);
+                            }
+                            return column;
+                         }
+
+                        var N = getCol(app.lttCoords.rows, "N");
+                        var time = getCol(app.lttCoords.rows, "time")
+
+                        console.log(N);
+                        console.log(time);
+
+                        var trace1 = {
+                          x: time,
+                          y: N,
+                          mode: 'markers',
+                          type: 'scatter'
+                        };
+
+
+
+                        var data = [trace1];
+
+                        var layout = {
+                          title:'LTT plot',
+                          xaxis: {title: 'Time before present'},
+                          yaxis: {title: 'Number of reconstructed lineages', type: 'log'},
+                        };
+
+                        Plotly.newPlot('myDiv', data, layout);
+
 
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded!");

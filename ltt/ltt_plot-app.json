@@ -13,12 +13,12 @@
     "name": "ltt_plot-app",
     "outputs": [
         {
-            "description": "LTT plot",
-            "format": "png.base64",
-            "id": "lttPlot",
-            "name": "lttPlot",
-            "type": "image"
+            "description": "output for plotting",
+            "format": "r.dataframe",
+            "id": "data",
+            "name": "data",
+            "type": "table"
         }
     ],
-    "script": "require(ape)\nrequire(cardoonTools)\n\nlttPlot <- cardoonPlot(expression(ltt.plot(tree, log=\"y\")), width=1000, height=1000, res=100)\nlttPlot <- lttPlot$png"
+    "script": "require(ape)\nrequire(cardoonTools)\n\ndata <- ltt.plot.coords(tree)"
 }
