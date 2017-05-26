@@ -1,0 +1,64 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.apetree",
+            "name": "tree",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "name": "table",
+            "type": "table"
+        },
+        {
+            "domain": [
+                "BM",
+                "OU",
+                "Pagel",
+                "ACDC"
+            ],
+            "format": "text",
+            "name": "correlation",
+            "type": "string"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "name": "ind_variable",
+            "type": "string"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "name": "dep_variable",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "PGLS_2traits",
+    "outputs": [
+        {
+            "format": "r.dataframe",
+            "name": "coefficients",
+            "type": "table"
+        },
+        {
+            "format": "r.dataframe",
+            "name": "modelfit_summary",
+            "type": "table"
+        },
+        {
+            "format": "png.base64",
+            "name": "pglsPlot",
+            "type": "image"
+        }
+    ],
+    "script": "require(ape)\nrequire(nlme)\nrequire(cardoonTools)\n\nif(correlation==\"BM\"){\n  cor <- corBrownian(1, phy=tree)\n}\nif(correlation==\"OU\"){\n  cor <- corMartins(1, phy=tree, fixed=FALSE)\n}\nif(correlation==\"Pagel\"){\n  cor <- corPagel(1, phy=tree, fixed=FALSE)\n  cor1 <- corPagel(1, phy=tree, fixed=TRUE)\n  cor0 <- corPagel(0, phy=tree, fixed=TRUE)\n}\nif(correlation==\"ACDC\"){\n  cor <- corBlomberg(1, phy=tree, fixed=FALSE)\n}\n\nfmla <- as.formula(paste(as.character(dep_variable), \"~\", as.character(ind_variable),sep=\"\"))\nres<-gls(model=fmla, correlation=cor, data=table, control=glsControl(opt=\"optim\"))\nsum_res <- summary(res)\nsum_aov <- anova(res)\n\n\nparameter <- coef(summary(res))\ncoefficients <- cbind(rownames(parameter), parameter)\ncolnames(coefficients)[1]<-\"parameter\"\n\nif(correlation == \"OU\") {\n\talpha<-res$modelStruct[[1]][[1]]\n\tcoefficients <- rbind(coefficients, c(\"alpha\", alpha, NA, NA, NA))\n}\n\n\n\nmodelfit_summary <- data.frame(\"AIC\"= sum_res$AIC, loglik=sum_res$logLik, residual_SE=sum_res$sigma, df_total=sum_res$dims$N, df_residual=sum_res$dims$N-sum_res$dims$p)\n\npgls_plot <- function() {\n  plot(table[,ind_variable], table[,dep_variable], pch=21, bg=\"gray80\", xlab=ind_variable, ylab=dep_variable)\n  abline(res, lty=2, lwd=2)\n}\n\npglsPlot = cardoonPlot(expression(pgls_plot()), width=1000, height=1000, res=100)\npglsPlot = pglsPlot$png"
+}
