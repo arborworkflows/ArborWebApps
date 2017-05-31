@@ -1,0 +1,148 @@
+<!doctype html>
+<meta charset=utf-8>
+    <head>
+        <title>Open Tree Tips Study</title>
+        <link rel="stylesheet" href="../static/built/girder.ext.min.css">
+        <link rel="stylesheet" href="../static/built/fontello/css/fontello.css">
+        <link rel="stylesheet" href="../static/built/app.min.css">
+        <link rel="stylesheet" href="../static/built/plugins/flow/flow.ext.min.css">
+
+    </head>
+<style>
+    html, body {
+        height: 100%;
+    }
+
+    body {
+        padding-top: 50px;
+    }
+</style>
+
+<link href=http://code.jquery.com/ui/1.9.1/themes/smoothness/jquery-ui.css rel=stylesheet>
+<link href=http://bootswatch.com/cosmo/bootstrap.min.css rel=stylesheet type=text/css>
+<link href=//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css rel=stylesheet>
+
+<script src=http://d3js.org/d3.v3.min.js></script>
+<script src=http://code.jquery.com/jquery-1.9.1.js></script>
+<script src=http://code.jquery.com/ui/1.9.1/jquery-ui.js></script>
+<script src=http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js></script>
+<script src=js/jquery.csv-0.71.js></script>
+
+ <!-- for girder -->
+ <script src="../static/built/plugins/flow/libs.min.js" charset="utf-8"></script>
+ <script src="../static/built/plugins/flow/ace.min.js" charset="utf-8"></script>
+ <script src="../static/built/app.min.js" charset="utf-8"></script>
+ <script src="../static/built/plugins/flow/app.min.js" charset="utf-8"></script>
+
+  <!-- for slickGrid -->
+ <link rel="stylesheet" href="css/slick.grid.css" type="text/css"/>
+ <link rel="stylesheet" href="css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css"/>
+ <script src="js/jquery.event.drag-2.2.js"></script>
+<script src="js/slick.core.js"></script>
+<script src="js/slick.grid.js"></script>
+<script src="js/slick.formatters.js"></script>
+<script src="js/slick.editors.js"></script>
+
+<!-- comes with SlickGrid but brings small font and yelllow background  -->
+<link rel="stylesheet" href="css/examples.css" type="text/css"/>
+
+<script src=studyTips.js></script>
+<script src=gridControl.js></script>
+
+<div id=info-panel class="modal fade">
+    <div class=modal-dialog>
+        <div class=modal-content>
+            <div class=modal-header>
+                <h3>Information</h3>
+            </div>
+
+            <div class=modal-body>
+                <p>The application allows the user to drag and drop one or more tabular data files (in CSV format) onto
+                the drop area on the top of the page. The files are parsed, rearranged, and then grouped into a single 
+                combined CSV file suitable as the basis for further analysis.  The combined file can be downloaded 
+                from the webpage. </p>
+            </div>
+
+            <div class=modal-footer>
+                <a class="btn btn-default" data-dismiss=modal>OK</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id=busy-panel class="modal fade">
+    <div class=modal-dialog>
+        <div class=modal-content>
+            <div class=modal-header>
+                <h3>Working</h3>
+            </div>
+
+            <div class=modal-body>
+                <p>
+                Please wait while the analysis runs.  Depending on the number of taxon selected,
+		this can take a very long time (30+ minutes).  This dialog will disappear when the 
+		analysis is complete. </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class=navbar-header>
+        <a class=navbar-brand href=/examples>Arbor</a>
+    </div>
+
+    <ul class="nav navbar-nav">
+        <li class=active> <a>Open Tree Tip Analysis</a>
+        <li><a style=cursor:pointer data-toggle=modal data-target=#info-panel><span class="glyphicon glyphicon-info-sign"></span> Info</a>
+    </ul>
+</div>
+
+   <div class=row>
+    <div class=col-md-12>
+        <button class="btn btn-link" id="login" href="#">Login</button>
+        <button class="btn btn-link" id="register" href="#">Register</button>
+        <label class="hidden" id="name" href="#"></label>
+        <button class="btn btn-link hidden" id="logout" href="#">Logout</button>
+        <div class="modal fade" id="dialog-container"></div>
+    </div>
+   </div>
+
+   <h3 style="margin-left:30px">Studies vs. OpenTree Edition</h4>
+   <div class=row>
+        <div class=col-md-8>
+            <h3 style="margin-left:30px">Enter Taxon Concept Here</h4>
+             <p style="margin-left:30px; margin-right:20px">Enter a name of a clade for which you want Arbor to extract all studies related to this search term. The search will be performed by OpenTree and related studies will be displayed in the table below. </p>
+            <input id="taxon_name" style="margin-left:30px; margin-top:20px; width:250px; height:40px; background-color:darkseagreen"><h>Enter Taxon name</h></input>
+            <!-- <output id="list" ></output>  -->
+            <br>
+            <div id=processbutton class="btn btn-success " style="margin-top:20px;margin-left:20px">Find Related Studies</div>    
+
+            </div>
+               
+        </div>
+   
+     
+        <!-- place for the compilation table with a row for each group of CSVs, after they have been combined -->
+        <div class=col-md-8>
+          <p style="margin-right:20px;margin-left:20px; margin-top:10px;">Please look at these entries and enable only the study trees that should be used in this comparison.  Sometimes a query term will return clades that should not be included, so please review this list carefully.  To unselect a study, just click the checkmark to activate the editor. The checkmark will change to blue in color. Click the blue checkmark to disable selection and click out of the cell to force an update of cell state.  Similarly, to re-select a cell, click inside the cell, click the empty square to re-select the study, and finally click outside the cell to force the update. 
+             </p>  
+             <div id="tablecontent" style="margin-top:20px; width:900px; height:500px;"></div>
+              <h4 style="margin-top:20px; margin-left:20px">Analyze Tree Tips </h4>
+                    <p style="margin-right:20px; margin-left:20px">When the list of studies above looks correct, press the extract tips button below to retrieve the trees from OpenTree and find which tips match tips in the synthetic tree</p>
+
+                <div id=extractbutton class="btn btn-success " style="margin-top:20px;margin-left:20px">Extract and Compare Tips</div>
+                <br>
+                <text id=treestatus style='margin-top: 20px; margin-left: 20px'></text>
+                <text id=tripstatus style='margin-top: 20px; margin-left: 20px'></text>
+        </div>
+    </div>
+
+<hr>
+
+  <div id=download </div>
+

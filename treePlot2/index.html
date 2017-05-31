@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+    <head>
+        <title>d3 tree plot</title>
+        <link href=//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css rel=stylesheet>
+        <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
+        <link rel="stylesheet" href="../static/built/girder.ext.min.css">
+        <link rel="stylesheet" href="../static/built/fontello/css/fontello.css">
+        <link rel="stylesheet" href="../static/built/app.min.css">
+        <link rel="stylesheet" href="../static/built/plugins/flow/flow.ext.min.css">
+        <link rel="stylesheet" href="css/force.css">
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script type="text/javascript" src="js/newick.js"></script>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <style>
+
+html, body {
+    height: 100%;
+}
+#upload, #help {
+    width: 100%;
+    padding: 20px;
+}
+#editor, #vis {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+.spacer {
+    margin-top: 20px;
+}
+.draggable {
+    text-align: center;
+    padding: 10px;
+}
+.full-width {
+    width: 100%;
+}
+#analyze {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+        </style>
+    </head>
+
+    <body>
+
+      <nav class="navbar navbar-default navbar-static-top" id="nav" role="navigation">
+          <div class="container-fluid">
+              <div class="navbar-header">
+                  <a class="navbar-brand" href="#">
+                      <img src="../static/img/Arbor.png" height="35px" alt="Arbor Logo">
+                  </a>
+                  <a class="navbar-text" href="#">
+                    Arbor App:
+                  </a>
+                  <a class="navbar-text" href="#">
+                    d3 tree plot
+                  </a>
+              </div>
+          </div>
+      </nav>
+
+      <div class="panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" href="#collapse1"><b>Click here</b> to find out more information about d3 tree plots</a>
+            </h4>
+          </div>
+          <div id="collapse1" class="panel-collapse collapse">
+            <div class="panel-body">
+              <b>D3</b> coming soon...
+              </table>
+            </div>
+            <div class="panel-footer">More info <a href = "http://phylogeneticcomparativemethods.com">textbook</a></div>
+          </div>
+        </div>
+      </div>
+
+
+              <div class="container-fluid">
+                  <div class="row">
+                      <div class="col-sm-3">
+                          <div class="btn btn-default" id="help" data-toggle="button">Show help</div>
+                          <div id="column-names" class="btn-group-vertical full-width btn"></div>
+                      </div>
+                      <div class="col-sm-9">
+                              <div id="dataset-management">
+                                  <div class="btn btn-primary full-width" id="upload">
+                                      <i class="glyphicon glyphicon-file"></i> Browse or drop files here
+                                  </div>
+                                  <div class="form-group hide">
+                                      <input id="g-files" type="file" multiple="multiple">
+                                  </div>
+                                  <div class="form-inline">
+                                      <select class="form-control datasets hidden"></select>
+                                  </div>
+                              </div>
+                              <div class="col-sm-8 spacer full-width">
+                                  <p id="tree-name"class="text-justify">
+                                      Tree: (none)
+                                      <span class="glyphicon glyphicon-exclamation-sign"></span>
+                                  </p>
+                              </div>
+                              <div id="column-input" class="bg-warning btn spacer full-width">
+                                  Load data above to proceed
+                              </div>
+                              <div id="analyze" class="btn btn-success spacer disabled full-width">
+                                  Go!
+                              </div>
+                              <div id="notice" class="spacer text-center"></div>
+                      </div>
+                  </div>
+
+
+
+                  <label id="show-length">
+                    <input type="checkbox"> Show branch length
+                  </label>
+                  
+                  <div class="row" id="tree-plot"><!-- d3 tree will be drawn inside this DIV --></div>
+
+
+                </div>
+
+
+      <div id="vis" class="hidden"></div>
+      <div id="code-editor" class="hidden"></div>
+      <div id="template-container" class="hidden"></div>
+      <script src="../static/built/plugins/flow/libs.min.js" charset="utf-8"></script>
+      <script src="../static/built/plugins/flow/ace.min.js" charset="utf-8"></script>
+      <script src="../static/built/app.min.js" charset="utf-8"></script>
+      <script src="../static/built/plugins/flow/app.min.js" charset="utf-8"></script>
+      <script type="text/javascript" src="js/d3.phylogram.js"></script>
+      <script type="text/javascript" src="js/phyloforce.js"></script>
+      <script src="js/main.js" charset="utf-8"></script>
+    </body>

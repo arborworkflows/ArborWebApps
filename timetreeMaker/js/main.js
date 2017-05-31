@@ -22,7 +22,11 @@
             app.readyToAnalyze();
         });
 
-        app.readyToAnalyze = function ();
+        app.readyToAnalyze = function () {
+            if ("column" in this && "table" in this &&
+                "analysisId" in this) {
+                d3.select("#analyze").classed('disabled', false);
+            }
         };
 
         function toggleInputTablePreview() {
@@ -66,26 +70,17 @@
                     d3.select("#table-name").html('Table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                     $("#column-input").text("Parsing column names...");
                     $("#column-names").empty();
-                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.discrete", false, _.bind(function (error, dataset) {
+
+                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names", false, _.bind(function (error, dataset) {
                         var columnNames = dataset.get('data');
                         for (var i = 0; i < columnNames.length; ++i) {
                             // create drag-and-drop elements here
-                            $("#column-names").append('<div class="btn btn-info draggable discrete">' + columnNames[i] + '</div>');
+                            $("#column-names").append('<div class="btn btn-info draggable">' + columnNames[i] + '</div>');
                         }
                         $(".draggable").draggable({
                              zIndex: 1, helper: "clone"
                         });
                         d3.select("#column-input").html('Drag column of interest here <span class="glyphicon glyphicon-exclamation-sign"></span>');
-                    }, this));
-                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.continuous", false, _.bind(function (error, dataset) {
-                        var columnNames = dataset.get('data');
-                        for (var i = 0; i < columnNames.length; ++i) {
-                            // create drag-and-drop elements here
-                            $("#column-names").append('<div class="btn btn-info draggable continuous">' + columnNames[i] + '</div>');
-                        }
-                        $(".draggable").draggable({
-                             zIndex: 1, helper: "clone"
-                        });
                     }, this));
 
                     flow.retrieveDatasetAsFormat(dataset, "table", "rows", false, _.bind(function (error, dataset) {
@@ -95,6 +90,7 @@
                       rowData.rows = rowData.rows.slice(0, 3);
                       d3.select("#input-table-vis-container").classed('hidden', false);
                       $("#input-table-vis").table({ data: rowData });
+                      d3.select("#column-input").html('Drag variable to analyze here <span class="glyphicon glyphicon-exclamation-sign"></span>');
                     }, this));
 
                 }
@@ -114,10 +110,6 @@
         $("#column-input").droppable({
             drop: function( event, ui ) {
                 var COI = ui.draggable.text();
-                app.type = "discrete";
-                if (ui.draggable.hasClass("continuous")) {
-                    app.type = "continuous";
-                }
                 app.column = COI;
                 d3.select("#column-input")
                     .classed('btn-primary', true)
@@ -156,25 +148,25 @@
             flow.performAnalysis(app.analysisId, inputs, outputs,
                 _.bind(function (error, result) {
                     app.taskId = result._id;
-                    setTimeout(_.bind(app.checkAnalysisResult, app), 1000);
+                    setTimeout(_.bind(app.checkResult, app), 1000);
                 }, app));
 
-        app.checkAnalysisResult = function () {
+        app.checkResult = function () {
             var check_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/status'
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
                 if (result.status === 'SUCCESS') {
                     // get result data
-                    var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
+                    var result_url = '/item/' + this.ASRId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.treePlot = data.result.treePlot.data;
 
                         // render tree plot
-                        $("#tree-plot").image({ data: app.treePlot });
+                        $("#model-plot").image({ data: app.treePlot });
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Chronogram created!");
                         $('html, body').animate({
-                            scrollTop: $("#tree-plot").offset().top
+                            scrollTop: $("#model-plot").offset().top
                         }, 1000);
                     }, this));
 
@@ -182,7 +174,7 @@
                     $("#analyze").removeAttr("disabled");
                     $("#notice").text("Analysis failed. " + result.message);
                 } else {
-                    setTimeout(_.bind(this.checkAnalysisResult, this), 1000);
+                    setTimeout(_.bind(this.checkResult, this), 1000);
                 }
             }, this));
         };
@@ -192,7 +184,7 @@
         $("#help").click(function() {
             $("#upload").popover({
                 title: 'Step #1',
-                content: 'Upload your table (csv or tsv) and tree (newick) here',
+                content: 'Upload your table (csv or tsv) here',
                 placement: 'bottom',
                 trigger: 'manual'
             });

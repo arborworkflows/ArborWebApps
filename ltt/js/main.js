@@ -5,10 +5,12 @@
 
     $(document).ready(function () {
         girder.apiRoot = '/girder/api/v1';
-        var app = new flow.App();
+        var app = new flow.App({
+            el: 'body'
+        });
 
         // Lookup the ID of the analysis that we wish to perform.
-        app.analysisName = "ltt_plot";
+        app.analysisName = "ltt_plot-app";
         girder.restRequest({
             path: 'resource/search',
             data: {
@@ -26,23 +28,9 @@
             }
         };
 
-        function toggleInputTablePreview() {
-            if ($("#table-preview-icon").hasClass("glyphicon-folder-close")) {
-                $("#table-preview-icon").removeClass("glyphicon-folder-close");
-                $("#table-preview-icon").addClass("glyphicon-folder-open");
-                $("#table-preview-text").text(" Hide input table preview");
-            }
-            else {
-                $("#table-preview-icon").removeClass("glyphicon-folder-open");
-                $("#table-preview-icon").addClass("glyphicon-folder-close");
-                $("#table-preview-text").text(" Show input table preview");
-            }
-
-            $("#input-table-vis").toggle('slow');
-        }
 
         // override upload function for simple mode
-        app.datasetsView.upload = function (file) {
+        flow.DatasetManagementView.prototype.upload = function (file) {
             var reader = new FileReader();
 
             reader.onload = _.bind(function (e) {
@@ -50,16 +38,19 @@
                         name: file.name,
                         data: e.target.result
                     },
-                    extension = file.name.split('.');
+                    extension = file.name.split('.'),
+                    typeFormat;
 
                 extension = extension[extension.length - 1];
-                _.extend(dataset, flow.extensionToType[extension]);
+                typeFormat = flow.getTypeFormatsFromExtension(extension)[0];
+                typeFormat = {type: typeFormat.type, format: typeFormat.format};
+                _.extend(dataset, typeFormat);
                 dataset = new Backbone.Model(dataset);
 
-
-                if (flow.extensionToType[extension].type == "tree") {
+                if (typeFormat.type == "tree") {
                     app.tree = dataset.get('data');
                     d3.select("#tree-name").html('Tree: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                    $("#column-input").text("Click GO! to make plot...");
                 }
                 app.readyToAnalyze();
 
@@ -68,6 +59,7 @@
 
             reader.readAsText(file);
         };
+
 
 
         $("#analyze").click(function() {
@@ -81,7 +73,7 @@
 
             var outputs = {
                 lttPlot: {type: "image", format: "png.base64"},
-                lttCoords: {type: "table", format: "rows"}
+                data: {type: "table",  format: "rows"}
             };
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
@@ -97,16 +89,56 @@
                 if (result.status === 'SUCCESS') {
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
-
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        app.lttPlot = data.result.lttPlot.data;
-                        app.lttCoords = data.result.lttCoords.data;
+                        app.lttCoords = data.result.data.data;
+                        console.log(app.lttCoords);
+
+
                         // render results
-                        $("#ltt-plot").image({ data: app.lttPlot });
+                        function getCol(matrix, col){
+                            var column = [];
+                            for(var i=0; i<matrix.length; i++){
+                               column.push(matrix[i][col]);
+                            }
+                            return column;
+                         }
+
+                        var N = getCol(app.lttCoords.rows, "N");
+                        var time = getCol(app.lttCoords.rows, "time")
+
+                        console.log(N);
+                        console.log(time);
+
+                        var trace1 = {
+                          x: time,
+                          y: N,
+                          mode: 'lines',
+                          type: 'scatter'
+                        };
 
 
 
-                        console.log(app.lttCoords)
+                        var data = [trace1];
+
+                        var layout = {
+                          title:'LTT plot',
+                          xaxis: {
+                            title: 'Time before present',
+                            showgrid: false,
+                            zeroline: false,
+                            nticks: 10
+                          },
+                          yaxis: {
+                            title: 'Number of reconstructed lineages',
+                            type: 'log',
+                            showgrid: false,
+                            zeroline: false,
+                            nticks: 4
+                          },
+                        };
+
+                        Plotly.newPlot('ltt-plot', data, layout);
+
 
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded!");

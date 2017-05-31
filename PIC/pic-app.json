@@ -1,0 +1,54 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.dataframe",
+            "id": "table",
+            "name": "table",
+            "type": "table"
+        },
+        {
+            "format": "r.apetree",
+            "id": "tree",
+            "name": "tree",
+            "type": "tree"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "id": "dep_variable",
+            "name": "dep_variable",
+            "type": "string"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "id": "ind_variable",
+            "name": "ind_variable",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "pic-app",
+    "outputs": [
+        {
+            "format": "r.dataframe",
+            "id": "pic",
+            "name": "pic",
+            "type": "table"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "modelfit_summary",
+            "name": "modelfit_summary",
+            "type": "table"
+        }
+    ],
+    "script": "\nrequire(ape)\nrequire(cardoonTools)\nrequire(aRbor)\n\n# Match tree and tip data\n\ntd<-make.treedata(tree, table)\ntree<-tree\n\n# get x and y data with names\n# would be better to have an aRbor function that takes td directly?\n\nx <- select_(td, ind_variable)$dat[[1]]\nnames(x)<-td$tree$tip.label\n\ny <- select_(td, dep_variable)$dat[[1]]\nnames(y)<-td$tree$tip.label\n\n\n\n# calculate independent contrasts\npicX <- pic(x, tree)\npicY <- pic(y, tree)\n\n# run regression forced through the origin\n\nres <- lm(picY~picX-1)\noutput <- anova(res)\n\n# modelfit_summary is the model summary \n# coerce into table\nmodelfit_summary<-cbind(c(dep_variable, \"Residuals\"), c(coefficients(res), NA), output[,1:5])\ncolnames(modelfit_summary)[1]<-\"Effect\"\ncolnames(modelfit_summary)[2]<-\"Slope\"\n\n# pic are the contrasts\npic<-cbind(picX, picY)\n\n\n\n"
+}
