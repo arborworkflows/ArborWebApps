@@ -114,10 +114,6 @@
         $("#column-input").droppable({
             drop: function( event, ui ) {
                 var COI = ui.draggable.text();
-                app.type = "discrete";
-                if (ui.draggable.hasClass("continuous")) {
-                    app.type = "continuous";
-                }
                 app.column = COI;
                 d3.select("#column-input")
                     .classed('btn-primary', true)
@@ -174,7 +170,7 @@
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Chronogram created!");
                         $('html, body').animate({
-                            scrollTop: $("#tree-plot").offset().top
+                            scrollTop: $("#treePlot").offset().top
                         }, 1000);
                     }, this));
 
@@ -192,7 +188,7 @@
         $("#help").click(function() {
             $("#upload").popover({
                 title: 'Step #1',
-                content: 'Upload your table (csv or tsv) and tree (newick) here',
+                content: 'Upload your table (csv or tsv) here',
                 placement: 'bottom',
                 trigger: 'manual'
             });
