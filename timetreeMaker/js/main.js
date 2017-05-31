@@ -173,7 +173,7 @@
                     $("#analyze").removeAttr("disabled");
                     $("#notice").text("Analysis failed. " + result.message);
                 } else {
-                    setTimeout(_.bind(this.checkAnalysisResult, this), 1000);
+                    setTimeout(_.bind(this.checkResult, this), 1000);
                 }
             }, this));
         };
