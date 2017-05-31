@@ -22,7 +22,11 @@
             app.readyToAnalyze();
         });
 
-        app.readyToAnalyze = function ();
+        app.readyToAnalyze = function () {
+            if ("column" in this && "table" in this &&
+                "analysisId" in this) {
+                d3.select("#analyze").classed('disabled', false);
+            }
         };
 
         function toggleInputTablePreview() {
