@@ -10,7 +10,7 @@
         });
 
         // Lookup the ID of the analysis that we wish to perform.
-        app.analysisName = "aceArbor";
+        app.analysisName = "plotTreeWithggtree";
         girder.restRequest({
             path: 'resource/search',
             data: {
@@ -18,12 +18,12 @@
                 types: JSON.stringify(["item"])
             }
         }).done(function (results) {
-            app.ASRId = results["item"][0]._id;
+            app.funId = results["item"][0]._id;
             app.readyToAnalyze();
         });
 
         app.readyToAnalyze = function () {
-            if ("column" in this && "table" in this && "tree" in this && "ASRId" in this) {
+            if ("table" in this && "tree" in this && "funId" in this) {
                 d3.select("#analyze").classed('disabled', false);
             }
         };
@@ -67,29 +67,7 @@
                     app.table = dataset.get('data');
                     app.tableFormat = typeFormat.format;
                     d3.select("#table-name").html('Table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
-                    $("#column-input").text("Parsing column names...");
-                    $("#column-names").empty();
-                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.discrete", false, _.bind(function (error, dataset) {
-                        var columnNames = dataset.get('data');
-                        for (var i = 0; i < columnNames.length; ++i) {
-                            // create drag-and-drop elements here
-                            $("#column-names").append('<div class="btn btn-info draggable discrete">' + columnNames[i] + '</div>');
-                        }
-                        $(".draggable").draggable({
-                             zIndex: 1, helper: "clone"
-                        });
-                        d3.select("#column-input").html('Drag column of interest here <span class="glyphicon glyphicon-exclamation-sign"></span>');
-                    }, this));
-                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.continuous", false, _.bind(function (error, dataset) {
-                        var columnNames = dataset.get('data');
-                        for (var i = 0; i < columnNames.length; ++i) {
-                            // create drag-and-drop elements here
-                            $("#column-names").append('<div class="btn btn-info draggable continuous">' + columnNames[i] + '</div>');
-                        }
-                        $(".draggable").draggable({
-                             zIndex: 1, helper: "clone"
-                        });
-                    }, this));
+
 
                     flow.retrieveDatasetAsFormat(dataset, "table", "rows", false, _.bind(function (error, dataset) {
                       // show the input table to help the user understand if their data
@@ -114,64 +92,35 @@
             reader.readAsText(file);
         };
 
-        $("#column-input").droppable({
-            drop: function( event, ui ) {
-                var COI = ui.draggable.text();
-                app.type = "discrete";
-                if (ui.draggable.hasClass("continuous")) {
-                    app.type = "continuous";
-                }
-                app.column = COI;
-                d3.select("#column-input")
-                    .classed('btn-primary', true)
-                    .classed('btn-success', false)
-                    .classed('bg-warning', false)
-                    .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>');
-                app.readyToAnalyze();
-            },
-            over: function (event, ui) {
-                d3.select("#column-input")
-                    .classed('btn-success', true)
-                    .classed('bg-warning', false);
-            },
-            out: function (event, ui) {
-                d3.select("#column-input")
-                    .classed('btn-success', false)
-                    .classed('bg-warning', true);
-            }
-            });
+
 
         $("#analyze").click(function() {
             $("#analyze").attr("disabled", "disabled");
             $("#analyze").text("Re-run");
-            $("#notice").text("Performing ancestral state reconstruction analysis...");
+            $("#notice").text("Making plot...");
 
             var inputs = {
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
-                column: {type: "string", format: "text",             data: app.column},
-                type:   {type: "string", format: "text",             data: app.type},
-                method: {type: "string", format: "text",             data: "marginal"}
             };
 
             var outputs = {
-                res: {type: "table", format: "rows"},
                 treePlot: {type: "image", format: "png.base64"}
             };
 
-            flow.performAnalysis(app.ASRId, inputs, outputs,
+            flow.performAnalysis(app.funId, inputs, outputs,
                 _.bind(function (error, result) {
                     app.taskId = result._id;
-                    setTimeout(_.bind(app.checkASRResult, app), 1000);
+                    setTimeout(_.bind(app.checkResult, app), 1000);
                 }, app));
 
-        app.checkASRResult = function () {
-            var check_url = '/item/' + this.ASRId + '/flow/' + this.taskId + '/status'
+        app.checkResult = function () {
+            var check_url = '/item/' + this.funId + '/flow/' + this.taskId + '/status'
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
                 if (result.status === 'SUCCESS') {
                     // get result data
-                    var result_url = '/item/' + this.ASRId + '/flow/' + this.taskId + '/result'
+                    var result_url = '/item/' + this.funId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.treePlot = data.result.treePlot.data;
 
@@ -188,7 +137,7 @@
                     $("#analyze").removeAttr("disabled");
                     $("#notice").text("Analysis failed. " + result.message);
                 } else {
-                    setTimeout(_.bind(this.checkASRResult, this), 1000);
+                    setTimeout(_.bind(this.checkResult, this), 1000);
                 }
             }, this));
         };
