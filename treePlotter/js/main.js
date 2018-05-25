@@ -153,15 +153,8 @@
                 trigger: 'manual'
             });
             $("#upload").popover('toggle');
-            $("#column-input").popover({
-                title: 'Step #2',
-                content: 'Drag your column of interest here',
-                placement: 'left',
-                trigger: 'manual'
-            });
-            $("#column-input").popover('toggle');
             $("#analyze").popover({
-                title: 'Step #3',
+                title: 'Step #2',
                 content: 'Click on the "Go!" button',
                 placement: 'bottom',
                 trigger: 'manual'
