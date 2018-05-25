@@ -21,7 +21,7 @@
         });
 
         app.readyToAnalyze = function () {
-            if ("tree1" in this && "analysisId" in this) {
+            if ("tree1" in this && "tree2" in this && "analysisId" in this) {
                 d3.select("#analyze").classed('disabled', false);
             }
         };
@@ -42,7 +42,7 @@
         }
 
         // override upload function for simple mode
-        app.datasetsView.upload = function (file) {
+        app.datasetsView.upload1 = function (file) {
             var reader = new FileReader();
 
             reader.onload = _.bind(function (e) {
@@ -58,8 +58,35 @@
 
 
                 if (flow.extensionToType[extension].type == "tree") {
-                    app.tree = dataset.get('data');
-                    d3.select("#tree-name").html('Tree: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                    app.tree1 = dataset.get('data');
+                    d3.select("#tree1-name").html('Tree 1: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                }
+                app.readyToAnalyze();
+
+                this.datasets.off('add', null, 'set-collection').add(dataset);
+            }, this);
+
+            reader.readAsText(file);
+        };
+
+        app.datasetsView.upload2 = function (file) {
+            var reader = new FileReader();
+
+            reader.onload = _.bind(function (e) {
+                var dataset = {
+                        name: file.name,
+                        data: e.target.result
+                    },
+                    extension = file.name.split('.');
+
+                extension = extension[extension.length - 1];
+                _.extend(dataset, flow.extensionToType[extension]);
+                dataset = new Backbone.Model(dataset);
+
+
+                if (flow.extensionToType[extension].type == "tree") {
+                    app.tree2 = dataset.get('data');
+                    d3.select("#tree2-name").html('Tree 2: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                 }
                 app.readyToAnalyze();
 
@@ -81,8 +108,7 @@
             };
 
             var outputs = {
-                lttPlot: {type: "image", format: "png.base64"},
-                lttCoords: {type: "table", format: "rows"}
+                cophyloPlot: {type: "image", format: "png.base64"},
             };
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
