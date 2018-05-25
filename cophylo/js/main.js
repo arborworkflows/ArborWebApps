@@ -103,12 +103,12 @@
                 }
 
                 else if (typeFormat.type == "tree") {
-                  if ("tree1" in this) {
-                    app.tree2 = dataset.get('data');
-                    d3.select("#tree-name-2").html('Tree 2: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
-                  } else {
+                  if (typeof app.tree1 === 'undefined') {
                     app.tree1 = dataset.get('data');
                     d3.select("#tree-name-1").html('Tree 1: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                  } else {
+                    app.tree2 = dataset.get('data');
+                    d3.select("#tree-name-2").html('Tree 2: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                   }
                 }
                 app.readyToAnalyze();
