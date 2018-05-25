@@ -5,10 +5,12 @@
 
     $(document).ready(function () {
         girder.apiRoot = '/girder/api/v1';
-        var app = new flow.App();
+        var app = new flow.App({
+            el: 'body'
+        });
 
         // Lookup the ID of the analysis that we wish to perform.
-        app.analysisName = "cophylo-app";
+        app.analysisName = "aceArbor";
         girder.restRequest({
             path: 'resource/search',
             data: {
@@ -16,12 +18,12 @@
                 types: JSON.stringify(["item"])
             }
         }).done(function (results) {
-            app.analysisId = results["item"][0]._id;
+            app.ASRId = results["item"][0]._id;
             app.readyToAnalyze();
         });
 
         app.readyToAnalyze = function () {
-            if ("tree1" in this && "tree2" in this && "analysisId" in this) {
+            if ("column" in this && "table" in this && "tree" in this && "ASRId" in this) {
                 d3.select("#analyze").classed('disabled', false);
             }
         };
@@ -44,7 +46,6 @@
         // override upload function for simple mode
         flow.DatasetManagementView.prototype.upload = function (file) {
             var reader = new FileReader();
-            console.log("in here")
 
             reader.onload = _.bind(function (e) {
                 var dataset = {
@@ -61,7 +62,47 @@
                 dataset = new Backbone.Model(dataset);
 
                 // modifications for simple app begin here
-                if (typeFormat.type == "tree") {
+                // if its a table, get the column names
+                if (typeFormat.type == "table") {
+                    app.table = dataset.get('data');
+                    app.tableFormat = typeFormat.format;
+                    d3.select("#table-name").html('Table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                    $("#column-input").text("Parsing column names...");
+                    $("#column-names").empty();
+                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.discrete", false, _.bind(function (error, dataset) {
+                        var columnNames = dataset.get('data');
+                        for (var i = 0; i < columnNames.length; ++i) {
+                            // create drag-and-drop elements here
+                            $("#column-names").append('<div class="btn btn-info draggable discrete">' + columnNames[i] + '</div>');
+                        }
+                        $(".draggable").draggable({
+                             zIndex: 1, helper: "clone"
+                        });
+                        d3.select("#column-input").html('Drag column of interest here <span class="glyphicon glyphicon-exclamation-sign"></span>');
+                    }, this));
+                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.continuous", false, _.bind(function (error, dataset) {
+                        var columnNames = dataset.get('data');
+                        for (var i = 0; i < columnNames.length; ++i) {
+                            // create drag-and-drop elements here
+                            $("#column-names").append('<div class="btn btn-info draggable continuous">' + columnNames[i] + '</div>');
+                        }
+                        $(".draggable").draggable({
+                             zIndex: 1, helper: "clone"
+                        });
+                    }, this));
+
+                    flow.retrieveDatasetAsFormat(dataset, "table", "rows", false, _.bind(function (error, dataset) {
+                      // show the input table to help the user understand if their data
+                      // was parsed correctly or not
+                      var rowData = dataset.get('data');
+                      rowData.rows = rowData.rows.slice(0, 3);
+                      d3.select("#input-table-vis-container").classed('hidden', false);
+                      $("#input-table-vis").table({ data: rowData });
+                    }, this));
+
+                }
+
+                else if (typeFormat.type == "tree") {
                     app.tree = dataset.get('data');
                     d3.select("#tree-name").html('Tree: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
                 }
@@ -73,82 +114,81 @@
             reader.readAsText(file);
         };
 
-        // app.datasetsView.upload2 = function (file) {
-        //     var reader = new FileReader();
-        //
-        //     reader.onload = _.bind(function (e) {
-        //         var dataset = {
-        //                 name: file.name,
-        //                 data: e.target.result
-        //             },
-        //             extension = file.name.split('.');
-        //
-        //         extension = extension[extension.length - 1];
-        //         _.extend(dataset, flow.extensionToType[extension]);
-        //         dataset = new Backbone.Model(dataset);
-        //
-        //
-        //         if (flow.extensionToType[extension].type == "tree") {
-        //             app.tree2 = dataset.get('data');
-        //             d3.select("#tree2-name").html('Tree 2: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
-        //         }
-        //         app.readyToAnalyze();
-        //
-        //         this.datasets.off('add', null, 'set-collection').add(dataset);
-        //     }, this);
-        //
-        //     reader.readAsText(file);
-        // };
-
+        $("#column-input").droppable({
+            drop: function( event, ui ) {
+                var COI = ui.draggable.text();
+                app.type = "discrete";
+                if (ui.draggable.hasClass("continuous")) {
+                    app.type = "continuous";
+                }
+                app.column = COI;
+                d3.select("#column-input")
+                    .classed('btn-primary', true)
+                    .classed('btn-success', false)
+                    .classed('bg-warning', false)
+                    .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                app.readyToAnalyze();
+            },
+            over: function (event, ui) {
+                d3.select("#column-input")
+                    .classed('btn-success', true)
+                    .classed('bg-warning', false);
+            },
+            out: function (event, ui) {
+                d3.select("#column-input")
+                    .classed('btn-success', false)
+                    .classed('bg-warning', true);
+            }
+            });
 
         $("#analyze").click(function() {
             $("#analyze").attr("disabled", "disabled");
             $("#analyze").text("Re-run");
-            $("#notice").text("Performing analysis...");
+            $("#notice").text("Performing ancestral state reconstruction analysis...");
 
             var inputs = {
-                tree1:   {type: "tree",   format: "newick",           data: app.tree},
-                tree2:   {type: "tree",   format: "newick",           data: app.tree},
+                table:  {type: "table",  format: app.tableFormat,    data: app.table},
+                tree:   {type: "tree",   format: "newick",           data: app.tree},
+                column: {type: "string", format: "text",             data: app.column},
+                type:   {type: "string", format: "text",             data: app.type},
+                method: {type: "string", format: "text",             data: "marginal"}
             };
 
             var outputs = {
-                cophyloPlot: {type: "image", format: "png.base64"},
+                res: {type: "table", format: "rows"},
+                treePlot: {type: "image", format: "png.base64"}
             };
 
-            flow.performAnalysis(app.analysisId, inputs, outputs,
+            flow.performAnalysis(app.ASRId, inputs, outputs,
                 _.bind(function (error, result) {
                     app.taskId = result._id;
-                    setTimeout(_.bind(app.checkResult, app), 1000);
+                    setTimeout(_.bind(app.checkASRResult, app), 1000);
                 }, app));
 
-        app.checkResult = function () {
-            var check_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/status'
+        app.checkASRResult = function () {
+            var check_url = '/item/' + this.ASRId + '/flow/' + this.taskId + '/status'
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
                 if (result.status === 'SUCCESS') {
                     // get result data
-                    var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
-
+                    var result_url = '/item/' + this.ASRId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        app.lttPlot = data.result.lttPlot.data;
-                        app.lttCoords = data.result.lttCoords.data;
-                        // render results
-                        $("#ltt-plot").image({ data: app.lttPlot });
+                        app.treePlot = data.result.treePlot.data;
 
-
-
-                        console.log(app.lttCoords)
-
+                        // render tree plot
+                        $("#tree-plot").image({ data: app.treePlot });
                         $("#analyze").removeAttr("disabled");
-                        $("#notice").text("Analysis succeeded!");
-
+                        $("#notice").text("Ancestral state reconstruction succeeded!");
+                        $('html, body').animate({
+                            scrollTop: $("#tree-plot").offset().top
+                        }, 1000);
                     }, this));
 
                 } else if (result.status === 'FAILURE') {
                     $("#analyze").removeAttr("disabled");
                     $("#notice").text("Analysis failed. " + result.message);
                 } else {
-                    setTimeout(_.bind(this.checkResult, this), 1000);
+                    setTimeout(_.bind(this.checkASRResult, this), 1000);
                 }
             }, this));
         };
@@ -177,7 +217,6 @@
                 trigger: 'manual'
             });
             $("#analyze").popover('toggle');
-
         });
 
         $("#table-preview").click(function() {

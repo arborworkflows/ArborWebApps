@@ -1,9 +1,7 @@
 <!doctype html>
-
-
 <html>
     <head>
-        <title>Cophylo (tanglegram) plot</title>
+        <title>Cophylogeny plotting</title>
         <link href=//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css rel=stylesheet>
         <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
         <link rel="stylesheet" href="../static/built/girder.ext.min.css">
@@ -11,13 +9,12 @@
         <link rel="stylesheet" href="../static/built/app.min.css">
         <link rel="stylesheet" href="../static/built/plugins/flow/flow.ext.min.css">
         <link rel="stylesheet" href="../static/built/plugins/flow/flow.min.css">
-        <link rel="stylesheet" href="css/nv.d3.css">
         <style>
 
 html, body {
     height: 100%;
 }
-#upload, #upload2, #help {
+#upload, #help {
     width: 100%;
     padding: 20px;
 }
@@ -69,19 +66,25 @@ html, body {
         <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
-              <a data-toggle="collapse" href="#collapse1"><b>EXPAND: </b>More information about cophylogenetic plotting</a>
+              <a data-toggle="collapse" href="#collapse1"><b>EXPAND: </b>More information about ancestral state estimation</a>
             </h4>
           </div>
           <div id="collapse1" class="panel-collapse collapse">
             <div class="panel-body">
-              This is a method for visualizing the associations between pairs of species from two
-              different phylogenetic trees.
+              <b>Ancestral state reconstruction</b> is a method for inferring ancestral character states at the internal nodes
+              of a phylogenetic tree. The method uses the character values at the tips along with the branch lengths and tree topology.
+              Along with a particular model of evolution, this information can be used to reconstruct character states in the
+              history of the clade of interest.<br><br>
+              This method assumes that the model is correct, that both the tree and tip data are known without error, and that the assumed
+              model of character evolution is correct.<br><br>
+              This app uses a <b>Brownian motion</b> model for continuous characters and an <b>equal-rates Mk model</b> for discrete characters.
 
             </div>
-            <div class="panel-footer">More info <a href = "http://lukejharmon.github.io/pcm">textbook</a></div>
+            <div class="panel-footer">More info <a href = "http://phylogeneticcomparativemethods.com">textbook</a></div>
           </div>
         </div>
       </div>
+
 
         <div class="container-fluid">
             <div class="row">
@@ -91,15 +94,9 @@ html, body {
                 </div>
                 <div class="col-sm-9">
                         <div id="dataset-management">
-                          <div class="btn-group-justified">
-                            <div class="btn btn-primary" id="upload">
-                                <i class="glyphicon glyphicon-file"></i> Browse or drop tree file 1 here
+                            <div class="btn btn-primary full-width" id="upload">
+                                <i class="glyphicon glyphicon-file"></i> Browse or drop files here
                             </div>
-                            <div class="btn btn-primary" id="upload2">
-                                <i class="glyphicon glyphicon-file"></i> Browse or drop tree file 2 here
-                            </div>
-                          </div>
-
                             <div class="form-group hide">
                                 <input id="g-files" type="file" multiple="multiple">
                             </div>
@@ -108,14 +105,17 @@ html, body {
                             </div>
                         </div>
                         <div class="col-sm-8 spacer full-width">
-                            <p id="tree1-name"class="text-justify">
-                                Tree 1: (none)
+                            <p id="tree-name"class="text-justify">
+                                Tree: (none)
                                 <span class="glyphicon glyphicon-exclamation-sign"></span>
                             </p>
-                            <p id="tree2-name"class="text-justify">
-                                Tree 2: (none)
+                            <p id="table-name" class="text-justify">
+                                Table: (none)
                                 <span class="glyphicon glyphicon-exclamation-sign"></span>
                             </p>
+                        </div>
+                        <div id="column-input" class="bg-warning btn spacer full-width">
+                            Load data above to proceed
                         </div>
                         <div id="analyze" class="btn btn-success spacer disabled full-width">
                             Go!
@@ -123,17 +123,19 @@ html, body {
                         <div id="notice" class="spacer text-center"></div>
                 </div>
             </div>
-
-            <div class="row">
-                <div id="ltt-plot" class="col-sm-12 text-center">
+            <div class="row hidden spacer" id="input-table-vis-container">
+                <div class="col-sm-3">
+                    <div class="btn btn-default full-width" id="table-preview">
+                        <i class="glyphicon glyphicon-folder-open" id="table-preview-icon"></i>
+                        <span id="table-preview-text"> Hide input table preview</span>
+                    </div>
+                    <div class="spacer" id="input-table-vis"></div>
                 </div>
             </div>
             <div class="row">
-                <div>
-                  <svg id="test1"></svg>
+                <div id="tree-plot" class="col-sm-12 text-center">
                 </div>
             </div>
-
         </div>
         <div id="vis" class="hidden"></div>
         <div id="code-editor" class="hidden"></div>
@@ -143,6 +145,5 @@ html, body {
         <script src="../static/built/app.min.js" charset="utf-8"></script>
         <script src="../static/built/plugins/flow/app.min.js" charset="utf-8"></script>
         <script src="js/main.js" charset="utf-8"></script>
-
     </body>
 </html>

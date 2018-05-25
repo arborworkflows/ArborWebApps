@@ -1,0 +1,59 @@
+{
+    "inputs": [
+        {
+            "description": "A Phylogenetic Tree",
+            "format": "r.apetree",
+            "name": "tree",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "name": "table",
+            "type": "table"
+        },
+        {
+            "default": "island",
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "name": "column",
+            "type": "string"
+        },
+        {
+            "default": "discrete",
+            "domain": [
+                "discrete",
+                "continuous"
+            ],
+            "format": "text",
+            "name": "type",
+            "type": "string"
+        },
+        {
+            "default": "marginal",
+            "domain": [
+                "marginal"
+            ],
+            "format": "text",
+            "name": "method",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "aceArbor",
+    "outputs": [
+        {
+            "format": "r.dataframe",
+            "name": "res",
+            "type": "table"
+        },
+        {
+            "format": "png.base64",
+            "name": "treePlot",
+            "type": "image"
+        }
+    ],
+    "script": "library(devtools)\nlibrary(cardoonTools)\n#options(repos=\"http://cran.cnr.Berkeley.edu\")\n#install.packages(\"diversitree\", type=\"source\")\n#install_github(\"arborworkflows/aRbor\")\n\n\n# Removed this parameter to restore automated use of the analyses from Easy Mode apps\nfont_size <- 1\n\n# Two separate R operations are performed, depending on whether the character is discrete or\n# continuous.  The discrete path uses picante and geiger, while the continuous path uses aRbor.\n\n#if(type==\"discrete\"){\n#    require(picante)\n#    require(geiger)\n#    tree<-as.phylo(tree)\n#    row.names(table)<-table[[1]]\n#    combined<-match.phylo.data(tree, table)\n#    phy<-combined$phy\n#    data<-combined$data\n#    phy$edge.length <- phy$edge.length + 0.000001\n#    trait<-data[[column]]\n#    trait<-as.factor(trait)\n#    res<-ace(trait,phy,type=\"discrete\")\n#    TH <- max(branching.times(phy))\n#    acePlot<-function(phy,res,trait){\n#     cols<-rainbow(nlevels(trait))\n#     plot(phy, type=\"p\", FALSE, cex=1, label.offset=0.8, main=column)\n#     tiplabels(pch=21, bg=cols[as.numeric(trait)], cex=2)\n#     nodelabels(pie = res$lik.anc, piecol=cols, cex=0.5)\n#    }\n\n    # plot and wrap the result in a PNG for output on the webpage\n    # this uses the plot routine defined directly above\n#    treePlot <- cardoonPlot(expression(acePlot(phy, res,trait)), width=1000, height=1000, res=100)\n#    treePlot <- treePlot$png\n    # the return from APE is a complex object, lets pick out a simple table from this to return so it\n    # can be converted to a dataframe reliably\n#    res <- res$lik.anc\n#} \n\n#if(type==\"continuous\"){\n    require(aRbor)\n    td <- make.treedata(tree, table)\n    td1 <- select_(td, column)\n    res <- aceArbor(td1, charType=type, aceType=method)\n    TH <- max(branching.times(td$phy))\n    # plot and wrap the result in a PNG for output on the webpage\n    treePlot <- cardoonPlot(expression(plot(res, label.offset=0.05*TH)), width=1000, height=1000, res=100)\n    treePlot <- treePlot$png\n    \n    #require(picante)\n    #require(geiger)    \n    #tree<-as.phylo(tree)\n    #row.names(table)<-table[[1]]\n    #combined<-match.phylo.data(tree, table)\n    #phy<-combined$phy\n    #data<-combined$data\n    #phy$edge.length <- phy$edge.length + 0.000001\n    #trait<-data[[column]]\n    #trait<-as.numeric(as.character(trait))\n    #standard<-trait-min(trait)\n    #standard<-100*standard/max(standard)\n    #standard<-round(standard,0)\n    #res<-ace(trait,phy,type=\"continuous\")\n    #stdAce<-res$ace-min(res$ace)\n    #stdAce<-100*stdAce/max(stdAce)\n    #stdAce<-round(stdAce,0)\n    #aceContinuousPlot<-function(phy, trait, stdAce, ...){\n    #  cols<-rainbow(100)\n    #  plot(phy, type=\"p\", FALSE, cex=0.5, label.offset=1, main=column)\n    #  tiplabels(pch=21, bg=cols[standard], cex=1, adj=1)\n    #  nodelabels(pch=21, bg=cols[stdAce], cex=1)\n    #}\n    #treePlot <- cardoonPlot(expression(aceContinuousPlot(phy, standard, stdAce)), width=1000, height=1000, res=100)\n    #treePlot <- treePlot$png\n#}\n\n"
+}
