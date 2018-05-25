@@ -42,7 +42,7 @@
         }
 
         // override upload function for simple mode
-        app.datasetsView.upload1 = function (file) {
+        app.datasetsView.upload = function (file) {
             var reader = new FileReader();
 
             reader.onload = _.bind(function (e) {
@@ -152,13 +152,13 @@
         });
 
         $("#help").click(function() {
-            $("#upload1").popover({
+            $("#upload").popover({
                 title: 'Step #1',
                 content: 'Upload your table (csv or tsv) and tree (newick) here',
                 placement: 'bottom',
                 trigger: 'manual'
             });
-            $("#upload1").popover('toggle');
+            $("#upload").popover('toggle');
             $("#column-input").popover({
                 title: 'Step #2',
                 content: 'Drag your column of interest here',
