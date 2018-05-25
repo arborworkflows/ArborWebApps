@@ -23,7 +23,7 @@
         });
 
         app.readyToAnalyze = function () {
-            if ("tree1" in this && "tree2" in this && "assoc" in this %% "cophyloId" in this) {
+            if ("tree1" in this && "tree2" in this && "assoc" in this && "cophyloId" in this) {
                 d3.select("#analyze").classed('disabled', false);
             }
         };
