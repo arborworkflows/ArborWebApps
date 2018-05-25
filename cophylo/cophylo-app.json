@@ -1,0 +1,34 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.apetree",
+            "id": "tree1",
+            "name": "Tree 1",
+            "type": "tree"
+        },
+        {
+            "format": "r.apetree",
+            "id": "tree2",
+            "name": "Tree 2",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "assoc",
+            "name": "associations",
+            "type": "table"
+        }
+    ],
+    "mode": "r",
+    "name": "cophylo-app",
+    "outputs": [
+        {
+            "format": "png.base64",
+            "id": "cophyloPlot",
+            "name": "cophylogeny plot",
+            "type": "image"
+        }
+    ],
+    "script": "library(cardoonTools)\nlibrary(phytools)\n\nassoc<-assoc[,-1]\n\nc1<-sum(tree1$tip.label %in% assoc[,1])\nc2<-sum(tree2$tip.label %in% assoc[,1])\n\nif(c2 > c1) {\n    tmp<-tree1\n    tree1<-tree2\n    tree2<-tmp\n}\n\ncc<-cophylo(tree1, tree2, assoc=assoc, rotate=TRUE)\n    \n# plot and wrap the result in a PNG for output on the webpage\ncophyloPlot <- cardoonPlot(expression(plot(cc)))\ncophyloPlot <- cophyloPlot$png"
+}
