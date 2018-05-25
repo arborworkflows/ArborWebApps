@@ -1,0 +1,38 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.apetree",
+            "id": "tree",
+            "name": "Input tree",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "table",
+            "name": "Data table",
+            "type": "table"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "id": "variable",
+            "name": "Selected column",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "makeSimmap-app",
+    "outputs": [
+        {
+            "format": "png.base64",
+            "id": "simmapPlot",
+            "name": "Simmap figure",
+            "type": "image"
+        }
+    ],
+    "script": "require(phytools)\nrequire(cardoonTools)\n\nx<-table[,variable]\nnames(x) <- rownames(table)\n\ncols<-setNames(palette()[1:length(unique(x))],sort(unique(x)))\n    \nmtree<-make.simmap(tree,x,model=\"ER\")\n\n\nsimmap_plot <- function() {\n    plotSimmap(mtree,cols,type=\"fan\",fsize=0.8,ftype=\"i\")\n    add.simmap.legend(colors=cols,prompt=FALSE,x=0.9*par()$usr[1], y=-max(nodeHeights(tree)),fsize=0.8)\n}\n\nsimmapPlot = cardoonPlot(expression(simmap_plot()), width=1000, height=1000, res=100)\nsimmapPlot = simmapPlot$png\n\n\n\n"
+}
