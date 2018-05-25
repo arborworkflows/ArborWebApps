@@ -44,6 +44,7 @@
         // override upload function for simple mode
         flow.DatasetManagementView.prototype.upload = function (file) {
             var reader = new FileReader();
+            console.log("in here")
 
             reader.onload = _.bind(function (e) {
                 var dataset = {
