@@ -128,7 +128,7 @@
                         // render tree plot
                         $("#tree-plot").image({ data: app.treePlot });
                         $("#analyze").removeAttr("disabled");
-                        $("#notice").text("Ancestral state reconstruction succeeded!");
+                        $("#notice").text("Succeeded!");
                         $('html, body').animate({
                             scrollTop: $("#tree-plot").offset().top
                         }, 1000);
