@@ -23,7 +23,7 @@
         });
 
         app.readyToAnalyze = function () {
-            if ("column" in this && "table" in this && "tree" in this && "ASRId" in this) {
+            if ("tree1" in this && "tree2" in this && "ASRId" in this) {
                 d3.select("#analyze").classed('disabled', false);
             }
         };
@@ -103,8 +103,13 @@
                 }
 
                 else if (typeFormat.type == "tree") {
-                    app.tree = dataset.get('data');
-                    d3.select("#tree-name").html('Tree: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                  if ("tree1" in this) {
+                    app.tree2 = dataset.get('data');
+                    d3.select("#tree-name-2").html('Tree 2: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                  } else {
+                    app.tree1 = dataset.get('data');
+                    d3.select("#tree-name-1").html('Tree 1: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                  }
                 }
                 app.readyToAnalyze();
 
@@ -147,11 +152,8 @@
             $("#notice").text("Performing ancestral state reconstruction analysis...");
 
             var inputs = {
-                table:  {type: "table",  format: app.tableFormat,    data: app.table},
-                tree:   {type: "tree",   format: "newick",           data: app.tree},
-                column: {type: "string", format: "text",             data: app.column},
-                type:   {type: "string", format: "text",             data: app.type},
-                method: {type: "string", format: "text",             data: "marginal"}
+                tree1:   {type: "tree",   format: "newick",           data: app.tree1},
+                tree2:   {type: "tree",   format: "newick",           data: app.tree2},
             };
 
             var outputs = {
