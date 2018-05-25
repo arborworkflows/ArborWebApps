@@ -64,32 +64,10 @@
                 // modifications for simple app begin here
                 // if its a table, get the column names
                 if (typeFormat.type == "table") {
-                    app.table = dataset.get('data');
+                    app.assoc = dataset.get('data');
                     app.tableFormat = typeFormat.format;
-                    d3.select("#table-name").html('Table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
-                    $("#column-input").text("Parsing column names...");
-                    $("#column-names").empty();
-                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.discrete", false, _.bind(function (error, dataset) {
-                        var columnNames = dataset.get('data');
-                        for (var i = 0; i < columnNames.length; ++i) {
-                            // create drag-and-drop elements here
-                            $("#column-names").append('<div class="btn btn-info draggable discrete">' + columnNames[i] + '</div>');
-                        }
-                        $(".draggable").draggable({
-                             zIndex: 1, helper: "clone"
-                        });
-                        d3.select("#column-input").html('Drag column of interest here <span class="glyphicon glyphicon-exclamation-sign"></span>');
-                    }, this));
-                    flow.retrieveDatasetAsFormat(dataset, "table", "column.names.continuous", false, _.bind(function (error, dataset) {
-                        var columnNames = dataset.get('data');
-                        for (var i = 0; i < columnNames.length; ++i) {
-                            // create drag-and-drop elements here
-                            $("#column-names").append('<div class="btn btn-info draggable continuous">' + columnNames[i] + '</div>');
-                        }
-                        $(".draggable").draggable({
-                             zIndex: 1, helper: "clone"
-                        });
-                    }, this));
+                    d3.select("#assoc-name").html('Association table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                    
 
                     flow.retrieveDatasetAsFormat(dataset, "table", "rows", false, _.bind(function (error, dataset) {
                       // show the input table to help the user understand if their data
@@ -154,6 +132,7 @@
             var inputs = {
                 tree1:   {type: "tree",   format: "newick",           data: app.tree1},
                 tree2:   {type: "tree",   format: "newick",           data: app.tree2},
+                assoc:  {type: "table",  format: app.tableFormat,    data: app.assoc},
             };
 
             var outputs = {
