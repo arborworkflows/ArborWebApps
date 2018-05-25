@@ -25,8 +25,7 @@
         app.readyToAnalyze = function () {
             if ("table" in this && "tree" in this && "funId" in this) {
                 d3.select("#analyze").classed('disabled', false);
-                d3.select("#column-input").classed('btn-success', true);
-                d3.select("#column-input").text('Ready to plot');
+                d3.select("#analyze").text('Make plot');
             }
         };
 
