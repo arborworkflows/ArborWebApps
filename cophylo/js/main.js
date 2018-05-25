@@ -152,13 +152,13 @@
         });
 
         $("#help").click(function() {
-            $("#upload").popover({
+            $("#upload1").popover({
                 title: 'Step #1',
                 content: 'Upload your table (csv or tsv) and tree (newick) here',
                 placement: 'bottom',
                 trigger: 'manual'
             });
-            $("#upload").popover('toggle');
+            $("#upload1").popover('toggle');
             $("#column-input").popover({
                 title: 'Step #2',
                 content: 'Drag your column of interest here',
