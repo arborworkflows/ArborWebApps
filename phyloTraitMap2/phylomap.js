@@ -126,7 +126,9 @@ function searchLocationsNear(searchUrl) {
 			var latlng = new google.maps.LatLng(
 				parseFloat(d.lat),
 				parseFloat(d.lng));
-			var text = "location: " + latlng + "<br>id: " + id;
+			var text = 'name: ' + name + '\n';
+			text = text + "location: " + latlng + "\n"
+			text = text + "id: " + id;
 			createMarker(latlng, name, text, id, icon);
 			bounds.extend(latlng);
 		});
@@ -174,7 +176,7 @@ function searchLocationsNearCircle(lat,lon,radius) {
 					// the id field is used internally to phylomap for highlighting, it doesn't
 					// need to be displayed to the user generally
 					//var text = "species: " + name + " <br>id: " + id;
-					var text = "species: " + name ;	
+					var text = "name: " + name + "\n";	
 					// add other attributes to display tag if they are present in the taxon nodes
 					var attribs = []
 					if ('attributes' in phylomap.taxalist[i].node_data) {
@@ -182,7 +184,7 @@ function searchLocationsNearCircle(lat,lon,radius) {
 							attribs = phylomap.taxalist[i].node_data['attributes'][j]
 							// add descriptions to the text markers
 							for (var attrib in attribs) {
-								text = text + ' [' + attrib+']:'+attribs[attrib]
+								text = text + ' [' + attrib+']:'+attribs[attrib] + '\n'
 							};
 						}
 					}
@@ -211,6 +213,7 @@ function addLocationToSelectedList(node,attribs,lat,lon) {
     record['lat'] = lat
     record['lon'] = lon
     record['species'] = node.node_data['node name']
+    record['renderSize'] = 5
     phylomap.selectedOccurrences.push(record)
 }
 
@@ -236,7 +239,7 @@ function mapSingleNode(treeNode, rootNode,icon,selectionID) {
 			var latlng = new google.maps.LatLng(
 				parseFloat(thisloc[1]),
 				parseFloat(thisloc[0]));
-			var text = "species: " + name + "<br>id: " + selectionID;
+			var text = "name: " + name + "\nid: " + selectionID + '\n';
 			// add other attributes to display tag if they are present in the taxon node
 			var attribs = []
 			if ('attributes' in treeNode.node_data) {
@@ -244,7 +247,7 @@ function mapSingleNode(treeNode, rootNode,icon,selectionID) {
 					attribs = treeNode.node_data['attributes'][i]
 					// add descriptions to the text markers
 					for (var attrib in attribs) {
-						text = text + ' [' + attrib+']:'+attribs[attrib]
+						text = text + ' [' + attrib+']:'+attribs[attrib] + '\n'
 					};
 				}
 			}
@@ -305,6 +308,7 @@ function searchLocationsNearClade(selectedNode, callback) {
 	mapAllNodesInClade(rootOfClade, rootOfClade, icon, selectedNodeID)
 	//updateTableDisplay(phylomap.selectedOccurrences)
 	//updateGeoJSDisplay()
+	updateCandelaDisplay()
 	// run the callback if one was passed.  Use for setting and clearing processing badge
 	if (callback != null) callback();
 }
@@ -354,7 +358,8 @@ function createMarker(latlng, name, text, id, icon) {
 	var marker = new google.maps.Marker({
 		map: map,
 		position: latlng,
-		icon: icon
+		icon: icon,
+		title: text
 	});
 
 
@@ -449,7 +454,7 @@ addLoadEvent(function () {
 	mapOptions = {
 		//center: new google.maps.LatLng(18.994609, -71.345215),
 		//zoom: 6,
-		center: new google.maps.LatLng(1.65, -70.0),
+		center: new google.maps.LatLng(9.65, -83.0),
 		zoom: 5,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
@@ -608,6 +613,7 @@ function geojs_addVectorLayer(points) {
 	// save markers layer globally
 	phylomap.geojsmap.markers = markers
 	phylomap.geojsmap.map.draw();
+
 }
 
 
@@ -621,32 +627,7 @@ function updateOccurrencePointColors() {
 	var attribSelector = d3.select("#geojs_attribute").node();
     var selectedAttrib = attribSelector.options[attribSelector.selectedIndex].text;
     console.log('selected attrib is:',selectedAttrib)
-
-    // go through the points and figure out the min and max values of this particular attribute
-    var minVal = 1e99
-    var maxVal = -1e99
-    for (var i = 0; i< phylomap.selectedOccurrences.length; i++) {
-    	minVal = phylomap.selectedOccurrences[i][selectedAttrib] < minVal ? phylomap.selectedOccurrences[i][selectedAttrib] : minVal
-    	maxVal = phylomap.selectedOccurrences[i][selectedAttrib] > maxVal ? phylomap.selectedOccurrences[i][selectedAttrib] : maxVal
-    }
-    // now loop through and assign colors based on the interpolation.  The logic is simplified from
-    // complete interpolation because we are going between a fixed color for the min value and white
-
-    var valRange = maxVal - minVal
-    var interp_value = 0.0
-    var inverse_value = 0.0
-    var redColor = 0.0
-    var greenColor = 0.0
-    for (var i = 0; i < phylomap.geojsmap.markers.features().length; i++) {
- 		interp_value = (phylomap.selectedOccurrences[i][selectedAttrib] - minVal) / valRange
- 		inverse_value = 1.0 - interp_value
- 		redColor = interp_value + inverse_value*minRed
- 		greenColor = interp_value + inverse_value*minGreen
- 		phylomap.geojsmap.markers.features()[i].style("fillColor", {r:redColor, g:greenColor, b:1})
-
-    }
-    // redraw the map
-    phylomap.geojsmap.markers.map().draw();
+    candela_addGeoDots(phylomap.selectedOccurrences,selectedAttrib)
 }
 
 
@@ -695,3 +676,65 @@ function updateGeoJSDisplay() {
     geojs_addVectorLayer(phylomap.selectedOccurrences);
 
 }
+
+
+// ---------- Candela plotting functions
+
+// this function is called as soon as the page is finished loading
+function updateCandelaDisplay() {   
+
+
+    fillAttributeSelector();
+
+     d3.select("#geojs_attribute")
+            .on("change", updateOccurrencePointColors);
+    //geojs_addBaseLayer();
+    //candela_resize();
+    candela_addGeoDots(phylomap.selectedOccurrences);
+}
+
+
+function candela_resize() {
+    phylomap.geojsmap.map.resize(0, 0, $('#geojs_map_canvas').width()*0.7, $('#geojs_map_canvas').height());
+}
+
+
+
+function candela_addGeoDots(points, attrib='Poll') {
+    console.log('geodots:',points,"\n");
+
+	//var markers = phylomap.geojsmap.map.createLayer("feature",{"renderer":"vgl"})
+    //var uiLayer = phylomap.geojsmap.map.createLayer('ui', {"renderer":"vgl"});
+    //var tooltip = uiLayer.createWidget('dom', {position: {x: 0, y: 0}});
+    //tooltipElem = $(tooltip.canvas()).attr('id', 'tooltip').addClass('hidden');
+
+    // Add a vector layer to the map.  Fill the layer with all the points that are currently selected
+    $("#candela_map_canvas").empty();
+	 var el = document.getElementById('candela_map_canvas')
+	 el.style.width = '900px';
+	 el.style.height = '1000px';
+	 document.body.appendChild(el);
+
+   phylomap.candela_map = new candela.components.GeoDots(el, {
+   zoom: 7,
+   center: {
+     longitude: -82.948,
+     latitude: 9.9725
+   },
+   data: points,
+   width: 1000,
+   height: 700,
+   latitude: 'lat',
+   longitude: 'lon',
+   size: 'renderSize',
+   //tileUrl: 'http://c.tiles.wmflabs.org/hillshading/${z}/${x}/${y}.png',
+   //tileUrl: 'http://tile.stamen.com/terrain/${z}/${x}/${y}.jpg',
+   tileUrl: 'https://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=6548db9e547c4c5eacc2304ee947ebbe', 
+   color: attrib
+ });
+ phylomap.candela_map.render();
+
+
+}
+
+

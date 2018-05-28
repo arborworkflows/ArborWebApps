@@ -12,8 +12,13 @@
 <script src=//code.jquery.com/ui/1.11.4/jquery-ui.min.js></script>
 <script src=js/d3.v3.min.js charset=utf-8></script>
 
-<!-- source the API for Google Maps so we can draw layers on the map -->
+<!-- source the API for Google Maps so we can draw layers on the map 
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing"></script>
+
+-->
+
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDEvs0fUyS8f4Jf3l5hifYiK8F96DnUkkk&callback=initMap&libraries=drawing"
+  type="text/javascript"></script>
 
 <!-- include Geo.js -->
 
@@ -28,6 +33,11 @@
 <script src=//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js></script>
 
 <link rel="shortcut icon" href=/img/tangelo.ico>
+
+<!-- candela plots 
+<script src="//unpkg.com/candela/dist/candela.min.js"></script>
+-->
+<script src="candela/candela.js"></script>
 
 <!-- for slickGrid -->
 <!--
@@ -213,7 +223,9 @@ circle.hidden {
                 <button type="button" onclick="increaseHeight(80);">Increase Height</button>
                 <button type="button" onclick="increaseHeight(-80);">Decrease Height</button>        
                 <button type="button" onclick="clearAllHighlights();">Clear Highlights</button>
+                <!--
                 <button type="button" onclick="clearLocations();">Clear Map Markers</button>
+                -->
             </div>
         </div>
 
@@ -221,26 +233,37 @@ circle.hidden {
             <div class=col-md-6 id="tree" style="margin-top:10px; margin-left: 20px; margin-right:15px;  float-left; border-style:solid; overflow:hidden; border-width:medium"></div>
             <div class=col-md-5 id="map_canvas" style="  margin-left: 40px; margin-right:20px; height:800px; float-right; border-style:solid; border-width:medium"></div>
         </div>
-          <button type="button" onclick="updateGeoJSDisplay();" style="margin-top:25px; margin-left:25px;">Render Color by Attribute Map</button>
-
+        <!--
+          <button type="button" onclick="updateCandelaDisplay();" style="margin-top:25px; margin-left:25px;">Render Color by Attribute Map</button>
+        -->
          <div class=row style="margin-left:40px">
             Attribute to Color By:
-            <select  class=md-col-6 id='geojs_attribute' class='form-control' style="margin-left:40px;  margin-top:40px; margin-bottom:40px;width=40%"> </div>
+            <select  class=md-col-6 id='geojs_attribute' class='form-control' style="margin-left:40px;  margin-top:20px; margin-bottom:20px;width=40%"> </div>
             </select>
         </div>
-        <div class=row>
-            <div  class=md-col-6 id='geojs_map_canvas' style="margin-left:40px;  height:800px; margin-top:40px; margin-bottom:40px; width=80% "> </div>
-            </div>
 
-        </div>
-        <div>     
+            <div  id='candela_map_canvas' style="margin-left:100px;  height:1200px; margin-top:40px; margin-bottom:40px; width:1000px "> </div>
+            </div>
+       </div>
+ 
+        <!--
+        <div class=row>
+            <div  class=md-col-12 id='candela_map_canvas' style="margin-left:100px;  height:1200px; margin-top:40px; margin-bottom:40px; width:1000px "> </div>
+            </div>
+        -->
+
+ <!--   
+        
+        <div>  
             <button type="button" onclick="updateDrillDownDataDisplay();" style="margin-top:25px; margin-left:25px;">Aggregate Trait Results By Species</button>
+
             <div class=row>
                 <div  class='scatterplot' id='morphplot' style="margin-left:40px; margin-top:40px; margin-bottom:40px; width: 100%; "> </div>
             </div>
             <div class=row>
                 <div  id='tablecontent' style="margin-left:50px; margin-top:40px; margin-bottom:40px; width:90%; height: 500px;"> </div>
         </div>
+    -->
 
 </div>
 

@@ -17,6 +17,9 @@ phylomap.currentDatasetName = ''
 phylomap.currentDatasetArchiveId = null
 phylomap.currentTree = null
 
+// for Candela map
+phylomap.candela_map = null
+
 // added for authentication
 phylomap.usertoken = ''
 
@@ -214,6 +217,8 @@ function drawSelectedTree(projectName,datasetName) {
 							// initialize the display to show children nodes
 							root.children.forEach(toggleAll);
 							update(root);
+							// draw the candella display automatically 
+							updateCandelaDisplay()
 		    			}))
 				}
 			});
@@ -919,6 +924,7 @@ function updateVisualization() {
 	vis.selectAll("path.link")
 //		.duration(duration)
 		.attr("d", elbow);
+
 }
 
 
