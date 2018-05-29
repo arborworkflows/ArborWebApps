@@ -193,6 +193,8 @@ function searchLocationsNearCircle(lat,lon,radius) {
 					bounds.extend(latlng);
 					var colorToUse = getIconColor()
 	        		highlightPath(phylomap.taxalist[i],phylomap.currentTree,colorToUse)
+	        		// Candela is too slow to always update automatically
+	        		//updateCandelaDisplay()
 				}
 			}
 		}
@@ -213,7 +215,7 @@ function addLocationToSelectedList(node,attribs,lat,lon) {
     record['lat'] = lat
     record['lon'] = lon
     record['species'] = node.node_data['node name']
-    record['renderSize'] = 5
+    record['renderSize'] = 10
     phylomap.selectedOccurrences.push(record)
 }
 
@@ -308,7 +310,9 @@ function searchLocationsNearClade(selectedNode, callback) {
 	mapAllNodesInClade(rootOfClade, rootOfClade, icon, selectedNodeID)
 	//updateTableDisplay(phylomap.selectedOccurrences)
 	//updateGeoJSDisplay()
-	updateCandelaDisplay()
+	// Candela is too slow to always update automatically, user can invoke a render on demand
+	//updateCandelaDisplay()
+	
 	// run the callback if one was passed.  Use for setting and clearing processing badge
 	if (callback != null) callback();
 }
@@ -458,23 +462,20 @@ addLoadEvent(function () {
 		zoom: 5,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	};
+
 	map = new google.maps.Map(d3.select("#map_canvas").node(),
 		mapOptions);
-	var drawingManager = new google.maps.drawing.DrawingManager({
-		drawingMode: google.maps.drawing.OverlayType.CIRCLE,
-		drawingControl: true,
-		drawingControlOptions: {
-			position: google.maps.ControlPosition.TOP_CENTER,
-			drawingModes: [
-			  google.maps.drawing.OverlayType.MARKER,
-			  google.maps.drawing.OverlayType.CIRCLE,
-			  google.maps.drawing.OverlayType.RECTANGLE
-			]
-		},
-		markerOptions: {
-			icon: new google.maps.MarkerImage('http://www.example.com/icon.png')
-		}
-	});
+ 
+ var drawingManager = new google.maps.drawing.DrawingManager({
+    drawingMode: google.maps.drawing.OverlayType.MARKER,
+    drawingControl: true,
+    drawingControlOptions: {
+      position: google.maps.ControlPosition.TOP_CENTER,
+      drawingModes: ['marker', 'circle', 'rectangle']
+    },
+    markerOptions: {icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'},
+  });
+
 	drawingManager.setMap(map);
 
 	google.maps.event.addListener(drawingManager, 'overlaycomplete', function(event) {
@@ -701,7 +702,7 @@ function candela_resize() {
 
 
 function candela_addGeoDots(points, attrib='Poll') {
-    console.log('geodots:',points,"\n");
+    //console.log('geodots:',points,"\n");
 
 	//var markers = phylomap.geojsmap.map.createLayer("feature",{"renderer":"vgl"})
     //var uiLayer = phylomap.geojsmap.map.createLayer('ui', {"renderer":"vgl"});
