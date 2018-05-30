@@ -1,0 +1,28 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.apetree",
+            "id": "tree",
+            "name": "Phylogenetic tree",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "table",
+            "name": "Tip data",
+            "type": "table"
+        }
+    ],
+    "mode": "r",
+    "name": "plotTreeWithggtree-app",
+    "outputs": [
+        {
+            "format": "png.base64",
+            "id": "treePlot",
+            "name": "Tree Plot",
+            "type": "image"
+        }
+    ],
+    "script": "library(aRbor)\nlibrary(cardoonTools)\nlibrary(ggtree)\n\n\ntd <- make.treedata(tree, table)\n\nmtree<-td$phy\nmtable<-data.matrix(td$dat)\nmtable<-scale(mtable)\ncolnames(mtable)<-paste(\"c\", 1:ncol(mtable), sep=\"\")\n\nmt<-max(branching.times(tree))\n\ntreeplot <- function(tr){\n  p1<-ggtree(mtree)+ xlim(0, mt*2.5) + geom_tiplab(size=2, color=\"black\", offset=mt*0.6)\n  p2<-gheatmap(p1, mtable, offset=mt*0.05, width=0.5, low=\"red\", high=\"blue\", colnames_position = \"top\", font.size=2)\n  # plot\n  plot(p2)\n}\n\ntreePlot = cardoonPlot(expression(treeplot(mtree)), type=\"png\", width=15, height=15, units=\"cm\", res=300)\ntreePlot = treePlot$png\n\n\n\n\n\n\n\n"
+}

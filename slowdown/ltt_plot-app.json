@@ -1,0 +1,24 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "description": "Phylogenetic tree",
+            "format": "r.apetree",
+            "id": "tree",
+            "name": "tree",
+            "type": "tree"
+        }
+    ],
+    "mode": "r",
+    "name": "ltt_plot-app",
+    "outputs": [
+        {
+            "description": "output for plotting",
+            "format": "r.dataframe",
+            "id": "data",
+            "name": "data",
+            "type": "table"
+        }
+    ],
+    "script": "require(ape)\nrequire(cardoonTools)\n\ndata <- ltt.plot.coords(tree)"
+}
