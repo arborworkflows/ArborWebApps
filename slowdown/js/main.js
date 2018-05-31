@@ -72,6 +72,7 @@
             $("#analyze").attr("disabled", "disabled");
             $("#analyze").text("Re-run");
             $("#notice").text("Performing analysis...");
+            console.log(app.nMiss)
 
             var inputs = {
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
