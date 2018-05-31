@@ -20,6 +20,7 @@
         }).done(function (results) {
             app.analysisId = results["item"][0]._id;
             app.readyToAnalyze();
+            console.log(app.analysisId);
         });
 
         app.readyToAnalyze = function () {
@@ -165,13 +166,6 @@
                 trigger: 'manual'
             });
             $("#upload").popover('toggle');
-            $("#column-input").popover({
-                title: 'Step #2',
-                content: 'Drag your column of interest here',
-                placement: 'left',
-                trigger: 'manual'
-            });
-            $("#column-input").popover('toggle');
             $("#analyze").popover({
                 title: 'Step #3',
                 content: 'Click on the "Go!" button',
