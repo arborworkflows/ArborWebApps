@@ -106,9 +106,13 @@
                         result.append("<h2>Results:<\h2>");
 
                         result.append("<b>Analysis type: ");
-                        result.append("gamma test<br><br>");
+                        result.append("MCCR Gamma test from Pybus and Harvey <a href="https://scholar.google.com/scholar?q=Testing+macro-evolutionary+models+using+incomplete+molecular+phylogenies.+Pybus+2000">2000</a><br><br>");
 
-                        result.append("Number of species", data.result.slowdownResult.data.rows[0]["nSpecies"], "<br>")
+                        result.append("Number of species: ", data.result.slowdownResult.data.rows[0]["nSpecies"], "<br>");
+                        result.append("Number of missing taxa: ", data.result.slowdownResult.data.rows[0]["NumberMissing"], "<br>");
+                        result.append("Gamma statistic: ", data.result.slowdownResult.data.rows[0]["gam"], "<br>");
+                        result.append("Critical value of gamma: ", data.result.slowdownResult.data.rows[0]["criticalValue"], "<br>");
+                        result.append("P: ", data.result.slowdownResult.data.rows[0]["P"], "<br>");
 
                         function getCol(matrix, col){
                             var column = [];
