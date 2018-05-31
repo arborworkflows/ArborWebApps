@@ -10,7 +10,7 @@
         });
 
         // Lookup the ID of the analysis that we wish to perform.
-        app.analysisName = "ltt_plot-app";
+        app.analysisName = "testSlowdown-app";
         girder.restRequest({
             path: 'resource/search',
             data: {
@@ -72,8 +72,8 @@
             };
 
             var outputs = {
-                lttPlot: {type: "image", format: "png.base64"},
-                data: {type: "table",  format: "rows"}
+                lttdata: {type: "table",  format: "rows"},
+                slowdownResult: {type: "table",  format: "rows"}
             };
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
@@ -90,8 +90,9 @@
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        app.lttCoords = data.result.data.data;
-                        console.log(app.lttCoords);
+                        app.lttCoords = data.result.lttdata.data;
+                        app.slowdownResult = data.result.slowdownResult;
+                        console.log(app.slowdownResult);
 
 
                         // render results
