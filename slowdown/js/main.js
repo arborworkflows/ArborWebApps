@@ -108,7 +108,7 @@
                         result.append("<b>Analysis type: ");
                         result.append("gamma test<br><br>");
 
-                        result.append("Number of species", data.result.slowdownResult.rows[0]["nSpecies"], "<br>")
+                        result.append("Number of species", data.result.slowdownResult.data.rows[0]["nSpecies"], "<br>")
 
                         function getCol(matrix, col){
                             var column = [];
