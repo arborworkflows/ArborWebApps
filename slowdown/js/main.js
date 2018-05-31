@@ -72,7 +72,8 @@
             $("#analyze").attr("disabled", "disabled");
             $("#analyze").text("Re-run");
             $("#notice").text("Performing analysis...");
-            console.log(app.nMiss)
+
+            getMissingSpecies();
 
             var inputs = {
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
@@ -83,8 +84,6 @@
                 lttdata: {type: "table",  format: "rows"},
                 slowdownResult: {type: "table",  format: "rows"}
             };
-
-            getMissingSpecies();
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
                 _.bind(function (error, result) {
