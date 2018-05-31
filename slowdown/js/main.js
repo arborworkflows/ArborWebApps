@@ -31,7 +31,7 @@
 
         function getMissingSpecies() {
 
-          app.nMiss=document.getElementById("nMissing").value;
+          app.nMiss=document.getElementById("nMissing").value.toString();
           console.log(app.nMiss)
 
         }
@@ -75,7 +75,7 @@
 
             var inputs = {
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
-                NumberMissing: {type: "string", format: "text", data: app.nMiss.toString()}
+                NumberMissing: {type: "string", format: "text", data: app.nMiss}
             };
 
             var outputs = {
