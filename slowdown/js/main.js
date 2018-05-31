@@ -97,6 +97,19 @@
 
 
                         // render results
+                        var newRow = $('<div class="row"></div>');
+                        $(".main-content").append(newRow);
+                        newRow.append('<hr/>');
+
+                        var result = $('<div class="col-sm-12 full-width"></div>');
+                        newRow.append(result);
+                        result.append("<h2>Results:<\h2>");
+
+                        result.append("<b>Analysis type: ");
+                        result.append("gamma test<br><br>");
+
+                        result.append("Number of species", data.result.slowdownResult.datarows[0]["n species"], "<br>")
+
                         function getCol(matrix, col){
                             var column = [];
                             for(var i=0; i<matrix.length; i++){
@@ -141,16 +154,7 @@
 
                         Plotly.newPlot('ltt-plot', data, layout);
 
-                        var newRow = $('<div class="row"></div>');
-                        $(".main-content").append(newRow);
-                        newRow.append('<hr/>');
 
-                        var result = $('<div class="col-sm-12 full-width"></div>');
-                        newRow.append(result);
-                        result.append("<h2>Results:<\h2>");
-
-                        result.append("<b>Analysis type: <b>PGLS with residuals following ");
-                        result.append("gamma test<br><br>");
 
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded!");
