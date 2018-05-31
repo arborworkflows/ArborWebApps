@@ -31,7 +31,7 @@
 
         function getMissingSpecies() {
 
-          console.log(document.getElementById("nMissing").value)
+          app.nMiss=document.getElementById("nMissing").value)
 
         }
         // override upload function for simple mode
@@ -74,6 +74,7 @@
 
             var inputs = {
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
+                NumberMissing: {type: "string", format: "text", data: app.nMiss}
             };
 
             var outputs = {
