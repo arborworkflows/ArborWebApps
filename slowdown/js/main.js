@@ -110,9 +110,9 @@
 
                         result.append("Number of species: ", data.result.slowdownResult.data.rows[0]["nSpecies"], "<br>");
                         result.append("Number of missing taxa: ", data.result.slowdownResult.data.rows[0]["NumberMissing"], "<br>");
-                        result.append("Gamma statistic: ", data.result.slowdownResult.data.rows[0]["gam"], "<br>");
-                        result.append("Critical value of gamma: ", data.result.slowdownResult.data.rows[0]["criticalValue"], "<br>");
-                        result.append("P: ", data.result.slowdownResult.data.rows[0]["P"], "<br>");
+                        result.append("Gamma statistic: ", data.result.slowdownResult.data.rows[0]["gam"].toFixed(2), "<br>");
+                        result.append("Critical value of gamma: ", data.result.slowdownResult.data.rows[0]["criticalValue"].toFixed(2), "<br>");
+                        result.append("P: ", data.result.slowdownResult.data.rows[0]["P"].toFixed(4), "<br>");
 
                         function getCol(matrix, col){
                             var column = [];
