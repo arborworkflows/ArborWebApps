@@ -31,7 +31,7 @@
 
         function getMissingSpecies() {
 
-          console.log(document.getElementById("nMissing"))
+          console.log(document.getElementById("nMissing").value)
 
         }
         // override upload function for simple mode
