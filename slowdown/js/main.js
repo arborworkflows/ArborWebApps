@@ -10,7 +10,7 @@
         });
 
         // Lookup the ID of the analysis that we wish to perform.
-        app.analysisName = "testSlowdown-app";
+        app.analysisName = "testSlowdown_app";
         girder.restRequest({
             path: 'resource/search',
             data: {
