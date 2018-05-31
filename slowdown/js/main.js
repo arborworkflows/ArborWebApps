@@ -75,7 +75,7 @@
 
             var inputs = {
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
-                NumberMissing: {type: "string", format: "text", data: "11"}
+                NumberMissing: {type: "string", format: "text", data: app.nMiss.toString()}
             };
 
             var outputs = {
