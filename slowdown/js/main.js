@@ -141,6 +141,16 @@
 
                         Plotly.newPlot('ltt-plot', data, layout);
 
+                        var newRow = $('<div class="row"></div>');
+                        $(".main-content").append(newRow);
+                        newRow.append('<hr/>');
+
+                        var result = $('<div class="col-sm-12 full-width"></div>');
+                        newRow.append(result);
+                        result.append("<h2>Results:<\h2>");
+
+                        result.append("<b>Analysis type: <b>PGLS with residuals following ");
+                        result.append("gamma test<br><br>");
 
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded!");
