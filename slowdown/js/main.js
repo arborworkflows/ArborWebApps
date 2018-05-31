@@ -10,7 +10,7 @@
         });
 
         // Lookup the ID of the analysis that we wish to perform.
-        app.analysisName = "testSlowdown_app";
+        app.analysisName = "testSlowdown-app";
         girder.restRequest({
             path: 'resource/search',
             data: {
@@ -108,7 +108,7 @@
                         result.append("<b>Analysis type: ");
                         result.append("gamma test<br><br>");
 
-                        result.append("Number of species", data.result.slowdownResult.datarows[0]["n species"], "<br>")
+                        result.append("Number of species", data.result.slowdownResult.rows[0]["nSpecies"], "<br>")
 
                         function getCol(matrix, col){
                             var column = [];
