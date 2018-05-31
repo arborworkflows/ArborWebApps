@@ -29,7 +29,11 @@
             }
         };
 
+        function getMissingSpecies() {
 
+          console.log(document.getElementById("nMissing"))
+
+        }
         // override upload function for simple mode
         flow.DatasetManagementView.prototype.upload = function (file) {
             var reader = new FileReader();
@@ -76,6 +80,8 @@
                 lttdata: {type: "table",  format: "rows"},
                 slowdownResult: {type: "table",  format: "rows"}
             };
+
+            getMissingSpecies();
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
                 _.bind(function (error, result) {
