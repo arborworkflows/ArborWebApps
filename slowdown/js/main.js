@@ -106,7 +106,7 @@
                         result.append("<h2>Results:<\h2>");
 
                         result.append("<b>Analysis type: ");
-                        result.append("MCCR Gamma test from Pybus and Harvey <a href="https://scholar.google.com/scholar?q=Testing+macro-evolutionary+models+using+incomplete+molecular+phylogenies.+Pybus+2000">2000</a><br><br>");
+                        result.append("MCCR Gamma test from Pybus and Harvey 2000 <br><br>");
 
                         result.append("Number of species: ", data.result.slowdownResult.data.rows[0]["nSpecies"], "<br>");
                         result.append("Number of missing taxa: ", data.result.slowdownResult.data.rows[0]["NumberMissing"], "<br>");
