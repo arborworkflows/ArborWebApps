@@ -31,7 +31,7 @@
 
         function getMissingSpecies() {
 
-          app.nMiss=document.getElementById("nMissing").value)
+          app.nMiss=document.getElementById("nMissing").value;
 
         }
         // override upload function for simple mode
