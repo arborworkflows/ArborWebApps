@@ -190,16 +190,9 @@
 
                         // render results
 						$("#result").append("<h2>Results:<\h2>");
-						$("#result").append("<b>Column analyzed: <b>", app.column, "<br>");
-						$("#result").append("<b>Analysis type: <b>", app.analysisType, "<br>");
-						$("#result").append("<b>Estimated test statistic: <b>");
-                        if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
-							$("#result").append("lambda = ", app.result.rows[0][app.column + ".lambdaValue"].toFixed(2), "<br><br>")
-						} else {
-							$("#result").append("K = ", app.result.rows[0][app.column + ".KValue"].toFixed(2), "<br><br>")
-						}
+						$("#result").append("<b>Columns analyzed: <b>", app.column1, app.column2, "<br>");
+						$("#result").append("<b>Analysis type: Pagel correlation test <br>");
 
-                       if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
 							$("#result").append("<b>Statistical test: likelihood ratio</b><br>")
 							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the null model (lambda = 0): ", app.result.rows[0][app.column + ".lnlValues.Lambda fixed at zero"].toFixed(2), "<br>")
 							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the alternative model (lambda estimated): ", app.result.rows[0][app.column + ".lnlValues.Lambda estimated"].toFixed(2), "<br>")
@@ -212,9 +205,7 @@
 								$("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no phylogenetic signal.<br>")
 							}
 
-						} else {
-							$("#result").append("xxx")
-						}
+						
 
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded!");
