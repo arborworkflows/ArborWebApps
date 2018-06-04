@@ -23,7 +23,7 @@
         });
 
         app.readyToAnalyze = function () {
-            if ("column" in this && "table" in this && "tree" in this &&
+            if ("column1" in this && "column2" in this && "table" in this && "tree" in this &&
                 "analysisId" in this) {
                 d3.select("#analyze").classed('disabled', false);
             }
@@ -158,12 +158,11 @@
             var inputs = {
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
-                column: {type: "string", format: "text",             data: app.column},
-                method: {type: "string", format: "text",             data: "lambda"}
+                column: {type: "string", format: "text",             data: app.column1},
+                column: {type: "string", format: "text",             data: app.column2},
             };
 
             var outputs = {
-				analysisType: {type: "string", format: "text"},
                 result: {type: "table", format: "rows"}
             };
 
@@ -182,7 +181,6 @@
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.result = data.result.result.data;
-						app.analysisType = data.result.analysisType.data || 'continuous lambda';
 
 						console.log(app.result.rows[0])
 
