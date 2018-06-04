@@ -32,7 +32,7 @@
         function getMissingSpecies() {
 
           app.nMiss=document.getElementById("nMissing").value.toString();
-          if(app.nMiss=="") app.nMiss=0;
+          if(app.nMiss=="") app.nMiss="0";
           console.log(app.nMiss)
 
         }
