@@ -109,7 +109,7 @@
             drop: function( event, ui ) {
                 var COI = ui.draggable.text();
                 app.column1 = COI;
-                d3.select("#column-input")
+                d3.select("#column-input1")
                     .classed('btn-primary', true)
                     .classed('btn-success', false)
                     .classed('bg-warning', false)
@@ -117,12 +117,12 @@
                 app.readyToAnalyze();
             },
             over: function (event, ui) {
-                d3.select("#column-input")
+                d3.select("#column-input1")
                     .classed('btn-success', true)
                     .classed('bg-warning', false);
             },
             out: function (event, ui) {
-                d3.select("#column-input")
+                d3.select("#column-input1")
                     .classed('btn-success', false)
                     .classed('bg-warning', true);
             }
@@ -132,7 +132,7 @@
                 drop: function( event, ui ) {
                     var COI = ui.draggable.text();
                     app.column2 = COI;
-                    d3.select("#column-input")
+                    d3.select("#column-input2")
                         .classed('btn-primary', true)
                         .classed('btn-success', false)
                         .classed('bg-warning', false)
@@ -140,12 +140,12 @@
                     app.readyToAnalyze();
                 },
                 over: function (event, ui) {
-                    d3.select("#column-input")
+                    d3.select("#column-input2")
                         .classed('btn-success', true)
                         .classed('bg-warning', false);
                 },
                 out: function (event, ui) {
-                    d3.select("#column-input")
+                    d3.select("#column-input2")
                         .classed('btn-success', false)
                         .classed('bg-warning', true);
                 }
@@ -239,13 +239,13 @@
                 trigger: 'manual'
             });
             $("#upload").popover('toggle');
-            $("#column-input").popover({
+            $("#column-input1").popover({
                 title: 'Step #2',
                 content: 'Drag your column of interest here',
                 placement: 'left',
                 trigger: 'manual'
             });
-            $("#column-input").popover('toggle');
+            $("#column-input1").popover('toggle');
             $("#analyze").popover({
                 title: 'Step #3',
                 content: 'Click on the "Go!" button',
