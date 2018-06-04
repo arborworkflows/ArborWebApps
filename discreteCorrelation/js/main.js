@@ -198,15 +198,14 @@
 						$("#result").append("<b>Analysis type: Pagel correlation test <br>");
 
 							$("#result").append("<b>Statistical test: likelihood ratio</b><br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the null model (lambda = 0): ", app.result.rows[0]["lrStat"].toFixed(2), "<br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the alternative model (lambda estimated): ", app.result.rows[0][app.column + ".lnlValues.Lambda estimated"].toFixed(2), "<br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chi-squared test statistic: ", app.result.rows[0][app.column + ".chisqTestStat"].toFixed(2), "<br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0][app.column + ".chisqPVal"].toFixed(3), "<br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Likelihood ratio test statistic: ", app.result.rows[0]["lrStat"], "<br>")
+              $("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D.f.: ", app.result.rows[0]["lrDF"], "<br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0]["lrPVal"].toFixed(3), "<br>")
 
-							if(app.result.rows[0][app.column + ".chisqPVal"] < 0.05) {
-								$("#result").append("<br><br><b>Conclusion: </b> Reject the null hypothesis of no phylogenetic signal.<br>")
+							if(app.result.rows[0]["lrPVal"] < 0.05) {
+								$("#result").append("<br><br><b>Conclusion: </b> Characters are correlated (Reject the null hypothesis of no correlation).<br>")
 							} else {
-								$("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no phylogenetic signal.<br>")
+								$("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no correlation.<br>")
 							}
 
 
