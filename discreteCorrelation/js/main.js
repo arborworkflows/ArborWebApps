@@ -114,6 +114,9 @@
                     .classed('btn-success', false)
                     .classed('bg-warning', false)
                     .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                d3.select("#column-input2")
+                        .html('Now place second variable of interest here...');
+
                 app.readyToAnalyze();
             },
             over: function (event, ui) {
@@ -158,8 +161,8 @@
             var inputs = {
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
-                column: {type: "string", format: "text",             data: app.column1},
-                column: {type: "string", format: "text",             data: app.column2},
+                column1: {type: "string", format: "text",             data: app.column1},
+                column2: {type: "string", format: "text",             data: app.column2},
             };
 
             var outputs = {
