@@ -9,6 +9,7 @@
             el: 'body'
         });
 
+        app.nMiss=0;
         // Lookup the ID of the analysis that we wish to perform.
         app.analysisName = "testSlowdown-app";
         girder.restRequest({
