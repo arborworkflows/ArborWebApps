@@ -9,7 +9,6 @@
             el: 'body'
         });
 
-        app.nMiss=0;
         // Lookup the ID of the analysis that we wish to perform.
         app.analysisName = "testSlowdown-app";
         girder.restRequest({
@@ -33,6 +32,7 @@
         function getMissingSpecies() {
 
           app.nMiss=document.getElementById("nMissing").value.toString();
+          if(app.nMiss=="") app.nMiss=0;
           console.log(app.nMiss)
 
         }
