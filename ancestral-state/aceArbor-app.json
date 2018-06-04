@@ -1,0 +1,50 @@
+{
+    "description": "Estimate ancestral states for a single character (single column in \"table\"). Character must be identified as discrete or continuous.",
+    "inputs": [
+        {
+            "description": "A Phylogenetic Tree",
+            "format": "r.apetree",
+            "name": "tree",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "name": "table",
+            "type": "table"
+        },
+        {
+            "default": "island",
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "name": "column",
+            "type": "string"
+        },
+        {
+            "default": "marginal",
+            "domain": [
+                "marginal"
+            ],
+            "format": "text",
+            "name": "method",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "aceArbor-app",
+    "outputs": [
+        {
+            "format": "r.dataframe",
+            "name": "res",
+            "type": "table"
+        },
+        {
+            "format": "png.base64",
+            "name": "treePlot",
+            "type": "image"
+        }
+    ],
+    "script": "library(cardoonTools)\nrequire(treeplyr)\nrequire(aRbor)\nrequire(treeplyr)\n\nforce.ultrametric<-function(tree){\n\n        h<-diag(vcv(tree))\n        d<-max(h)-h\n        ii<-sapply(1:Ntip(tree),function(x,y) which(y==x),\n            y=tree$edge[,2])\n        tree$edge.length[ii]<-tree$edge.length[ii]+d\n    \n    tree\n}\ntree <- force.ultrametric(tree)\n\ntd <- make.treedata(tree, table)\ntd1 <- select_(td, column)\n\ntype<-detectCharacterType(as.matrix(td1$dat[,1]))\n\n\noutput <- aceArbor(td1, charType=type, aceType=method)\n\n\nTH <- max(branching.times(td$phy))\nntips<-length(td$phy$tip.label)\n    \n# plot and wrap the result in a PNG for output on the webpage\ntreePlot <- cardoonPlot(expression(plot(output, label.offset=0.05*TH)), width=1000, height=16*ntips, res=100)\ntreePlot <- treePlot$png\n\nres <- output[[1]]    \nnodeLabels<-1:td1$phy$Nnode + length(td1$phy$tip.label)\nres<-cbind(nodeLabels, res)"
+}
