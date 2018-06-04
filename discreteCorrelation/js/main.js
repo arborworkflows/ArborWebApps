@@ -191,7 +191,7 @@
 
             console.log(app.result.rows);
 						console.log(app.result.rows[0].valueOf());
-            console.log(app.result.rows[0]["lrStat"]);
+            console.log(app.result.data.rows[0]["lrStat"]);
 
 
                         // render results
@@ -200,7 +200,7 @@
 						$("#result").append("<b>Analysis type: Pagel correlation test <br>");
 
 							$("#result").append("<b>Statistical test: likelihood ratio</b><br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Likelihood ratio test statistic: ", app.result.rows[0].valueOf(), "<br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Likelihood ratio test statistic: ", app.result.data.rows[0], "<br>")
               $("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D.f.: ", app.result.rows[0]["lrDF"], "<br>")
 							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0]["lrPVal"], "<br>")
 
