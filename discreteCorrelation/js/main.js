@@ -175,16 +175,14 @@
             flow.performAnalysis(app.analysisId, inputs, outputs,
                 _.bind(function (error, result) {
                     app.taskId = result._id;
-                    console.log(app.taskId)
                     setTimeout(_.bind(app.checkResult, app), 1000);
                 }, app));
 
         app.checkResult = function () {
             var check_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/status'
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
-                console.log(result.status);
-                console.log("B")
-                if (result.status === 'SUCCESS') {
+              console.log(result.status);
+              if (result.status === 'SUCCESS') {
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
