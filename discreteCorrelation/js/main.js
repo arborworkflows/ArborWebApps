@@ -190,7 +190,7 @@
                         app.result = data.result.dcResultTable.data;
 
             console.log(app.result.rows)
-						console.log(app.result.rows[0])
+						console.log(app.result.rows[0].valueOf())
             console.log(app.result.rows[0]["lrStat"])
 
 
