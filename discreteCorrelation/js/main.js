@@ -175,12 +175,14 @@
                 _.bind(function (error, result) {
                     app.taskId = result._id;
                     setTimeout(_.bind(app.checkResult, app), 1000);
+                    console.log("A")
                 }, app));
 
         app.checkResult = function () {
             var check_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/status'
             girder.restRequest({path: check_url}).done(_.bind(function (result) {
                 console.log(result.status);
+                console.log("B")
                 if (result.status === 'SUCCESS') {
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
