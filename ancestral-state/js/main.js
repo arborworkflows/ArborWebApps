@@ -10,7 +10,7 @@
         });
 
         // Lookup the ID of the analysis that we wish to perform.
-        app.analysisName = "aceArbor";
+        app.analysisName = "aceArbor-app";
         girder.restRequest({
             path: 'resource/search',
             data: {
@@ -150,7 +150,6 @@
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
                 column: {type: "string", format: "text",             data: app.column},
-                type:   {type: "string", format: "text",             data: app.type},
                 method: {type: "string", format: "text",             data: "marginal"}
             };
 
