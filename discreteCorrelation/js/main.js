@@ -189,9 +189,7 @@
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.result = data.result.dcResultTable.data;
 
-            console.log(app.result.rows);
-						console.log(app.result.rows[0].valueOf());
-            console.log(app.result.data.rows[0]["lrStat"]);
+            console.log(app.result.rows[0]["lrStat"]);
 
 
                         // render results
