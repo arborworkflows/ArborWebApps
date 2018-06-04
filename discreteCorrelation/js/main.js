@@ -19,6 +19,7 @@
             }
         }).done(function (results) {
             app.analysisId = results["item"][0]._id;
+            console.log(app.analysisId)
             app.readyToAnalyze();
         });
 
