@@ -158,7 +158,7 @@
             $("#analyze").text("Re-run");
             $("#notice").text("Performing analysis...");
 
-            console.log(app.column1, app.column2)
+            console.log(app.column1, app.column2);
 
             var inputs = {
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
@@ -171,7 +171,7 @@
                 result: {type: "table", format: "rows"}
             };
 
-            console.log(app.analysisId)
+            console.log(app.analysisId);
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
                 _.bind(function (error, result) {
