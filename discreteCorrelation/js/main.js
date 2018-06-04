@@ -171,13 +171,12 @@
                 result: {type: "table", format: "rows"}
             };
 
-            console.log(app.analysisId);
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
                 _.bind(function (error, result) {
                     app.taskId = result._id;
+                    console.log(app.taskId)
                     setTimeout(_.bind(app.checkResult, app), 1000);
-                    console.log(app.analysisId)
                 }, app));
 
         app.checkResult = function () {
