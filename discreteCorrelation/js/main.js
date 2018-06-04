@@ -158,6 +158,8 @@
             $("#analyze").text("Re-run");
             $("#notice").text("Performing analysis...");
 
+            console.log(app.column1, app.column2)
+
             var inputs = {
                 table:  {type: "table",  format: app.tableFormat,    data: app.table},
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
@@ -205,7 +207,7 @@
 								$("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no phylogenetic signal.<br>")
 							}
 
-						
+
 
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded!");
