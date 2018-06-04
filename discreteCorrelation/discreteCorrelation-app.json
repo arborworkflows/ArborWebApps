@@ -1,0 +1,48 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.apetree",
+            "id": "tree",
+            "name": "Phylogenetic tree",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "table",
+            "name": "Data matrix",
+            "type": "table"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "id": "column1",
+            "name": "Column with character 1",
+            "type": "string"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "id": "column2",
+            "name": "Column with character 2",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "discreteCorrelation-app",
+    "outputs": [
+        {
+            "format": "r.dataframe",
+            "id": "dcResultTable",
+            "name": "Discrete correlation results",
+            "type": "table"
+        }
+    ],
+    "script": "\n## discreteCorrelation script\n\nlibrary(geiger)\nlibrary(cardoonTools)\nlibrary(treeplyr)\nlibrary(aRbor)\nlibrary(diversitree)\n\nmodelType=\"ER\"\n\nrownames(table)<-table[,1]\ntable<-table[,-1]\n\n\ndcResultTable<-discreteCorrelation(tree, table, column1, column2, modelType=\"ER\")\n"
+}
