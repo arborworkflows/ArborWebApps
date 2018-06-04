@@ -68,7 +68,7 @@
                     app.table = dataset.get('data');
                     app.tableFormat = typeFormat.format;
                     d3.select("#table-name").html('Table: ' + file.name + ' <span class="glyphicon glyphicon-ok-circle"></span>');
-                    $("#column-input").text("Parsing column names...");
+                    $("#column-input1").text("Parsing column names...");
                     $("#column-names").empty();
                     flow.retrieveDatasetAsFormat(dataset, "table", "column.names", false, _.bind(function (error, dataset) {
                         var columnNames = dataset.get('data');
@@ -79,7 +79,7 @@
                         $(".draggable").draggable({
                              zIndex: 1, helper: "clone"
                         });
-                        d3.select("#column-input").html('Drag column of interest here <span class="glyphicon glyphicon-exclamation-sign"></span>');
+                        d3.select("#column-input1").html('Drag first column of interest here (must be a binary character) <span class="glyphicon glyphicon-exclamation-sign"></span>');
                     }, this));
 
                     flow.retrieveDatasetAsFormat(dataset, "table", "rows", false, _.bind(function (error, dataset) {
@@ -105,10 +105,10 @@
             reader.readAsText(file);
         };
 
-        $("#column-input").droppable({
+        $("#column-input1").droppable({
             drop: function( event, ui ) {
                 var COI = ui.draggable.text();
-                app.column = COI;
+                app.column1 = COI;
                 d3.select("#column-input")
                     .classed('btn-primary', true)
                     .classed('btn-success', false)
@@ -128,6 +128,28 @@
             }
             });
 
+            $("#column-input2").droppable({
+                drop: function( event, ui ) {
+                    var COI = ui.draggable.text();
+                    app.column2 = COI;
+                    d3.select("#column-input")
+                        .classed('btn-primary', true)
+                        .classed('btn-success', false)
+                        .classed('bg-warning', false)
+                        .html(COI + ' <span class="glyphicon glyphicon-ok-circle"></span>');
+                    app.readyToAnalyze();
+                },
+                over: function (event, ui) {
+                    d3.select("#column-input")
+                        .classed('btn-success', true)
+                        .classed('bg-warning', false);
+                },
+                out: function (event, ui) {
+                    d3.select("#column-input")
+                        .classed('btn-success', false)
+                        .classed('bg-warning', true);
+                }
+                });
         $("#analyze").click(function() {
             $("#analyze").attr("disabled", "disabled");
             $("#analyze").text("Re-run");
