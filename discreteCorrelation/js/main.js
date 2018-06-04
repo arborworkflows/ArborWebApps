@@ -187,7 +187,7 @@
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        app.result = data.result.result.data;
+                        app.result = data.result.dcResultTable.data;
 
 						console.log(app.result.rows[0])
 
@@ -198,7 +198,7 @@
 						$("#result").append("<b>Analysis type: Pagel correlation test <br>");
 
 							$("#result").append("<b>Statistical test: likelihood ratio</b><br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the null model (lambda = 0): ", app.result.rows[0][app.column + ".lnlValues.Lambda fixed at zero"].toFixed(2), "<br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the null model (lambda = 0): ", app.result.rows[0]["lrStat"].toFixed(2), "<br>")
 							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the alternative model (lambda estimated): ", app.result.rows[0][app.column + ".lnlValues.Lambda estimated"].toFixed(2), "<br>")
 							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chi-squared test statistic: ", app.result.rows[0][app.column + ".chisqTestStat"].toFixed(2), "<br>")
 							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0][app.column + ".chisqPVal"].toFixed(3), "<br>")
