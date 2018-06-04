@@ -175,7 +175,7 @@
                 _.bind(function (error, result) {
                     app.taskId = result._id;
                     setTimeout(_.bind(app.checkResult, app), 1000);
-                    console.log("A")
+                    console.log(app.analysisId)
                 }, app));
 
         app.checkResult = function () {
