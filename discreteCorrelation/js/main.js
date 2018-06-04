@@ -169,7 +169,7 @@
             };
 
             var outputs = {
-                result: {type: "table", format: "rows"}
+                dcResultTable: {type: "table", format: "rows"}
             };
 
 
