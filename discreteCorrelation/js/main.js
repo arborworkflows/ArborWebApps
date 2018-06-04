@@ -171,6 +171,8 @@
                 result: {type: "table", format: "rows"}
             };
 
+            console.log(app.analysisId)
+
             flow.performAnalysis(app.analysisId, inputs, outputs,
                 _.bind(function (error, result) {
                     app.taskId = result._id;
