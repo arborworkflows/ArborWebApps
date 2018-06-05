@@ -189,8 +189,7 @@
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.result = data.result.dcResultTable.data;
-                        app.QPlot = data.result.discreteCorPlot.data;
-
+                        app.Qplot = data.result.discreteCorPlot.data;
 
                     // render results
 						        $("#result").append("<h2>Results:<\h2>");
