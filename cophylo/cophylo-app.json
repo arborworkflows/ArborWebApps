@@ -30,5 +30,5 @@
             "type": "image"
         }
     ],
-    "script": "library(cardoonTools)\nlibrary(phytools)\n\nassoc<-assoc[,-1]\n\nc1<-sum(tree1$tip.label %in% assoc[,1])\nc2<-sum(tree2$tip.label %in% assoc[,1])\n\nif(c2 > c1) {\n    tmp<-tree1\n    tree1<-tree2\n    tree2<-tmp\n}\n\ncc<-cophylo(tree1, tree2, assoc=assoc, rotate=TRUE)\n    \n# plot and wrap the result in a PNG for output on the webpage\ncophyloPlot <- cardoonPlot(expression(plot(cc)))\ncophyloPlot <- cophyloPlot$png"
+    "script": "library(cardoonTools)\nlibrary(phytools)\n\nassoc<-assoc[,-1]\n\nif(dim(assoc)[2]!=2) {\n  res<-NULL\n  for(i in 1:nrow(assoc))\n    for(j in 1:ncol(assoc))\n      if(assoc[i,j]!=0) {\n        res<-rbind(res, c(rownames(assoc)[i], colnames(assoc)[j]))\n      }\n  assoc<-res\n}\n\n\nc1<-sum(tree1$tip.label %in% assoc[,1])\nc2<-sum(tree2$tip.label %in% assoc[,1])\n\nif(c2 > c1) {\n    tmp<-tree1\n    tree1<-tree2\n    tree2<-tmp\n}\n\ncc<-cophylo(tree1, tree2, assoc=assoc, rotate=TRUE)\n\nn1<-length(tree1$tip.label)\nn2<-length(tree2$tip.label)\n    \n# plot and wrap the result in a PNG for output on the webpage\ncophyloPlot <- cardoonPlot(expression(plot(cc)), width=1000, height=max(n1, n2)*19, res=100)\ncophyloPlot <- cophyloPlot$png"
 }
