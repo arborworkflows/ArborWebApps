@@ -169,7 +169,8 @@
             };
 
             var outputs = {
-                dcResultTable: {type: "table", format: "rows"}
+                dcResultTable: {type: "table", format: "rows"},
+                discreteCorPlot: {type: "image", format: "png.base64"}
             };
 
 
@@ -188,23 +189,26 @@
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
                         app.result = data.result.dcResultTable.data;
+                        app.QPlot = data.result.discreteCorPlot.data;
 
-                        // render results
-						$("#result").append("<h2>Results:<\h2>");
-						$("#result").append("<b>Columns analyzed: <b>", app.column1, app.column2, "<br>");
-						$("#result").append("<b>Analysis type: Pagel correlation test <br>");
 
-							$("#result").append("<b>Statistical test: likelihood ratio</b><br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Likelihood ratio test statistic: ", app.result.rows[0]["lrStat"].toFixed(2), "<br>")
-              $("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D.f.: ", app.result.rows[0]["lrDF"], "<br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0]["lrPVal"].toFixed(4), "<br>")
+                    // render results
+						        $("#result").append("<h2>Results:<\h2>");
+						        $("#result").append("<b>Columns analyzed: <b>", app.column1, app.column2, "<br>");
+						        $("#result").append("<b>Analysis type: Pagel correlation test <br>");
 
-							if(app.result.rows[0]["lrPVal"] < 0.05) {
-								$("#result").append("<br><br><b>Conclusion: </b> Characters are correlated (Reject the null hypothesis of no correlation).<br>")
-							} else {
-								$("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no correlation.<br>")
-							}
+							      $("#result").append("<b>Statistical test: likelihood ratio</b><br>")
+							      $("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Likelihood ratio test statistic: ", app.result.rows[0]["lrStat"].toFixed(2), "<br>")
+                    $("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D.f.: ", app.result.rows[0]["lrDF"], "<br>")
+							      $("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0]["lrPVal"].toFixed(4), "<br>")
 
+							      if(app.result.rows[0]["lrPVal"] < 0.05) {
+								              $("#result").append("<br><br><b>Conclusion: </b> Characters are correlated (Reject the null hypothesis of no correlation).<br>")
+							      } else {
+								              $("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no correlation.<br>")
+							      }
+
+                    $("#Q-plot").image({ data: app.Qplot });
 
 
                         $("#analyze").removeAttr("disabled");
