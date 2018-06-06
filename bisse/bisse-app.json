@@ -1,0 +1,44 @@
+{
+    "description": "",
+    "inputs": [
+        {
+            "format": "r.apetree",
+            "id": "tree",
+            "name": "Phylogenetic tree",
+            "type": "tree"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "table",
+            "name": "Data matrix",
+            "type": "table"
+        },
+        {
+            "domain": {
+                "format": "column.names",
+                "input": "table"
+            },
+            "format": "text",
+            "id": "column",
+            "name": "Binary variable",
+            "type": "string"
+        }
+    ],
+    "mode": "r",
+    "name": "bisse-app",
+    "outputs": [
+        {
+            "format": "r.dataframe",
+            "id": "statTable",
+            "name": "Results of statistical test",
+            "type": "table"
+        },
+        {
+            "format": "r.dataframe",
+            "id": "paramTable",
+            "name": "Parameter estimates",
+            "type": "table"
+        }
+    ],
+    "script": "## bisse app script\nlibrary(aRbor)\nlibrary(treeplyr)\nlibrary(diversitree)\n\ntd <- make.treedata(tree, table)\ntd1 <- select(td, column)\n\nres<-bisseArbor(td1)\n\nstatTable<-res$stats\nparamTable<-res$param"
+}
