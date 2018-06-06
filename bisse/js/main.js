@@ -140,7 +140,8 @@
             };
 
             var outputs = {
-                result: {type: "table", format: "rows"}
+                statTable: {type: "table", format: "rows"},
+                paramTable: {type: "table", format: "rows"}
             };
 
             flow.performAnalysis(app.analysisId, inputs, outputs,
@@ -157,7 +158,8 @@
                     // get result data
                     var result_url = '/item/' + this.analysisId + '/flow/' + this.taskId + '/result'
                     girder.restRequest({path: result_url}).done(_.bind(function (data) {
-                        app.result = data.result.result.data;
+                        app.result = data.result.statTable.data;
+                        app.params = data.result.paramTable.data;
 
 						console.log(app.result.rows[0])
 
@@ -165,13 +167,11 @@
                         // render results
 						$("#result").append("<h2>Results:<\h2>");
 						$("#result").append("<b>Column analyzed: <b>", app.column, "<br>");
-						$("#result").append("<b>Analysis type: <b>", app.analysisType, "<br>");
-						$("#result").append("<b>Estimated test statistic: <b>");
-                        if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
-							$("#result").append("lambda = ", app.result.rows[0][app.column + ".lambdaValue"].toFixed(2), "<br><br>")
-						} else {
-							$("#result").append("K = ", app.result.rows[0][app.column + ".KValue"].toFixed(2), "<br><br>")
-						}
+						$("#result").append("<b>BiSSE null model likelihood: <b>");
+						$("#result").append("lnL = ", app.result.rows[0]["nullLik"].toFixed(2), "<br><br>")
+            $("#result").append("<b>BiSSE full model likelihood: <b>");
+						$("#result").append("lnL = ", app.result.rows[0]["bisLik"].toFixed(2), "<br><br>")
+
 
                        if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
 							$("#result").append("<b>Statistical test: likelihood ratio</b><br>")
