@@ -167,28 +167,33 @@
                         // render results
 						$("#result").append("<h2>Results:<\h2>");
 						$("#result").append("<b>Column analyzed: <b>", app.column, "<br>");
+            $("#result").append("<b>Statistical test: likelihood ratio</b><br>")
 						$("#result").append("<b>BiSSE null model likelihood: <b>");
 						$("#result").append("lnL = ", app.result.rows[0]["nullLik"].toFixed(2), "<br><br>")
             $("#result").append("<b>BiSSE full model likelihood: <b>");
 						$("#result").append("lnL = ", app.result.rows[0]["bisLik"].toFixed(2), "<br><br>")
 
+            $("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chi-squared test statistic: ", app.result.rows[0]["lrStat"].toFixed(2), "<br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0]["Pval"].toFixed(3), "<br>")
 
-                       if(app.analysisType=="discrete lambda" | app.analysisType=="continuous lambda") {
-							$("#result").append("<b>Statistical test: likelihood ratio</b><br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the null model (lambda = 0): ", app.result.rows[0][app.column + ".lnlValues.Lambda fixed at zero"].toFixed(2), "<br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lnL of the alternative model (lambda estimated): ", app.result.rows[0][app.column + ".lnlValues.Lambda estimated"].toFixed(2), "<br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chi-squared test statistic: ", app.result.rows[0][app.column + ".chisqTestStat"].toFixed(2), "<br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0][app.column + ".chisqPVal"].toFixed(3), "<br>")
-
-							if(app.result.rows[0][app.column + ".chisqPVal"] < 0.05) {
-								$("#result").append("<br><br><b>Conclusion: </b> Reject the null hypothesis of no phylogenetic signal.<br>")
+							if(app.result.rows[0]["PVal"] < 0.05) {
+								$("#result").append("<br><br><b>Conclusion: </b> Reject the null hypothesis, character-dependent model supported.<br>")
 							} else {
-								$("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis of no phylogenetic signal.<br>")
+								$("#result").append("<br><br><b>Conclusion: </b> Fail to reject the null hypothesis.<br>")
 							}
 
-						} else {
-							$("#result").append("xxx")
-						}
+              $("#result").append("<h2>Model parameter estimates:<\h2>");
+              $("#result").append("Null model: lambda = ", app.params.rows[0]["null_lambda1"].toFixed(2), "; ");
+              $("#result").append("mu = ", app.params.rows[0]["null_mu1"].toFixed(2), "<br>");
+              $("#result").append("forward rate q01 = ", app.params.rows[0]["null_q01"].toFixed(2), "; ");
+              $("#result").append("backward rate q10 = ", app.params.rows[0]["null_q10"].toFixed(2), "<br>");
+              $("#result").append("<br><br>BiSSE model: lambda state 0 = ", app.params.rows[0]["bis_lambda0"].toFixed(2), "; ");
+              $("#result").append("lambda state 1 = ", app.params.rows[0]["bis_lambda1"].toFixed(2), "<br>");
+              $("#result").append("mu state 0 = ", app.params.rows[0]["bis_mu0"].toFixed(2), "; ");
+              $("#result").append("mu state 1 = ", app.params.rows[0]["bis_mu1"].toFixed(2), "<br>");
+              $("#result").append("forward rate q01 = ", app.params.rows[0]["bis_q01"].toFixed(2), "; ");
+              $("#result").append("backward rate q10 = ", app.params.rows[0]["bis_q10"].toFixed(2), "<br>");
+
 
                         $("#analyze").removeAttr("disabled");
                         $("#notice").text("Analysis succeeded!");
