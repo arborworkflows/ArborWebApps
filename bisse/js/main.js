@@ -174,7 +174,7 @@
 						$("#result").append("lnL = ", app.result.rows[0]["bisLik"].toFixed(2), "<br><br>")
 
             $("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chi-squared test statistic: ", app.result.rows[0]["lrStat"].toFixed(2), "<br>")
-							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0]["Pval"].toFixed(3), "<br>")
+							$("#result").append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;P-value: ", app.result.rows[0]["lrPVal"].toFixed(3), "<br>")
 
 							if(app.result.rows[0]["PVal"] < 0.05) {
 								$("#result").append("<br><br><b>Conclusion: </b> Reject the null hypothesis, character-dependent model supported.<br>")
