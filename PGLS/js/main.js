@@ -17,6 +17,7 @@
             }
         }).done(function (results) {
             app.analysisId = results["item"][0]._id;
+            console.print(app.analysisId);
             app.readyToAnalyze();
         });
 
