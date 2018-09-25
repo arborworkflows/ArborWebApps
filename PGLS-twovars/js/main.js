@@ -216,7 +216,7 @@
 
                       var coeffTable = data.result.coefficients.data.rows;
                       var modelTable = data.result.modelfit_summary.data.rows;
-                      console.log(modelTable);
+                      console.log(coeffTable);
 
                       // pretty results
                       $("#result").append("<h2>Results:<\h2>");
