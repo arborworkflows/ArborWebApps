@@ -175,6 +175,7 @@
             $("#notice").text("Performing analysis...");
 
             toggleCorrelationModel();
+            console.log(app.table);
 
             var inputs = {
                 dat:  {type: "table",  format: app.tableFormat,    data: app.table},
