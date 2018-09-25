@@ -177,11 +177,11 @@
             toggleCorrelationModel();
 
             var inputs = {
-                table:  {type: "table",  format: app.tableFormat,    data: app.table},
+                dat:  {type: "table",  format: app.tableFormat,    data: app.table},
                 tree:   {type: "tree",   format: "newick",           data: app.tree},
                 dep_variable: {type: "string", format: "text",             data: app.column_y},
                 ind_variable: {type: "string", format: "text",             data: app.column_x},
-                correlation: {type: "string", format: "text",             data: app.correlation}
+                model: {type: "string", format: "text",             data: app.correlation}
             };
 
             var outputs = {
