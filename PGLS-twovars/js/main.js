@@ -175,7 +175,6 @@
             $("#notice").text("Performing analysis...");
 
             toggleCorrelationModel();
-            console.log(app.table);
 
             var inputs = {
                 dat:  {type: "table",  format: app.tableFormat,    data: app.table},
@@ -216,7 +215,6 @@
 
                       var coeffTable = data.result.coefficients.data.rows;
                       var modelTable = data.result.modelfit_summary.data.rows;
-                      console.log(coeffTable);
 
                       // pretty results
                       $("#result").append("<h2>Results:<\h2>");
@@ -230,7 +228,7 @@
                       $("#result").append("Slope =  ", coeffTable[1]["Estimate"].toFixed(3), ", P = ", coeffTable[1]["p.value"].toFixed(3), "<br>");
                       $("#result").append("AIC for model = ", modelTable[0]["AIC"].toFixed(3), "<br>");
                       $("#result").append("lnL = ", modelTable[0]["loglik"].toFixed(3), "<br>");
-                      $("#result").append("n = ", modelTable[0]["sample_size"].toFixed(3), "<br>");
+                      $("#result").append("n = ", modelTable[0]["sample_size"], "<br>");
                   }, this));
 
                 } else if (result.status === 'FAILURE') {
