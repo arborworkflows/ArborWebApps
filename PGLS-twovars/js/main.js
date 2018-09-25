@@ -224,7 +224,7 @@
                       $("#result").append(app.column_y," = ", app.column_x, "<br><br>");
                       $("#result").append("Model for residuals: ", app.correlation, "<br><br>");
                       if(app.correlation == "OU")
-                        $("#result").append("alpha = ", coeffTable[4]["Estimate"].toFixed(3));
+                        $("#result").append("alpha = ", coeffTable[2]["Estimate"].toFixed(3));
                       $("#result").append("<h3>Coefficients:<\h3><br>");
                       $("#result").append("Intercept =  ", coeffTable[0]["Estimate"].toFixed(3), ", P = ", coeffTable[0]["p.value"].toFixed(3), "<br>");
                       $("#result").append("Slope =  ", coeffTable[1]["Estimate"].toFixed(3), ", P = ", coeffTable[1]["p.value"].toFixed(3), "<br>");
